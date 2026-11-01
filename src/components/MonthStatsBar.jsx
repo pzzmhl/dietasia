@@ -45,12 +45,12 @@ export default function MonthStatsBar({
       {/* INTESTAZIONE DASHBOARD IN FONT UFFICIALE CORALINE */}
       <h3 style={{
         fontFamily: 'var(--font-coraline)',
-        fontSize: '26px',
+        fontSize: '15px',
         color: 'var(--coraline-yellow)',
         textAlign: 'center',
-        margin: '0 0 14px 0',
-        letterSpacing: '2px',
-        textShadow: '0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(216, 198, 21, 0.45)'
+        margin: '0 0 10px 0',
+        letterSpacing: '1px',
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(216, 198, 21, 0.35)'
       }}>
         Dashboard
       </h3>
