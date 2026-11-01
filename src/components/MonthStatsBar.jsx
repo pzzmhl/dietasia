@@ -101,7 +101,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
 
   return (
     <div 
-      className="stitched-card"
+      className="stitched-card vortex-card"
       style={{
         padding: '18px 14px',
         marginTop: '6px',

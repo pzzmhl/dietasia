@@ -126,6 +126,31 @@ body {
   display: none;
 }
 
+/* Sfondo vortice ipnotico dell'Altro Mondo (Coraline Tunnel Texture per Dashboard & Calendario) */
+.vortex-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.vortex-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.vortex-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('./assets/coraline-vortex-bg.webp');
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+
 /* Micro-animazioni Stop-Motion organiche per gli elementi tattili */
 @keyframes stopMotionSnap {
   0% { transform: scale(0.88) rotate(-2deg); }

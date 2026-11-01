@@ -216,7 +216,7 @@ export default function CalendarGrid({
 
   return (
     <div 
-      className="stitched-card" 
+      className="stitched-card vortex-card" 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{ 
