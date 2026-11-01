@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import CatIllustration from './CatIllustration';
+import catSuccessImg from '../assets/cat-success.png';
+import catCheatImg from '../assets/cat-cheat.png';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline)
- * Riceve la frase personalizzata rivolta ad Asia, il contesto e la callback onClose.
+ * Mostra l'immagine del Gatto corrispondente:
+ * - Gatto con testa reclinata e grandi occhi azzurri per: Dieta Rispettata (success)
+ * - Gatto sardonico/scettico con occhi socchiusi per: Dieta Non Rispettata (cheat)
  */
 export default function CatModal({ isOpen, quote, context, onClose }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      // Piccolo ritardo per attivare la transizione CSS di comparsa fluida
       const timer = setTimeout(() => setVisible(true), 15);
       return () => clearTimeout(timer);
     } else {
@@ -20,10 +22,18 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
 
   if (!isOpen) return null;
 
-  // Personalizzazione del pulsante in base alla natura della battuta
-  const buttonLabel = context === 'cheat' 
+  const isCheat = context === 'cheat';
+  const currentCatImg = isCheat ? catCheatImg : catSuccessImg;
+  const buttonLabel = isCheat 
     ? "Ricevuto, domani niente scuse" 
     : "Ho capito, Gatto";
+
+  // Palette dinamica in base all'esito
+  const borderColor = isCheat ? '#ef4444' : '#34d399';
+  const glowColor = isCheat ? 'rgba(239, 68, 68, 0.3)' : 'rgba(52, 211, 153, 0.3)';
+  const titleColor = isCheat ? '#f87171' : '#4ade80';
+  const buttonBg = isCheat ? '#7f1d1d' : '#15803d';
+  const buttonTextColor = isCheat ? '#fee2e2' : '#ffffff';
 
   return (
     <div 
@@ -32,13 +42,13 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: 'rgba(5, 6, 15, 0.82)',
+        backgroundColor: 'rgba(5, 6, 15, 0.85)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '16px',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.25s ease-out'
       }}
@@ -48,12 +58,12 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         className="cat-modal-content"
         style={{
           width: '100%',
-          maxWidth: '380px',
+          maxWidth: '360px',
           background: 'linear-gradient(180deg, #1b1633 0%, #111224 100%)',
           borderRadius: '24px',
-          border: '2px dashed #e09f3e',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(224, 159, 62, 0.2)',
-          padding: '24px 20px',
+          border: `2px dashed ${borderColor}`,
+          boxShadow: `0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px ${glowColor}`,
+          padding: '22px 18px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -68,10 +78,10 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           fontSize: '11px',
           letterSpacing: '2px',
           textTransform: 'uppercase',
-          color: '#e09f3e',
+          color: titleColor,
           fontFamily: 'var(--font-gothic)',
-          marginBottom: '6px',
-          opacity: 0.9
+          marginBottom: '8px',
+          fontWeight: 700
         }}>
           ✦ Il Gatto dell'Altro Mondo ✦
         </div>
@@ -81,17 +91,17 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           className="speech-bubble"
           style={{
             width: '100%',
-            marginBottom: '14px',
+            marginBottom: '10px',
             backgroundColor: 'rgba(15, 16, 38, 0.95)',
-            border: '1.5px dashed rgba(224, 159, 62, 0.5)',
+            border: `1.5px dashed ${borderColor}`,
             borderRadius: '16px',
-            padding: '16px',
+            padding: '14px 16px',
             boxShadow: 'inset 0 0 15px rgba(0,0,0,0.5)'
           }}
         >
           <p style={{
             color: '#f8fafc',
-            fontSize: '15px',
+            fontSize: '14px',
             lineHeight: '1.45',
             fontStyle: 'italic',
             textAlign: 'center',
@@ -101,26 +111,41 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           </p>
         </div>
 
-        {/* Illustrazione del Gatto Nero */}
-        <div style={{ margin: '4px 0 14px 0' }}>
-          <CatIllustration size={180} />
+        {/* Immagine Ufficiale del Gatto Nero */}
+        <div style={{ 
+          margin: '4px 0 12px 0',
+          height: '210px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <img
+            src={currentCatImg}
+            alt="Il Gatto Nero di Coraline"
+            style={{
+              maxHeight: '210px',
+              maxWidth: '220px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9))'
+            }}
+          />
         </div>
 
-        {/* Pulsante di conferma stile cucitura di Coraline */}
+        {/* Pulsante di conferma stile Coraline */}
         <button
           onClick={onClose}
           style={{
             width: '100%',
-            backgroundColor: '#e09f3e',
-            color: '#0f1026',
+            backgroundColor: buttonBg,
+            color: buttonTextColor,
             fontFamily: 'var(--font-gothic)',
             fontWeight: 700,
-            fontSize: '14px',
-            letterSpacing: '1px',
-            padding: '14px 18px',
+            fontSize: '13px',
+            letterSpacing: '0.8px',
+            padding: '13px 16px',
             borderRadius: '12px',
-            border: '2px dashed #0f1026',
-            boxShadow: '0 4px 15px rgba(224, 159, 62, 0.4)',
+            border: `1.5px dashed ${borderColor}`,
+            boxShadow: `0 4px 15px ${glowColor}`,
             cursor: 'pointer',
             transition: 'all 0.15s ease'
           }}
@@ -135,4 +160,3 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
     </div>
   );
 }
-
