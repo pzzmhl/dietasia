@@ -42,6 +42,9 @@ export default function App() {
     context: 'success'
   });
 
+  // Trigger per aggiornare istantaneamente la GIF nel banner animato
+  const [outcomeTrigger, setOutcomeTrigger] = useState(null);
+
   // Carica i dati salvati e le impostazioni all'avvio
   useEffect(() => {
     setAllLogs(getAllLogs());
@@ -107,7 +110,10 @@ export default function App() {
     // 1. Chiude il modal di selezione del giorno
     setDayModalState({ isOpen: false, dateStr: null });
 
-    // 2. Logica reattiva del Gatto Nero
+    // 2. Trigger per cambiare la GIF del banner in base all'esito (random senza ripetizioni)
+    setOutcomeTrigger({ status: newStatus, timestamp: Date.now() });
+
+    // 3. Logica reattiva del Gatto Nero
     if (newStatus === 'cheat_key') {
       // Calcolo se questa è l'ULTIMA chiave disponibile del mese
       const isNowLastKey = !wasAlreadyKey && (remainingKeys - 1 <= 0);
@@ -213,8 +219,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* BANNER ANIMATO SOPRA AL CALENDARIO */}
-      <AnimatedBanner />
+      {/* BANNER ANIMATO SOPRA AL CALENDARIO (ROTAZIONE RANDOMICA & CATEGORIZZATA) */}
+      <AnimatedBanner latestOutcomeTrigger={outcomeTrigger} />
 
       {/* 1. GRIGLIA MENSILE DEL CALENDARIO (CON SUPPORTO CHIAVI JOLLY) */}
       <CalendarGrid
