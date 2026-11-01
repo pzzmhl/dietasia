@@ -192,3 +192,4 @@ export default function WaterTracker({ initialGlasses = 0, onSaveWater }) {
     </div>
   );
 }
+

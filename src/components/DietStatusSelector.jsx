@@ -176,3 +176,4 @@ export default function DietStatusSelector({ status, onSelectStatus }) {
     </div>
   );
 }
+

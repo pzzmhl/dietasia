@@ -77,3 +77,4 @@ Una volta completato il push:
 2. Clicca sulla scheda **Actions** in alto.
 3. Seleziona il workflow **"Build Android APK (Coraline Tracker)"**.
 4. A fine compilazione (circa 2-3 minuti), troverai l'artefatto **`Coraline-Diet-Tracker-Beta-APK`** pronto da scaricare e installare sullo smartphone di Asia!
+

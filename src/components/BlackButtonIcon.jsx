@@ -134,3 +134,4 @@ export default function BlackButtonIcon({ size = 52, className = '' }) {
     </svg>
   );
 }
+

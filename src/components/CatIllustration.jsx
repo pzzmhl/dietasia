@@ -196,3 +196,4 @@ export default function CatIllustration({ size = 200, className = '' }) {
     </div>
   );
 }
+

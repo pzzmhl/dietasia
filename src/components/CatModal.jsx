@@ -135,3 +135,4 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
     </div>
   );
 }
+

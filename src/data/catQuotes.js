@@ -46,3 +46,4 @@ export function getRandomCatQuote(context) {
   const randomIndex = Math.floor(Math.random() * pool.length);
   return pool[randomIndex];
 }
+

@@ -343,3 +343,4 @@ export default function CalendarStrip({ selectedDate, onSelectDate, allLogs = {}
     </div>
   );
 }
+
