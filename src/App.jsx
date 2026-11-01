@@ -6,7 +6,8 @@ import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
 import CatModal from './components/CatModal';
 import StoryEventModal from './components/StoryEventModal';
-import BackupModal from './components/BackupModal';
+import SecretDoor from './components/SecretDoor';
+import SecretSettingsModal from './components/SecretSettingsModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import { 
   requestNotificationPermission, 
@@ -49,7 +50,13 @@ export default function App() {
   const [displayYear, setDisplayYear] = useState(() => todayObj.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(() => todayObj.getMonth());
   const [allLogs, setAllLogs] = useState({});
-  const keysPerMonth = 4; // Fisse a 4 di default, non modificabili
+  const [keysPerMonth, setKeysPerMonth] = useState(() => {
+    try {
+      return Number(localStorage.getItem('coraline_keys_per_month')) || 4;
+    } catch (e) {
+      return 4;
+    }
+  });
 
   // Modal Selezione Esito Giorno
   const [dayModalState, setDayModalState] = useState({
@@ -83,22 +90,22 @@ export default function App() {
     }
   });
 
-  // Modal Gestione Backup & Ripristino
-  const [isBackupOpen, setIsBackupOpen] = useState(false);
+  // Modal Gestione Impostazioni della Porticina Segreta (include Diario & Backup)
+  const [isSecretSettingsOpen, setIsSecretSettingsOpen] = useState(false);
 
   // Trigger per aggiornare istantaneamente la GIF nel banner animato
   const [outcomeTrigger, setOutcomeTrigger] = useState(null);
 
   // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
   const activeModalsRef = useRef({
-    backup: false,
+    settings: false,
     day: false,
     story: false,
     cat: false
   });
 
   activeModalsRef.current = {
-    backup: isBackupOpen,
+    settings: isSecretSettingsOpen,
     day: dayModalState.isOpen,
     story: storyModalState.isOpen,
     cat: catModalState.isOpen
@@ -110,9 +117,9 @@ export default function App() {
     const registerBackHandler = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          const { backup, day, story, cat } = activeModalsRef.current;
-          if (backup) {
-            setIsBackupOpen(false);
+          const { settings, day, story, cat } = activeModalsRef.current;
+          if (settings) {
+            setIsSecretSettingsOpen(false);
           } else if (day) {
             setDayModalState({ isOpen: false, dateStr: null });
           } else if (story) {
@@ -444,29 +451,8 @@ export default function App() {
         keysPerMonth={keysPerMonth}
       />
 
-      {/* 5. GESTIONE DIARIO & BACKUP: SCRITTA ELEGANTE E DISCRETA A FONDO PAGINA */}
-      <div style={{ textAlign: 'center', marginTop: '14px', marginBottom: '88px' }}>
-        <button
-          type="button"
-          onClick={() => setIsBackupOpen(true)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(221, 202, 183, 0.65)',
-            fontFamily: 'var(--font-coraline)',
-            fontSize: '11px',
-            letterSpacing: '0.9px',
-            cursor: 'pointer',
-            padding: '6px 14px',
-            borderRadius: '20px',
-            borderBottom: '1px dotted rgba(216, 198, 21, 0.35)',
-            transition: 'all 0.2s ease',
-            touchAction: 'manipulation'
-          }}
-        >
-          ✦ Diario & Backup di Sicurezza ✦
-        </button>
-      </div>
+      {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (IMPOSTAZIONI, DIARIO & BACKUP) */}
+      <SecretDoor onOpenSettings={() => setIsSecretSettingsOpen(true)} />
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
@@ -547,10 +533,12 @@ export default function App() {
         onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
       />
 
-      {/* OVERLAY GESTIONE BACKUP & RIPRISTINO SICUREZZA */}
-      <BackupModal
-        isOpen={isBackupOpen}
-        onClose={() => setIsBackupOpen(false)}
+      {/* OVERLAY IMPOSTAZIONI DELLA PORTICINA SEGRETA & DIARIO */}
+      <SecretSettingsModal
+        isOpen={isSecretSettingsOpen}
+        onClose={() => setIsSecretSettingsOpen(false)}
+        keysPerMonth={keysPerMonth}
+        onChangeKeysPerMonth={(newKeys) => setKeysPerMonth(newKeys)}
         onRestoreSuccess={(restoredLogs) => {
           setAllLogs(restoredLogs);
         }}

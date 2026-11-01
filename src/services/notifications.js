@@ -159,3 +159,36 @@ export async function sendOtherMotherKeysDepletedNotification() {
     return false;
   }
 }
+
+/**
+ * Notifica di Prova (Test immediato per impostazioni)
+ */
+export async function sendTestReminderNotification() {
+  const granted = await requestNotificationPermission();
+  if (!granted) return false;
+
+  const title = "✦ I Topi Saltatori sono qui! (Test) ✦";
+  const body = "Promemoria di prova riuscito! Le notifiche dell'Altro Mondo sono attive, Asia.";
+
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          title,
+          body,
+          id: 9999,
+          channelId: 'coraline_reminders',
+          schedule: { at: new Date(Date.now() + 600) },
+          smallIcon: 'ic_launcher'
+        }
+      ]
+    });
+    return true;
+  } catch (err) {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/favicon.png' });
+      return true;
+    }
+    return false;
+  }
+}

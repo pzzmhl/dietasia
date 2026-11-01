@@ -6,7 +6,22 @@ import { Capacitor } from '@capacitor/core';
  * Offre micro-vibrazioni tattili differenziate a bassissimo consumo energetico.
  */
 
+export const isHapticsEnabled = () => {
+  try {
+    return localStorage.getItem('coraline_haptics_enabled') !== 'false';
+  } catch (e) {
+    return true;
+  }
+};
+
+export const setHapticsEnabled = (enabled) => {
+  try {
+    localStorage.setItem('coraline_haptics_enabled', enabled ? 'true' : 'false');
+  } catch (e) {}
+};
+
 export const triggerHapticFeedback = async (type = 'selection') => {
+  if (!isHapticsEnabled()) return;
   try {
     if (Capacitor.isNativePlatform()) {
       switch (type) {
