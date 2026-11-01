@@ -109,7 +109,9 @@ export function saveDayLog(dateStr, updates) {
 }
 
 /**
- * Trova i giorni passati (dal 1° del mese corrente a oggi) che non sono stati ancora contrassegnati
+ * Trova i giorni passati (dal 1° del mese corrente a oggi) che richiedono attenzione.
+ * - I giorni precedenti a oggi sono considerati non contrassegnati se sono 'neutral' o assenti.
+ * - Il giorno odierno viene considerato non contrassegnato SOLO se sono già passate le 20:00.
  * @param {Record<string, any>} allLogs
  * @returns {string[]} Elenco di date 'YYYY-MM-DD' non registrate
  */
@@ -119,11 +121,12 @@ export function getUnmarkedPastDays(allLogs) {
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
   const currentDay = today.getDate();
+  const currentHour = today.getHours();
 
   const unmarked = [];
 
-  // Scansiona dal primo giorno del mese fino a oggi
-  for (let day = 1; day <= currentDay; day++) {
+  // Scansiona dal primo giorno del mese fino a ieri
+  for (let day = 1; day < currentDay; day++) {
     const dayStr = String(day).padStart(2, '0');
     const monthStr = String(currentMonth + 1).padStart(2, '0');
     const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
@@ -131,6 +134,18 @@ export function getUnmarkedPastDays(allLogs) {
     const log = allLogs[dateStr];
     if (!log || typeof log !== 'object' || !log.dietState || log.dietState === 'neutral') {
       unmarked.push(dateStr);
+    }
+  }
+
+  // Per il giorno odierno: allarma solo se sono già passate le ore 20:00 e non è ancora registrato
+  if (currentHour >= 20) {
+    const dayStr = String(currentDay).padStart(2, '0');
+    const monthStr = String(currentMonth + 1).padStart(2, '0');
+    const todayDateStr = `${currentYear}-${monthStr}-${dayStr}`;
+
+    const todayLog = allLogs[todayDateStr];
+    if (!todayLog || typeof todayLog !== 'object' || !todayLog.dietState || todayLog.dietState === 'neutral') {
+      unmarked.push(todayDateStr);
     }
   }
 

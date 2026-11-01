@@ -56,15 +56,20 @@ export async function requestNotificationPermission() {
 }
 
 /**
- * Pianifica il promemoria giornaliero all'orario indicato (es. "20:00")
+ * Pianifica il promemoria giornaliero alle ore 20:00 (o timeStr indicato).
+ * Se la giornata di oggi è già stata registrata con successo o sgarro,
+ * la notifica odierna viene evitata e programmata direttamente per il giorno successivo.
  */
-export async function scheduleDailyReminder(timeStr = '20:00') {
+export async function scheduleDailyReminder(timeStr = '20:00', isTodayLogged = false) {
   const [hoursStr, minutesStr] = timeStr.split(':');
   const targetHour = parseInt(hoursStr, 10) || 20;
   const targetMinute = parseInt(minutesStr, 10) || 0;
 
   try {
-    // Registra il canale notifiche ad alta priorità su Android se supportato
+    // 1. Assicura che i permessi siano concessi
+    await requestNotificationPermission();
+
+    // 2. Registra il canale notifiche ad alta priorità su Android
     try {
       await LocalNotifications.createChannel({
         id: 'coraline_reminders',
@@ -76,16 +81,17 @@ export async function scheduleDailyReminder(timeStr = '20:00') {
       });
     } catch (e) {}
 
-    // Cancella eventuali notifiche precedenti
+    // 3. Cancella notifiche precedenti per evitare doppioni
     await LocalNotifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] });
 
-    // Calcola il prossimo trigger
+    // 4. Calcola la data e ora del prossimo trigger
     const now = new Date();
     const scheduledDate = new Date();
     scheduledDate.setHours(targetHour, targetMinute, 0, 0);
 
-    // Se l'orario di oggi è già passato, programma per domani alla stessa ora
-    if (scheduledDate <= now) {
+    // Se l'orario delle 20:00 per oggi è già passato, OPPURE se oggi è già stato segnato,
+    // programma per domani alla stessa ora!
+    if (scheduledDate <= now || isTodayLogged) {
       scheduledDate.setDate(scheduledDate.getDate() + 1);
     }
 
@@ -108,7 +114,7 @@ export async function scheduleDailyReminder(timeStr = '20:00') {
       ]
     });
 
-    console.log(`Promemoria programmato per le ore ${timeStr} ogni giorno.`);
+    console.log(`[Notifiche] Promemoria programmato per: ${scheduledDate.toLocaleString()}`);
     return true;
   } catch (err) {
     console.warn('Pianificazione notifica nativa non riuscita o su web:', err);

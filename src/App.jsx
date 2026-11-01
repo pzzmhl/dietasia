@@ -66,20 +66,9 @@ export default function App() {
   // Trigger per aggiornare istantaneamente la GIF nel banner animato
   const [outcomeTrigger, setOutcomeTrigger] = useState(null);
 
-  // Carica i dati salvati, programma notifica automatica alle 20:00 e precarica le immagini critiche
+  // Carica i dati salvati e precarica le immagini critiche in memoria RAM all'avvio
   useEffect(() => {
     setAllLogs(getAllLogs());
-
-    // Imposta e programma la notifica giornaliera delle ore 20:00 di default
-    const initDailyNotification = async () => {
-      try {
-        await requestNotificationPermission();
-        await scheduleDailyReminder('20:00');
-      } catch (e) {
-        console.warn('Configurazione automatica notifica 20:00 non riuscita:', e);
-      }
-    };
-    initDailyNotification();
 
     // Preload rapido delle immagini di interfaccia per azzerare flash o ritardi al tocco
     const criticalImages = [
@@ -147,16 +136,22 @@ export default function App() {
     return Math.max(0, keysPerMonth - usedKeysForMonth);
   }, [keysPerMonth, usedKeysForMonth]);
 
-  // Modalità simulazione Topo Saltatore (attiva su richiesta utente)
-  const [simulatedMouseAlert] = useState(true);
-
-  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore memoizzato
+  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore memoizzato (nessuna falsa simulazione)
   const unmarkedDays = useMemo(() => {
-    const realUnmarkedDays = getUnmarkedPastDays(allLogs);
-    return realUnmarkedDays.length > 0 
-      ? realUnmarkedDays 
-      : (simulatedMouseAlert ? ['2026-11-01', '2026-10-31', '2026-10-30'] : []);
-  }, [allLogs, simulatedMouseAlert]);
+    return getUnmarkedPastDays(allLogs);
+  }, [allLogs]);
+
+  // Controlla se la giornata odierna è già stata registrata
+  const isTodayAlreadyLogged = useMemo(() => {
+    const todayLog = allLogs[todayStr];
+    return !!(todayLog && todayLog.dietState && todayLog.dietState !== 'neutral');
+  }, [allLogs, todayStr]);
+
+  // Pianifica o aggiorna la notifica quotidiana delle 20:00:
+  // Se oggi è già segnato, la notifica per oggi viene evitata e programmata per domani!
+  useEffect(() => {
+    scheduleDailyReminder('20:00', isTodayAlreadyLogged);
+  }, [isTodayAlreadyLogged]);
 
   // Selezione esito dal pop-up ottimizzata
   const handleSelectStatusFromModal = useCallback((newStatus) => {
