@@ -129,13 +129,6 @@ export default function App() {
     });
   }, []);
 
-  const handleTodayClick = useCallback(() => {
-    const now = new Date();
-    setDisplayYear(now.getFullYear());
-    setDisplayMonth(now.getMonth());
-    setSelectedDate(todayStr);
-  }, [todayStr]);
-
   // Quando l'utente tocca un giorno del calendario
   const handleDayClick = useCallback((dateStr) => {
     setSelectedDate(dateStr);
@@ -310,7 +303,6 @@ export default function App() {
         displayMonth={displayMonth}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
-        onTodayClick={handleTodayClick}
       />
 
       {/* 4. LA DASHBOARD: CHIAVI GIGANTI E STATISTICHE */}

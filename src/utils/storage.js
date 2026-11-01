@@ -1,9 +1,7 @@
 const STORAGE_KEY = 'coraline_asia_habit_tracker_v1';
-const KEYS_CONFIG_KEY = 'coraline_asia_keys_per_month_v1';
 
 // Cache in memoria RAM per azzerare I/O sincrono bloccante
 let logsMemoryCache = null;
-let keysConfigCache = null;
 
 /**
  * Ottiene la data corrente formattata in YYYY-MM-DD
@@ -14,20 +12,6 @@ export function getTodayDateString() {
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
-
-/**
- * Numero di chiavi mensili fisso a 4 di default (non modificabile)
- */
-export function getKeysPerMonth() {
-  return 4;
-}
-
-/**
- * Mantenuto per compatibilità, fissa a 4
- */
-export function setKeysPerMonth() {
-  return 4;
 }
 
 /**
@@ -45,18 +29,6 @@ export function getAllLogs() {
     logsMemoryCache = {};
     return logsMemoryCache;
   }
-}
-
-/**
- * Ottiene i dati di un singolo giorno dalla RAM
- * @param {string} dateStr 'YYYY-MM-DD'
- */
-export function getDayLog(dateStr) {
-  const all = getAllLogs();
-  return all[dateStr] || {
-    dietState: 'neutral',
-    updatedAt: null
-  };
 }
 
 /**
@@ -200,4 +172,3 @@ export function getConsecutiveDietStreak(allLogs) {
 
   return streak;
 }
-

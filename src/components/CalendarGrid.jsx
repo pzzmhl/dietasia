@@ -144,10 +144,9 @@ export default function CalendarGrid({
   displayYear,
   displayMonth,
   onPrevMonth,
-  onNextMonth,
-  onTodayClick
+  onNextMonth
 }) {
-  const { daysInMonth, firstDayColumn, daysArray, todayStr } = useMemo(() => {
+  const { firstDayColumn, daysArray, todayStr } = useMemo(() => {
     const count = new Date(displayYear, displayMonth + 1, 0).getDate();
     const rawFirst = new Date(displayYear, displayMonth, 1).getDay();
     const col = rawFirst === 0 ? 7 : rawFirst;
@@ -159,7 +158,6 @@ export default function CalendarGrid({
     const today = `${now.getFullYear()}-${m}-${d}`;
 
     return {
-      daysInMonth: count,
       firstDayColumn: col,
       daysArray: arr,
       todayStr: today
