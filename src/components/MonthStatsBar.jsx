@@ -1,35 +1,37 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.png';
 import blackButtonImg from '../assets/black-button.png';
 import KeyIcon from './KeyIcon';
 
 /**
- * Dashboard Statistiche Mensile Stile Coraline (Versione Gigante & Ultra-Visiva):
- * - Rimosso totalmente il filo e la percentuale.
- * - Le 4 Chiavi Nere in formato gigante (60px), le usate diventano opacizzate/meno visibili.
- * - Pietra Verde e Bottone Nero in formato gigante (48px) con grandi numeri a colpo d'occhio.
+ * Dashboard Statistiche Mensile Stile Coraline (Versione Gigante & Ultra-Visiva, Memoizzata):
  */
-export default function MonthStatsBar({ 
+const MonthStatsBar = React.memo(function MonthStatsBar({ 
   displayYear, 
   displayMonth, 
   allLogs = {},
   keysPerMonth = 4 
 }) {
-  const monthPrefix = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}`;
+  const { successCount, cheatCount, remainingKeys } = useMemo(() => {
+    const monthPrefix = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}`;
+    let sCount = 0;
+    let cCount = 0;
+    let kCount = 0;
 
-  let successCount = 0;
-  let cheatCount = 0;
-  let keyCount = 0;
+    Object.entries(allLogs || {}).forEach(([dateStr, log]) => {
+      if (dateStr.startsWith(monthPrefix) && log && typeof log === 'object') {
+        if (log.dietState === 'success') sCount++;
+        else if (log.dietState === 'cheat') cCount++;
+        else if (log.dietState === 'cheat_key') kCount++;
+      }
+    });
 
-  Object.entries(allLogs || {}).forEach(([dateStr, log]) => {
-    if (dateStr.startsWith(monthPrefix) && log && typeof log === 'object') {
-      if (log.dietState === 'success') successCount++;
-      else if (log.dietState === 'cheat') cheatCount++;
-      else if (log.dietState === 'cheat_key') keyCount++;
-    }
-  });
-
-  const remainingKeys = Math.max(0, keysPerMonth - keyCount);
+    return {
+      successCount: sCount,
+      cheatCount: cCount,
+      remainingKeys: Math.max(0, keysPerMonth - kCount)
+    };
+  }, [allLogs, displayYear, displayMonth, keysPerMonth]);
 
   return (
     <div 
@@ -197,4 +199,6 @@ export default function MonthStatsBar({
       </div>
     </div>
   );
-}
+});
+
+export default MonthStatsBar;

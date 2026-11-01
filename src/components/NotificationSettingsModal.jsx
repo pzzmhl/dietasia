@@ -28,8 +28,8 @@ export default function NotificationSettingsModal({
       const current = getNotificationSettings();
       setEnabled(current.enabled);
       setReminderTime(current.time);
-      const timer = setTimeout(() => setVisible(true), 15);
-      return () => clearTimeout(timer);
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
     } else {
       setVisible(false);
       setTestSent(false);
@@ -71,7 +71,9 @@ export default function NotificationSettingsModal({
         justifyContent: 'center',
         padding: '16px',
         opacity: visible ? 1 : 0,
-        transition: 'opacity 0.22s ease-out'
+        transition: 'opacity 0.18s ease-out',
+        willChange: 'opacity',
+        transform: 'translateZ(0)'
       }}
       onClick={onClose}
     >
@@ -87,8 +89,9 @@ export default function NotificationSettingsModal({
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          transform: visible ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.96)',
-          transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+          transform: visible ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 16px, 0) scale(0.96)',
+          transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          willChange: 'transform'
         }}
         onClick={(e) => e.stopPropagation()}
       >

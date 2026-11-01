@@ -48,6 +48,8 @@ export default function KeyIcon({
     <img
       src={keyImg}
       alt="Chiave Nera di Coraline"
+      loading="eager"
+      decoding="async"
       onError={() => setHasError(true)}
       style={{
         width: `${size}px`,
@@ -57,7 +59,9 @@ export default function KeyIcon({
         filter: isUsed 
           ? 'brightness(1.15) drop-shadow(0 0 3px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 7px rgba(220, 240, 255, 0.75))' 
           : 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 6px rgba(216, 198, 21, 0.35))',
-        transition: 'all 0.25s ease',
+        transition: 'opacity 0.2s ease, filter 0.2s ease',
+        willChange: 'opacity, filter',
+        pointerEvents: 'none',
         ...style
       }}
       className={className}

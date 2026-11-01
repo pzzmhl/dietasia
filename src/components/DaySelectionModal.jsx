@@ -23,8 +23,8 @@ export default function DaySelectionModal({
 
   useEffect(() => {
     if (isOpen) {
-      const timer = setTimeout(() => setVisible(true), 15);
-      return () => clearTimeout(timer);
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
     } else {
       setVisible(false);
     }
@@ -55,7 +55,9 @@ export default function DaySelectionModal({
         justifyContent: 'center',
         padding: '16px',
         opacity: visible ? 1 : 0,
-        transition: 'opacity 0.22s ease-out'
+        transition: 'opacity 0.18s ease-out',
+        willChange: 'opacity',
+        transform: 'translateZ(0)'
       }}
       onClick={onClose}
     >
@@ -71,8 +73,9 @@ export default function DaySelectionModal({
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          transform: visible ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.96)',
-          transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+          transform: visible ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 16px, 0) scale(0.96)',
+          transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          willChange: 'transform'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -95,7 +98,8 @@ export default function DaySelectionModal({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '13px',
-            fontWeight: 700
+            fontWeight: 700,
+            touchAction: 'manipulation'
           }}
         >
           ✕
@@ -140,19 +144,20 @@ export default function DaySelectionModal({
               alignItems: 'center',
               justifyContent: 'center',
               padding: '12px',
-              transition: 'all 0.18s ease'
+              touchAction: 'manipulation'
             }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <img
               src={seeingStoneImg}
               alt="Pietra Verde"
+              loading="eager"
+              decoding="async"
               style={{
                 width: '54px',
                 height: '54px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 3px 8px rgba(16, 185, 129, 0.6))'
+                filter: 'drop-shadow(0 3px 8px rgba(16, 185, 129, 0.6))',
+                pointerEvents: 'none'
               }}
             />
           </button>
@@ -176,19 +181,20 @@ export default function DaySelectionModal({
               alignItems: 'center',
               justifyContent: 'center',
               padding: '12px',
-              transition: 'all 0.18s ease'
+              touchAction: 'manipulation'
             }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <img
               src={blackButtonImg}
               alt="Bottone Nero"
+              loading="eager"
+              decoding="async"
               style={{
                 width: '54px',
                 height: '54px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95))'
+                filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95))',
+                pointerEvents: 'none'
               }}
             />
           </button>
@@ -224,11 +230,9 @@ export default function DaySelectionModal({
             alignItems: 'center',
             justifyContent: 'center',
             opacity: canUseKey ? 1 : 0.35,
-            transition: 'all 0.18s ease',
-            marginBottom: currentStatus !== 'neutral' ? '10px' : '2px'
+            marginBottom: currentStatus !== 'neutral' ? '10px' : '2px',
+            touchAction: 'manipulation'
           }}
-          onMouseDown={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(0.98)')}
-          onMouseUp={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(1)')}
         >
           {/* Chiave Nera Jolly: leggermente più piccola (36px) */}
           <KeyIcon size={36} isUsed={!canUseKey && currentStatus !== 'cheat_key'} />
@@ -246,7 +250,8 @@ export default function DaySelectionModal({
                 fontSize: '11px',
                 textDecoration: 'underline',
                 cursor: 'pointer',
-                padding: '4px 8px'
+                padding: '4px 8px',
+                touchAction: 'manipulation'
               }}
             >
               Azzera esito

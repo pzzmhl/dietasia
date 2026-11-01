@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import AnimatedBanner from './components/AnimatedBanner';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
@@ -7,9 +7,18 @@ import SettingsModal from './components/SettingsModal';
 import CatModal from './components/CatModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import NotificationSettingsModal from './components/NotificationSettingsModal';
+
+// Immagini critiche per il rendering immediato e il preloading
 import catStandingImg from './assets/cat-standing.png';
+import catSuccessImg from './assets/cat-success.png';
+import catFailImg from './assets/cat-fail.png';
+import catCheatKeyImg from './assets/cat-cheat-key.png';
 import blackButtonImg from './assets/black-button.png';
+import seeingStoneImg from './assets/seeing-stone.png';
+import keyImg from './assets/key.png';
 import jumpingMouseImg from './assets/jumping-mouse.png';
+import catModalBg from './assets/cat-modal-bg.jpg';
+
 import { 
   getTodayDateString, 
   getAllLogs, 
@@ -23,11 +32,11 @@ import { getRandomCatQuote } from './data/catQuotes';
 
 export default function App() {
   const todayStr = getTodayDateString();
-  const todayObj = new Date(todayStr + 'T00:00:00');
+  const todayObj = useMemo(() => new Date(todayStr + 'T00:00:00'), [todayStr]);
 
   const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [displayYear, setDisplayYear] = useState(todayObj.getFullYear());
-  const [displayMonth, setDisplayMonth] = useState(todayObj.getMonth());
+  const [displayYear, setDisplayYear] = useState(() => todayObj.getFullYear());
+  const [displayMonth, setDisplayMonth] = useState(() => todayObj.getMonth());
   const [allLogs, setAllLogs] = useState({});
   const [keysPerMonth, setKeysPerMonthState] = useState(4);
 
@@ -65,68 +74,95 @@ export default function App() {
   // Trigger per aggiornare istantaneamente la GIF nel banner animato
   const [outcomeTrigger, setOutcomeTrigger] = useState(null);
 
-  // Carica i dati salvati e le impostazioni all'avvio
+  // Carica i dati salvati e precarica le immagini critiche in memoria RAM all'avvio
   useEffect(() => {
     setAllLogs(getAllLogs());
     setKeysPerMonthState(getKeysPerMonth());
+
+    // Preload rapido delle immagini di interfaccia per azzerare flash o ritardi al tocco
+    const criticalImages = [
+      catStandingImg,
+      catSuccessImg,
+      catFailImg,
+      catCheatKeyImg,
+      blackButtonImg,
+      seeingStoneImg,
+      keyImg,
+      jumpingMouseImg,
+      catModalBg
+    ];
+
+    criticalImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
   }, []);
 
-  // Navigazione mese
-  const handlePrevMonth = () => {
-    if (displayMonth === 0) {
-      setDisplayMonth(11);
-      setDisplayYear((prev) => prev - 1);
-    } else {
-      setDisplayMonth((prev) => prev - 1);
-    }
-  };
+  // Navigazione mese memoizzata
+  const handlePrevMonth = useCallback(() => {
+    setDisplayMonth((prev) => {
+      if (prev === 0) {
+        setDisplayYear((y) => y - 1);
+        return 11;
+      }
+      return prev - 1;
+    });
+  }, []);
 
-  const handleNextMonth = () => {
-    if (displayMonth === 11) {
-      setDisplayMonth(0);
-      setDisplayYear((prev) => prev + 1);
-    } else {
-      setDisplayMonth((prev) => prev + 1);
-    }
-  };
+  const handleNextMonth = useCallback(() => {
+    setDisplayMonth((prev) => {
+      if (prev === 11) {
+        setDisplayYear((y) => y + 1);
+        return 0;
+      }
+      return prev + 1;
+    });
+  }, []);
 
-  const handleTodayClick = () => {
+  const handleTodayClick = useCallback(() => {
     const now = new Date();
     setDisplayYear(now.getFullYear());
     setDisplayMonth(now.getMonth());
     setSelectedDate(todayStr);
-  };
+  }, [todayStr]);
 
   // Quando l'utente tocca un giorno del calendario
-  const handleDayClick = (dateStr) => {
+  const handleDayClick = useCallback((dateStr) => {
     setSelectedDate(dateStr);
     setDayModalState({
       isOpen: true,
       dateStr
     });
-  };
+  }, []);
 
-  // Calcola quante chiavi sono state usate e quante ne restano nel mese selezionato
-  const usedKeysForMonth = getMonthUsedKeys(allLogs, displayYear, displayMonth);
-  const remainingKeys = Math.max(0, keysPerMonth - usedKeysForMonth);
+  // Calcolo memoizzato delle chiavi usate nel mese selezionato
+  const usedKeysForMonth = useMemo(() => {
+    return getMonthUsedKeys(allLogs, displayYear, displayMonth);
+  }, [allLogs, displayYear, displayMonth]);
+
+  const remainingKeys = useMemo(() => {
+    return Math.max(0, keysPerMonth - usedKeysForMonth);
+  }, [keysPerMonth, usedKeysForMonth]);
 
   // Modalità simulazione Topo Saltatore (attiva su richiesta utente)
-  const [simulatedMouseAlert, setSimulatedMouseAlert] = useState(true);
+  const [simulatedMouseAlert] = useState(true);
 
-  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore
-  const realUnmarkedDays = getUnmarkedPastDays(allLogs);
-  const unmarkedDays = realUnmarkedDays.length > 0 
-    ? realUnmarkedDays 
-    : (simulatedMouseAlert ? ['2026-11-01', '2026-10-31', '2026-10-30'] : []);
+  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore memoizzato
+  const unmarkedDays = useMemo(() => {
+    const realUnmarkedDays = getUnmarkedPastDays(allLogs);
+    return realUnmarkedDays.length > 0 
+      ? realUnmarkedDays 
+      : (simulatedMouseAlert ? ['2026-11-01', '2026-10-31', '2026-10-30'] : []);
+  }, [allLogs, simulatedMouseAlert]);
 
   // Salvataggio impostazioni chiavi al mese
-  const handleSaveKeysPerMonth = (newCount) => {
+  const handleSaveKeysPerMonth = useCallback((newCount) => {
     setKeysPerMonth(newCount);
     setKeysPerMonthState(newCount);
-  };
+  }, []);
 
-  // Selezione esito dal pop-up
-  const handleSelectStatusFromModal = (newStatus) => {
+  // Selezione esito dal pop-up ottimizzata
+  const handleSelectStatusFromModal = useCallback((newStatus) => {
     const targetDate = dayModalState.dateStr || selectedDate;
     const oldLog = allLogs[targetDate] || {};
     const wasAlreadyKey = oldLog.dietState === 'cheat_key';
@@ -139,14 +175,12 @@ export default function App() {
     // 1. Chiude il modal di selezione del giorno
     setDayModalState({ isOpen: false, dateStr: null });
 
-    // 2. Trigger per cambiare la GIF del banner in base all'esito (random senza ripetizioni)
+    // 2. Trigger per cambiare la GIF del banner in base all'esito
     setOutcomeTrigger({ status: newStatus, timestamp: Date.now() });
 
     // 3. Logica reattiva del Gatto Nero
     if (newStatus === 'cheat_key') {
-      // Calcolo se questa è l'ULTIMA chiave disponibile del mese
       const isNowLastKey = !wasAlreadyKey && (remainingKeys - 1 <= 0);
-
       const quoteContext = isNowLastKey ? 'last_key' : 'key';
       const quote = getRandomCatQuote(quoteContext);
 
@@ -161,7 +195,7 @@ export default function App() {
           quote,
           context: quoteContext
         });
-      }, 180);
+      }, 120);
     } else if (newStatus === 'success' || newStatus === 'cheat') {
       const quote = getRandomCatQuote(newStatus);
 
@@ -176,9 +210,9 @@ export default function App() {
           quote,
           context: newStatus
         });
-      }, 180);
+      }, 120);
     }
-  };
+  }, [dayModalState.dateStr, selectedDate, allLogs, remainingKeys]);
 
   const currentDayLog = dayModalState.dateStr 
     ? (allLogs[dayModalState.dateStr] || { dietState: 'neutral' })
@@ -349,16 +383,16 @@ export default function App() {
           flexDirection: 'column',
           alignItems: 'center',
           animation: 'catCornerBreathe 3s ease-in-out infinite',
-          transition: 'transform 0.18s ease'
+          willChange: 'transform',
+          transform: 'translateZ(0)',
+          touchAction: 'manipulation'
         }}
-        onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
-        onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-        onTouchStart={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
-        onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
       >
         <img
           src={catStandingImg}
           alt="Gatto Nero di Coraline"
+          loading="eager"
+          decoding="async"
           style={{
             height: '130px',
             width: 'auto',
@@ -372,10 +406,10 @@ export default function App() {
       <style>{`
         @keyframes catCornerBreathe {
           0%, 100% {
-            transform: translateY(0) rotate(0deg);
+            transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translateY(-6px) rotate(1.2deg);
+            transform: translate3d(0, -6px, 0) rotate(1.2deg);
           }
         }
       `}</style>

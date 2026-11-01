@@ -127,14 +127,16 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
           objectFit: 'cover',
           objectPosition: 'center',
           display: 'block',
-          animation: 'bannerFadeIn 0.35s ease-out'
+          animation: 'bannerFadeIn 0.22s ease-out',
+          willChange: 'opacity',
+          transform: 'translateZ(0)'
         }}
       />
 
       <style>{`
         @keyframes bannerFadeIn {
-          from { opacity: 0.6; filter: blur(3px); }
-          to { opacity: 1; filter: blur(0px); }
+          from { opacity: 0.7; }
+          to { opacity: 1; }
         }
       `}</style>
     </div>

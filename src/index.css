@@ -39,6 +39,7 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 html, body {
@@ -51,14 +52,34 @@ html, body {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
-button {
+button, a, input, [role="button"] {
   font-family: inherit;
   outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Reattività tattile immediata per mobile */
+button {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Micro-feedback tattile istantaneo senza repaint */
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.96) translateZ(0);
+  transition: transform 0.06s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Atmosfera notturna con la palette Coraline */

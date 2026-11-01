@@ -204,16 +204,21 @@ export default function JumpingMouseNotice({
             src={jumpingMouseImg}
             alt="Topo Saltatore del Circo di Bobinsky"
             className="jumping-mouse-animated"
+            loading="eager"
+            decoding="async"
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95))'
+              filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95))',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              pointerEvents: 'none'
             }}
           />
         </div>
 
-        {/* SOLO TITOLO E SOTTOTITOLO (SENZA EMOJI TROMBA E SENZA PULSANTE) */}
+        {/* SOLO TITOLO E SOTTOTITOLO */}
         <div style={{ flex: 1, minWidth: 0, paddingRight: '14px' }}>
           <h4
             style={{
@@ -251,11 +256,11 @@ export default function JumpingMouseNotice({
         @keyframes mouseNoticeEnter {
           from {
             opacity: 0;
-            transform: translateY(-10px) scale(0.98);
+            transform: translate3d(0, -8px, 0) scale(0.98);
           }
           to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translate3d(0, 0, 0) scale(1);
           }
         }
 
@@ -267,22 +272,19 @@ export default function JumpingMouseNotice({
 
         @keyframes mouseTrumpetBlast {
           0% {
-            transform: translateY(0) rotate(0deg) scale(1);
+            transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
           }
           8% {
-            /* Carica fiato */
-            transform: translateY(2px) rotate(-2deg) scale(0.97, 1.03);
+            transform: translate3d(0, 2px, 0) rotate(-2deg) scale(0.97, 1.03);
           }
           16% {
-            /* Colpo di tromba forte: rinculo e vibrazione */
-            transform: translateY(-4px) rotate(5deg) scale(1.07, 0.95);
+            transform: translate3d(0, -4px, 0) rotate(5deg) scale(1.07, 0.95);
           }
           22% {
-            /* Tremolio serrato rapido (squillo acuto) */
-            transform: translateY(-2px) rotate(-4deg) scale(1.03, 0.98);
+            transform: translate3d(0, -2px, 0) rotate(-4deg) scale(1.03, 0.98);
           }
           28% {
-            transform: translateY(-4px) rotate(4deg) scale(1.06, 0.95);
+            transform: translate3d(0, -4px, 0) rotate(4deg) scale(1.06, 0.95);
           }
           34% {
             transform: translateY(-2px) rotate(-3deg) scale(1.02, 0.98);

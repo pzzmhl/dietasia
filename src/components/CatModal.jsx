@@ -15,8 +15,8 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
 
   useEffect(() => {
     if (isOpen) {
-      const timer = setTimeout(() => setVisible(true), 15);
-      return () => clearTimeout(timer);
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
     } else {
       setVisible(false);
     }
@@ -102,7 +102,9 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         justifyContent: 'center',
         padding: '16px',
         opacity: visible ? 1 : 0,
-        transition: 'opacity 0.25s ease-out'
+        transition: 'opacity 0.18s ease-out',
+        willChange: 'opacity',
+        transform: 'translateZ(0)'
       }}
       onClick={onClose}
     >
@@ -119,14 +121,15 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          transform: visible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
-          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          transform: visible ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 18px, 0) scale(0.96)',
+          transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          willChange: 'transform'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* NUVOLETTA DI DIALOGO STILE CORALINE (Abbassata, con cuciture e codina verso il gatto) */}
+        {/* NUVOLETTA DI DIALOGO STILE CORALINE */}
         <div
           className="coraline-speech-bubble"
           style={{
@@ -139,9 +142,10 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             padding: '16px 18px',
             boxShadow: `0 8px 24px rgba(0,0,0,0.7), inset 0 0 16px rgba(0,0,0,0.5)`,
             marginBottom: '16px',
-            animation: 'coralineBubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+            animation: 'coralineBubblePop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
             backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)'
+            WebkitBackdropFilter: 'blur(6px)',
+            willChange: 'transform, opacity'
           }}
         >
           {/* Testo pronunciato dal Gatto */}
@@ -161,7 +165,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             «{quote}»
           </p>
 
-          {/* Coda a triangolo della nuvoletta rivolta verso la bocca del gatto */}
+          {/* Coda a triangolo della nuvoletta */}
           <div
             style={{
               position: 'absolute',
@@ -191,7 +195,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           />
         </div>
 
-        {/* IMMAGINE DEL GATTO NERO (INGRANDITO PER IL SUCCESSO) */}
+        {/* IMMAGINE DEL GATTO NERO */}
         <div
           style={{
             margin: '4px 0 16px 0',
@@ -205,13 +209,18 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           <img
             src={currentCatImg}
             alt="Il Gatto Nero di Coraline"
+            loading="eager"
+            decoding="async"
             style={{
               maxHeight: catHeight,
               width: 'auto',
               maxWidth: '100%',
               objectFit: 'contain',
               filter: `drop-shadow(0 10px 22px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px ${glowColor})`,
-              animation: 'catHeadTilt 3s ease-in-out infinite'
+              animation: 'catHeadTilt 3s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              pointerEvents: 'none'
             }}
           />
         </div>
@@ -232,12 +241,8 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             border: `1.5px solid ${borderColor}`,
             boxShadow: `0 6px 18px ${glowColor}`,
             cursor: 'pointer',
-            transition: 'all 0.15s ease'
+            touchAction: 'manipulation'
           }}
-          onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.97)')}
-          onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-          onTouchStart={(e) => (e.currentTarget.style.transform = 'scale(0.97)')}
-          onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         >
           {buttonLabel}
         </button>
@@ -247,24 +252,24 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         @keyframes coralineBubblePop {
           0% {
             opacity: 0;
-            transform: scale(0.85) translateY(10px);
+            transform: scale(0.88) translate3d(0, 8px, 0);
           }
           70% {
             opacity: 1;
-            transform: scale(1.03) translateY(-2px);
+            transform: scale(1.02) translate3d(0, -2px, 0);
           }
           100% {
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: scale(1) translate3d(0, 0, 0);
           }
         }
 
         @keyframes catHeadTilt {
           0%, 100% {
-            transform: translateY(0) rotate(0deg);
+            transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translateY(-4px) rotate(1deg);
+            transform: translate3d(0, -4px, 0) rotate(1deg);
           }
         }
       `}</style>

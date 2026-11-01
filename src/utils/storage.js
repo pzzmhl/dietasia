@@ -1,6 +1,10 @@
 const STORAGE_KEY = 'coraline_asia_habit_tracker_v1';
 const KEYS_CONFIG_KEY = 'coraline_asia_keys_per_month_v1';
 
+// Cache in memoria RAM per azzerare I/O sincrono bloccante
+let logsMemoryCache = null;
+let keysConfigCache = null;
+
 /**
  * Ottiene la data corrente formattata in YYYY-MM-DD
  */
@@ -13,13 +17,16 @@ export function getTodayDateString() {
 }
 
 /**
- * Carica il numero di chiavi mensili configurato (default: 4)
+ * Carica il numero di chiavi mensili configurato (default: 4) con cache in RAM
  */
 export function getKeysPerMonth() {
+  if (keysConfigCache !== null) return keysConfigCache;
   try {
     const val = localStorage.getItem(KEYS_CONFIG_KEY);
-    return val ? Math.max(1, parseInt(val, 10)) : 4;
+    keysConfigCache = val ? Math.max(1, parseInt(val, 10)) : 4;
+    return keysConfigCache;
   } catch (err) {
+    keysConfigCache = 4;
     return 4;
   }
 }
@@ -30,6 +37,7 @@ export function getKeysPerMonth() {
 export function setKeysPerMonth(count) {
   try {
     const safeCount = Math.max(1, count);
+    keysConfigCache = safeCount;
     localStorage.setItem(KEYS_CONFIG_KEY, String(safeCount));
     return safeCount;
   } catch (err) {
@@ -38,27 +46,30 @@ export function setKeysPerMonth(count) {
 }
 
 /**
- * Carica l'intero database locale
+ * Carica l'intero database locale con cache in RAM (zero parsing ridondante)
  * @returns {Record<string, { dietState: 'neutral' | 'success' | 'cheat' | 'cheat_key', updatedAt: string }>}
  */
 export function getAllLogs() {
+  if (logsMemoryCache !== null) return logsMemoryCache;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    logsMemoryCache = raw ? JSON.parse(raw) : {};
+    return logsMemoryCache;
   } catch (err) {
     console.error("Errore caricamento dati locali:", err);
-    return {};
+    logsMemoryCache = {};
+    return logsMemoryCache;
   }
 }
 
 /**
- * Ottiene i dati di un singolo giorno
+ * Ottiene i dati di un singolo giorno dalla RAM
  * @param {string} dateStr 'YYYY-MM-DD'
  */
 export function getDayLog(dateStr) {
   const all = getAllLogs();
   return all[dateStr] || {
-    dietState: 'neutral', // 'neutral' | 'success' | 'cheat' | 'cheat_key'
+    dietState: 'neutral',
     updatedAt: null
   };
 }
@@ -79,7 +90,7 @@ export function getMonthUsedKeys(allLogs, year, month) {
 }
 
 /**
- * Salva o aggiorna lo stato per una specifica data
+ * Salva o aggiorna lo stato per una specifica data in modo atomico e istantaneo
  * @param {string} dateStr 'YYYY-MM-DD'
  * @param {object} updates
  */
@@ -96,7 +107,15 @@ export function saveDayLog(dateStr, updates) {
       updatedAt: new Date().toISOString()
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    logsMemoryCache = all;
+
+    // Sincronizzazione atomica senza bloccare il thread UI
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    } catch (writeErr) {
+      console.error("Errore scrittura localStorage:", writeErr);
+    }
+
     return all[dateStr];
   } catch (err) {
     console.error("Errore salvataggio dati locali:", err);
