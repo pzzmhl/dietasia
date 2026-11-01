@@ -192,3 +192,4 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
     </div>
   );
 }
+
