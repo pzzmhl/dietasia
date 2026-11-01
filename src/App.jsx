@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AnimatedBanner from './components/AnimatedBanner';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
@@ -211,6 +212,9 @@ export default function App() {
           />
         </div>
       </header>
+
+      {/* BANNER ANIMATO SOPRA AL CALENDARIO */}
+      <AnimatedBanner />
 
       {/* 1. GRIGLIA MENSILE DEL CALENDARIO (CON SUPPORTO CHIAVI JOLLY) */}
       <CalendarGrid
