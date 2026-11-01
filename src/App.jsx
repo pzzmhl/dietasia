@@ -7,6 +7,7 @@ import SettingsModal from './components/SettingsModal';
 import CatModal from './components/CatModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import NotificationSettingsModal from './components/NotificationSettingsModal';
+import IntroSplashVideo from './components/IntroSplashVideo';
 import blackButtonImg from './assets/black-button.png';
 import jumpingMouseImg from './assets/jumping-mouse.png';
 import { 
@@ -35,6 +36,9 @@ export default function App() {
 
   // Modal Notifiche Quotidiane (Topi Saltatori)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Anteprima Video di Apertura all'avvio dell'app
+  const [showIntro, setShowIntro] = useState(true);
 
   // Modal Selezione Esito Giorno
   const [dayModalState, setDayModalState] = useState({
@@ -169,6 +173,9 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
+      {/* ANTEPRIMA VIDEO DI BENVENUTO AD OGNI APERTURA */}
+      {showIntro && <IntroSplashVideo onFinish={() => setShowIntro(false)} />}
+
       {/* HEADER COMPATTO CON IDENTITÀ CORALINE & PULSANTE IMPOSTAZIONI */}
       <header style={{
         padding: '12px 14px',
