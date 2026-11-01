@@ -223,7 +223,8 @@ export default function CalendarGrid({
         padding: '14px 10px', 
         marginBottom: '16px',
         width: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        touchAction: 'pan-y'
       }}
     >
       {/* Intestazione Mese con font Dashboard al centro e freccette ai lati */}

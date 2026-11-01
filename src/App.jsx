@@ -377,7 +377,6 @@ export default function App() {
           zIndex: 0,
           overflow: 'hidden',
           pointerEvents: 'none',
-          touchAction: 'none',
           userSelect: 'none'
         }}
       >
