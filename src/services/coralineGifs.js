@@ -136,38 +136,24 @@ export function getNextGifForCategory(category) {
   };
 }
 
+// GIF ufficiale di apertura neutra con Coraline (sopracciglio alzato / pigiama blu)
+export const CORALINE_DEFAULT_STARTUP_GIF = {
+  id: 'GGvY01t71eu0I5Ywq6',
+  url: fallbackBanner, // Asset locale istantaneo e fluido a zero attesa
+  title: 'Coraline Neutra',
+  category: 'neutral'
+};
+
 /**
- * All'avvio / riapertura dell'app:
- * Seleziona una GIF randomica tra tutto il pacchetto disponibile.
+ * All'avvio / riapertura dell'app in stato neutro:
+ * Mostra ESCLUSIVAMENTE la GIF ufficiale di Coraline.
  */
+export function getNeutralStartupGif() {
+  return CORALINE_DEFAULT_STARTUP_GIF;
+}
+
 export function getRandomStartupGif() {
-  const allGifs = [
-    ...CORALINE_GIF_REGISTRY.key,
-    ...CORALINE_GIF_REGISTRY.success,
-    ...CORALINE_GIF_REGISTRY.cheat,
-    ...CORALINE_GIF_REGISTRY.extra
-  ];
-
-  let lastId = null;
-  try {
-    lastId = localStorage.getItem('coraline_last_gif_id');
-  } catch (e) {}
-
-  // Evita di riproporre immediatamente la medesima GIF se possibile
-  const candidates = allGifs.filter((g) => g.id !== lastId);
-  const selected = candidates.length > 0
-    ? candidates[Math.floor(Math.random() * candidates.length)]
-    : allGifs[0];
-
-  try {
-    localStorage.setItem('coraline_last_gif_id', selected.id);
-  } catch (e) {}
-
-  return {
-    id: selected.id,
-    url: getGiphyUrl(selected.id),
-    category: 'all'
-  };
+  return CORALINE_DEFAULT_STARTUP_GIF;
 }
 
 /**
@@ -178,3 +164,4 @@ export function preloadGif(url) {
   const img = new Image();
   img.src = url;
 }
+

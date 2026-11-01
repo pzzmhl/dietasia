@@ -38,6 +38,10 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
 
   // Funzione per avanzare alla prossima GIF della categoria attiva dopo 10 ripetizioni
   const advanceToNextRotatingGif = () => {
+    // In apertura neutra rimane fissa la GIF ufficiale di Coraline
+    if (activeCategoryRef.current === 'neutral') {
+      return;
+    }
     const next = getNextGifForCategory(activeCategoryRef.current);
     setCurrentGif(next);
     setFadeKey((prev) => prev + 1);
