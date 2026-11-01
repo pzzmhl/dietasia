@@ -42,6 +42,19 @@ export default function MonthStatsBar({
         boxSizing: 'border-box'
       }}
     >
+      {/* INTESTAZIONE DASHBOARD IN FONT UFFICIALE CORALINE */}
+      <h3 style={{
+        fontFamily: 'var(--font-coraline)',
+        fontSize: '26px',
+        color: 'var(--coraline-yellow)',
+        textAlign: 'center',
+        margin: '0 0 14px 0',
+        letterSpacing: '2px',
+        textShadow: '0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(216, 198, 21, 0.45)'
+      }}>
+        Dashboard
+      </h3>
+
       {/* SEZIONE 1: LE 4 CHIAVI NERE GIGANTI (SENZA ALCUNA SCRITTA) */}
       <div style={{
         backgroundColor: 'rgba(6, 22, 37, 0.88)',
