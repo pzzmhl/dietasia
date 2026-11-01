@@ -12,12 +12,34 @@ export default function JumpingMouseNotice({
   onSelectDay = () => {},
   audioSrc = null // Predisposto per ricevere file audio (es. /src/assets/mouse-audio.mp3)
 }) {
+  // 1. TUTTI GLI HOOKS DEVONO ESSERE DICHIARATI RIGOROSAMENTE IN CIMA SENZA ALCUN EARLY RETURN
   const [isDismissed, setIsDismissed] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioRef = useRef(null);
 
-  // Se non ci sono giorni non contrassegnati, non mostrare nulla
-  if (!Array.isArray(unmarkedDays) || unmarkedDays.length === 0) {
+  const hasUnmarked = Array.isArray(unmarkedDays) && unmarkedDays.length > 0;
+
+  const handlePlayAudio = () => {
+    try {
+      if (audioRef.current && audioSrc) {
+        audioRef.current.currentTime = 0;
+        const p = audioRef.current.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => setIsPlayingAudio(true)).catch(() => {});
+        }
+      }
+    } catch (e) {}
+  };
+
+  // Tenta riproduzione audio non appena il componente appare (chiamato sempre incondizionatamente)
+  useEffect(() => {
+    if (hasUnmarked && audioSrc && audioRef.current && !isDismissed) {
+      handlePlayAudio();
+    }
+  }, [hasUnmarked, audioSrc, isDismissed]);
+
+  // 2. SOLO DOPO TUTTI GLI HOOKS: EARLY RETURN SE NON CI SONO GIORNI DA NOTIFICARE
+  if (!hasUnmarked) {
     return null;
   }
 
@@ -43,25 +65,6 @@ export default function JumpingMouseNotice({
       return dStr || '';
     }
   };
-
-  const handlePlayAudio = () => {
-    try {
-      if (audioRef.current && audioSrc) {
-        audioRef.current.currentTime = 0;
-        const p = audioRef.current.play();
-        if (p && typeof p.then === 'function') {
-          p.then(() => setIsPlayingAudio(true)).catch(() => {});
-        }
-      }
-    } catch (e) {}
-  };
-
-  // Tenta riproduzione audio non appena il modal appare (se supportato dal browser)
-  useEffect(() => {
-    if (audioSrc && audioRef.current && !isDismissed) {
-      handlePlayAudio();
-    }
-  }, [audioSrc, isDismissed]);
 
   // Se minimizzato, mostra un'icona compatta flottante del topo che trema nell'angolo
   if (isDismissed) {
