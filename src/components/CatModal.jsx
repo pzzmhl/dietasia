@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import catSuccessImg from '../assets/cat-standing.png';
 import catCheatImg from '../assets/cat-cheat.png';
+import catModalBg from '../assets/cat-modal-bg.jpg';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline):
- * - Rimosso qualsiasi titolo testuale ("Gatto dell'Altro Mondo").
- * - Nuvoletta di dialogo gotico-artigianale stile Coraline con cuciture e codina a fumetto.
- * - Animazione elastica a comparsa della nuvoletta.
- * - Immagine del gatto per il successo visibilmente più grande e nitida.
+ * - Rimosso il tasto X di chiusura.
+ * - Sfondo notturno stellato ispirato al maglione/cielo vorticoso di Coraline.
+ * - Nuvoletta di dialogo abbassata, in stile cucito gotico con animazione fluida.
+ * - Immagine del gatto per il successo visibilmente grande e nitida.
  */
 export default function CatModal({ isOpen, quote, context, onClose }) {
   const [visible, setVisible] = useState(false);
@@ -95,58 +96,37 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         style={{
           width: '100%',
           maxWidth: '350px',
-          background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
+          background: `linear-gradient(180deg, rgba(7, 24, 42, 0.45) 0%, rgba(4, 14, 24, 0.78) 100%), url(${catModalBg}) center/cover no-repeat`,
           borderRadius: '26px',
           border: `1.5px solid var(--border-dark-blue-light)`,
           boxShadow: `0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px ${glowColor}`,
-          padding: '24px 20px 20px 20px',
+          padding: '28px 20px 22px 20px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           transform: visible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
           transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'hidden'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Pulsantino Chiusura rapida "✕" */}
-        <button
-          onClick={onClose}
-          aria-label="Chiudi"
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-            border: 'none',
-            color: 'var(--coraline-parchment)',
-            fontSize: '13px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.8
-          }}
-        >
-          ✕
-        </button>
-
-        {/* NUVOLETTA DI DIALOGO STILE CORALINE (Con cuciture tratteggiate e codina verso il gatto) */}
+        {/* NUVOLETTA DI DIALOGO STILE CORALINE (Abbassata, con cuciture e codina verso il gatto) */}
         <div
           className="coraline-speech-bubble"
           style={{
             width: '100%',
             position: 'relative',
-            background: 'linear-gradient(145deg, rgba(8, 26, 44, 0.98) 0%, rgba(4, 16, 28, 0.98) 100%)',
+            marginTop: '20px',
+            background: 'linear-gradient(145deg, rgba(8, 26, 44, 0.94) 0%, rgba(4, 16, 28, 0.94) 100%)',
             border: `2px dashed ${bubbleStitchColor}`,
             borderRadius: '20px',
             padding: '16px 18px',
             boxShadow: `0 8px 24px rgba(0,0,0,0.7), inset 0 0 16px rgba(0,0,0,0.5)`,
             marginBottom: '16px',
-            animation: 'coralineBubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'
+            animation: 'coralineBubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)'
           }}
         >
           {/* Testo pronunciato dal Gatto */}
