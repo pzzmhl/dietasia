@@ -5,10 +5,11 @@ import KeyIcon from './KeyIcon';
 
 /**
  * Modal Compatto di Selezione Esito Giornaliero:
- * - Opzione 1: Dieta Rispettata (Pietra Verde)
- * - Opzione 2: Non Rispettata (Bottone Nero)
- * - Opzione 3: Sgarro Programmato con Chiave Nera Jolly (se disponibile)
- * - Opzione 4: Azzera registrazione
+ * - Data del giorno in intestazione con chiusura "✕".
+ * - A SINISTRA: L'Anello / Pietra Verde (successo).
+ * - A DESTRA: Il Bottone Nero con il rosso (sgarro).
+ * - SOTTO: In giallo la Chiave Nera Jolly (leggermente più piccola come opzione secondaria).
+ * - Nessun testo descrittivo: solo le immagini pure ad alto contrasto.
  */
 export default function DaySelectionModal({ 
   isOpen, 
@@ -61,12 +62,12 @@ export default function DaySelectionModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '350px',
+          maxWidth: '320px',
           background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
-          borderRadius: '22px',
+          borderRadius: '24px',
           border: '1.5px solid var(--border-dark-blue-light)',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(26, 69, 110, 0.35)',
-          padding: '20px 18px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(26, 69, 110, 0.35)',
+          padding: '20px 18px 18px 18px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
@@ -87,7 +88,7 @@ export default function DaySelectionModal({
             height: '28px',
             borderRadius: '50%',
             backgroundColor: 'rgba(6, 22, 37, 0.8)',
-            border: '1px solid rgba(199, 164, 14, 0.4)',
+            border: '1px solid var(--border-dark-blue)',
             color: 'var(--coraline-parchment)',
             cursor: 'pointer',
             display: 'flex',
@@ -100,20 +101,10 @@ export default function DaySelectionModal({
           ✕
         </button>
 
-        {/* Intestazione Data Selezionata */}
-        <div style={{ textAlign: 'center', marginBottom: '16px', paddingRight: '20px', paddingLeft: '20px' }}>
-          <div style={{
-            fontSize: '10px',
-            fontFamily: 'var(--font-gothic)',
-            textTransform: 'uppercase',
-            letterSpacing: '1.5px',
-            color: 'var(--coraline-gold)',
-            marginBottom: '4px'
-          }}>
-            ✦ Registra Giornata ✦
-          </div>
+        {/* Intestazione Data del Giorno */}
+        <div style={{ textAlign: 'center', marginBottom: '18px', paddingRight: '20px', paddingLeft: '20px' }}>
           <h3 style={{
-            fontSize: '16px',
+            fontSize: '15px',
             fontFamily: 'var(--font-gothic)',
             color: 'var(--coraline-parchment)',
             fontWeight: 800,
@@ -123,133 +114,129 @@ export default function DaySelectionModal({
           </h3>
         </div>
 
-        {/* OPZIONE 1: DIETA RISPETTATA (Verde Smeraldo con Pietra) */}
-        <button
-          onClick={() => onSelectStatus('success')}
-          style={{
-            width: '100%',
-            padding: '12px 14px',
-            marginBottom: '10px',
-            backgroundColor: currentStatus === 'success' ? '#15803d' : 'rgba(21, 128, 61, 0.35)',
-            border: currentStatus === 'success' ? '2px solid #4ade80' : '1.5px solid rgba(74, 222, 128, 0.4)',
-            boxShadow: currentStatus === 'success' ? '0 0 16px rgba(74, 222, 128, 0.45)' : 'none',
-            borderRadius: '12px',
-            color: '#ffffff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <img
-            src={seeingStoneImg}
-            alt="Pietra Verde"
-            style={{ width: '26px', height: '26px', objectFit: 'contain' }}
-          />
-          <div style={{ textAlign: 'left', flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-gothic)', fontSize: '13px', fontWeight: 800, color: '#86efac' }}>
-              Dieta Rispettata
-            </div>
-            <div style={{ fontSize: '10.5px', color: '#dcfce7', opacity: 0.85 }}>
-              Pietra della vista (successo)
-            </div>
-          </div>
-          <span style={{ fontSize: '15px', color: '#4ade80', fontWeight: 900 }}>✓</span>
-        </button>
+        {/* RIGA SUPERIORE: A SINISTRA PIETRA VERDE, A DESTRA BOTTONE NERO CON IL ROSSO */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '12px',
+          marginBottom: '12px'
+        }}>
+          {/* A SINISTRA: ANELLO / PIETRA VERDE */}
+          <button
+            onClick={() => onSelectStatus('success')}
+            aria-label="Dieta Rispettata"
+            title="Dieta Rispettata"
+            style={{
+              aspectRatio: '1',
+              width: '100%',
+              backgroundColor: currentStatus === 'success' ? '#15803d' : 'rgba(21, 128, 61, 0.35)',
+              border: currentStatus === 'success' ? '2.5px solid #4ade80' : '1.5px solid rgba(52, 211, 153, 0.45)',
+              boxShadow: currentStatus === 'success' 
+                ? '0 0 18px rgba(74, 222, 128, 0.55)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4)',
+              borderRadius: '16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '12px',
+              transition: 'all 0.18s ease'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
+            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <img
+              src={seeingStoneImg}
+              alt="Pietra Verde"
+              style={{
+                width: '54px',
+                height: '54px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 3px 8px rgba(16, 185, 129, 0.6))'
+              }}
+            />
+          </button>
 
-        {/* OPZIONE 2: USA CHIAVE (SGARRO PROGRAMMATO JOLLY) */}
+          {/* A DESTRA: BOTTONE NERO CON IL ROSSO */}
+          <button
+            onClick={() => onSelectStatus('cheat')}
+            aria-label="Dieta Non Rispettata"
+            title="Non Rispettata (Sgarrato)"
+            style={{
+              aspectRatio: '1',
+              width: '100%',
+              backgroundColor: currentStatus === 'cheat' ? '#450a0a' : 'rgba(69, 10, 10, 0.45)',
+              border: currentStatus === 'cheat' ? '2.5px solid #ef4444' : '1.5px solid rgba(239, 68, 68, 0.45)',
+              boxShadow: currentStatus === 'cheat' 
+                ? '0 0 18px rgba(220, 38, 38, 0.55)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4)',
+              borderRadius: '16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '12px',
+              transition: 'all 0.18s ease'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
+            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <img
+              src={blackButtonImg}
+              alt="Bottone Nero"
+              style={{
+                width: '54px',
+                height: '54px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95))'
+              }}
+            />
+          </button>
+        </div>
+
+        {/* RIGA INFERIORE: SOTTO IN GIALLO LA CHIAVE (LEGGERMENTE PIÙ PICCOLA) */}
         <button
           onClick={() => onSelectStatus('cheat_key')}
           disabled={!canUseKey}
+          aria-label="Usa Chiave Nera"
+          title={canUseKey ? "Usa Chiave Nera (Sgarro Programmato)" : "Chiavi esaurite"}
           style={{
             width: '100%',
-            padding: '13px 14px',
-            marginBottom: '10px',
+            height: '54px',
             backgroundColor: currentStatus === 'cheat_key' 
               ? 'rgba(120, 99, 67, 0.75)' 
               : canUseKey 
-              ? 'rgba(120, 99, 67, 0.35)' 
-              : 'rgba(30, 41, 59, 0.3)',
+              ? 'rgba(6, 22, 37, 0.85)' 
+              : 'rgba(20, 30, 45, 0.4)',
             border: currentStatus === 'cheat_key' 
-              ? '2px solid var(--coraline-gold)' 
+              ? '2px solid var(--coraline-yellow)' 
               : canUseKey 
-              ? '1.5px solid var(--border-dark-blue)' 
+              ? '1.5px solid var(--coraline-gold)' 
               : '1px solid #334155',
-            boxShadow: currentStatus === 'cheat_key' ? '0 0 16px rgba(199, 164, 14, 0.5)' : 'none',
-            borderRadius: '12px',
-            color: canUseKey ? '#ffffff' : '#64748b',
+            boxShadow: currentStatus === 'cheat_key' 
+              ? '0 0 16px rgba(216, 198, 21, 0.5)' 
+              : canUseKey 
+              ? '0 3px 10px rgba(0, 0, 0, 0.35)' 
+              : 'none',
+            borderRadius: '14px',
             cursor: canUseKey ? 'pointer' : 'not-allowed',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            opacity: canUseKey ? 1 : 0.65,
-            transition: 'all 0.15s ease'
+            justifyContent: 'center',
+            opacity: canUseKey ? 1 : 0.35,
+            transition: 'all 0.18s ease',
+            marginBottom: currentStatus !== 'neutral' ? '10px' : '2px'
           }}
           onMouseDown={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(0.98)')}
           onMouseUp={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(1)')}
         >
-          <KeyIcon size={34} isUsed={!canUseKey && currentStatus !== 'cheat_key'} />
-          <div style={{ textAlign: 'left', flex: 1 }}>
-            <div style={{ 
-              fontFamily: 'var(--font-gothic)', 
-              fontSize: '13.5px', 
-              fontWeight: 800, 
-              color: canUseKey ? 'var(--coraline-yellow)' : '#94a3b8' 
-            }}>
-              Usa Chiave Nera
-            </div>
-            <div style={{ fontSize: '11px', color: canUseKey ? 'var(--coraline-parchment)' : '#64748b', opacity: 0.85 }}>
-              {canUseKey 
-                ? `Sgarro programmato (${remainingKeys} rimaste)` 
-                : "Chiavi esaurite per questo mese"}
-            </div>
-          </div>
-          <span style={{ fontSize: '15px', color: canUseKey ? 'var(--coraline-yellow)' : '#64748b', fontWeight: 900 }}>🗝️</span>
+          {/* Chiave Nera Jolly: leggermente più piccola (36px) */}
+          <KeyIcon size={36} isUsed={!canUseKey && currentStatus !== 'cheat_key'} />
         </button>
 
-        {/* OPZIONE 3: NON RISPETTATA (Bordeaux Scuro con Bottone Nero) */}
-        <button
-          onClick={() => onSelectStatus('cheat')}
-          style={{
-            width: '100%',
-            padding: '12px 14px',
-            marginBottom: '12px',
-            backgroundColor: currentStatus === 'cheat' ? '#450a0a' : 'rgba(69, 10, 10, 0.45)',
-            border: currentStatus === 'cheat' ? '2px solid #ef4444' : '1.5px solid rgba(239, 68, 68, 0.4)',
-            boxShadow: currentStatus === 'cheat' ? '0 0 16px rgba(220, 38, 38, 0.45)' : 'none',
-            borderRadius: '12px',
-            color: '#ffffff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <img
-            src={blackButtonImg}
-            alt="Bottone Nero"
-            style={{ width: '26px', height: '26px', objectFit: 'contain' }}
-          />
-          <div style={{ textAlign: 'left', flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-gothic)', fontSize: '13px', fontWeight: 800, color: '#fca5a5' }}>
-              Non Rispettata
-            </div>
-            <div style={{ fontSize: '10.5px', color: '#fee2e2', opacity: 0.85 }}>
-              Bottone dell'Altra Madre (sgarro)
-            </div>
-          </div>
-          <span style={{ fontSize: '14px', color: '#f87171', fontWeight: 900 }}>●</span>
-        </button>
-
-        {/* OPZIONE 4: AZZERA / CANCELLA STATO */}
+        {/* OPZIONE AZZERA / CANCELLA STATO */}
         {currentStatus !== 'neutral' && (
-          <div style={{ textAlign: 'center', marginTop: '2px' }}>
+          <div style={{ textAlign: 'center', marginTop: '4px' }}>
             <button
               onClick={() => onSelectStatus('neutral')}
               style={{
@@ -262,7 +249,7 @@ export default function DaySelectionModal({
                 padding: '4px 8px'
               }}
             >
-              Rimuovi registrazione per questo giorno
+              Azzera esito
             </button>
           </div>
         )}
