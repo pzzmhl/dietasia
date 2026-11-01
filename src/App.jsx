@@ -16,6 +16,7 @@ import catCheatKeyImg from './assets/cat-cheat-key.png';
 import blackButtonImg from './assets/black-button.png';
 import seeingStoneImg from './assets/seeing-stone.png';
 import keyImg from './assets/key.png';
+import streakStarImg from './assets/streak-star.png';
 import jumpingMouseImg from './assets/jumping-mouse.png';
 import catModalBg from './assets/cat-modal-bg.jpg';
 
@@ -87,6 +88,7 @@ export default function App() {
       catCheatKeyImg,
       blackButtonImg,
       seeingStoneImg,
+      streakStarImg,
       keyImg,
       jumpingMouseImg,
       catModalBg

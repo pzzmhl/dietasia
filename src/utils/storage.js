@@ -152,3 +152,52 @@ export function getUnmarkedPastDays(allLogs) {
   return unmarked;
 }
 
+/**
+ * Calcola i giorni di dieta consecutivi (streak attuale di successi)
+ * @param {Record<string, any>} allLogs
+ * @returns {number} Numero di giorni consecutivi di dieta rispettata
+ */
+export function getConsecutiveDietStreak(allLogs) {
+  if (!allLogs || typeof allLogs !== 'object') return 0;
+
+  const now = new Date();
+  const formatYMD = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const todayStr = formatYMD(now);
+  const todayLog = allLogs[todayStr];
+  
+  let checkDate = new Date(now);
+  let streak = 0;
+
+  // Se oggi è segnato come 'success', contiamo partendo da oggi
+  if (todayLog && todayLog.dietState === 'success') {
+    streak = 1;
+    checkDate.setDate(checkDate.getDate() - 1);
+  } else if (!todayLog || todayLog.dietState === 'neutral') {
+    // Se oggi non è ancora stato segnato, verifichiamo la serie a ritroso da ieri
+    checkDate.setDate(checkDate.getDate() - 1);
+  } else {
+    // Se oggi è già segnato con uno sgarro, la serie è interrotta
+    return 0;
+  }
+
+  // Conta i giorni consecutivi a ritroso fino a trovare un'interruzione
+  while (true) {
+    const dateStr = formatYMD(checkDate);
+    const log = allLogs[dateStr];
+    if (log && log.dietState === 'success') {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
