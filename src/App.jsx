@@ -362,22 +362,25 @@ export default function App() {
 
   return (
     <>
-      {/* SFONDO NOTTURNO CON STELLE DI CORALINE (FULL-SCREEN HARDWARE-ACCELERATED) */}
+      {/* SFONDO NOTTURNO CON STELLE DI CORALINE (SFUOCATO & HARDWARE-ACCELERATED) */}
       <div
         aria-hidden="true"
         style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100vw',
-          height: '100vh',
+          top: '-20px',
+          left: '-20px',
+          right: '-20px',
+          bottom: '-20px',
+          width: 'calc(100vw + 40px)',
+          height: 'calc(100vh + 40px)',
           zIndex: 0,
           backgroundImage: `url(${starryNightBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
+          filter: 'blur(8px)',
+          WebkitFilter: 'blur(8px)',
+          transform: 'scale(1.05) translateZ(0)',
           pointerEvents: 'none',
           touchAction: 'none'
         }}
