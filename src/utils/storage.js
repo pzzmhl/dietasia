@@ -158,8 +158,8 @@ export function getConsecutiveDietStreak(allLogs) {
     return 0;
   }
 
-  // Conta i giorni consecutivi a ritroso fino a trovare un'interruzione
-  while (true) {
+  // Conta i giorni consecutivi a ritroso fino a trovare un'interruzione (con tetto di sicurezza)
+  while (streak < 3650) {
     const dateStr = formatYMD(checkDate);
     const log = allLogs[dateStr];
     if (log && log.dietState === 'success') {

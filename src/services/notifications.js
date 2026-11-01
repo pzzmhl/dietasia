@@ -97,38 +97,6 @@ export async function scheduleDailyReminder(timeStr = '20:00', isTodayLogged = f
 }
 
 /**
- * Test immediato del promemoria quotidiano delle 20:00 (invia la notifica subito per la prova)
- */
-export async function sendDailyReminderImmediateTest() {
-  await requestNotificationPermission();
-
-  const title = 'I Topi Saltatori ti chiamano!';
-  const body = 'Asia, è ora di contrassegnare il tuo diario prima che l’Altra Madre se ne accorga!';
-
-  try {
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          title,
-          body,
-          id: 4200,
-          channelId: 'coraline_reminders',
-          schedule: { at: new Date(Date.now() + 300) },
-          smallIcon: 'ic_launcher'
-        }
-      ]
-    });
-    return true;
-  } catch (err) {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body, icon: '/favicon.ico' });
-      return true;
-    }
-    return false;
-  }
-}
-
-/**
  * Notifica 1: Wybie celebra il traguardo di giorni di dieta consecutivi (streak)
  */
 export async function sendWybieStreakNotification(streak) {
