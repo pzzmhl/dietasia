@@ -22,10 +22,10 @@
   --border-dark-blue-light: rgba(26, 69, 110, 0.85);
   --border-dark-blue-subtle: rgba(26, 69, 110, 0.45);
 
-  /* Sfondi, Card e Superfici */
+  /* Sfondi, Card e Superfici Leggermente Trasparenti (Glassmorphism Dark) */
   --bg-deep: #071727;
-  --bg-card: rgba(13, 44, 73, 0.85);
-  --bg-card-inner: rgba(6, 22, 37, 0.9);
+  --bg-card: rgba(10, 32, 54, 0.62);
+  --bg-card-inner: rgba(5, 18, 30, 0.58);
 
   /* Tipografia */
   --font-coraline: 'CoralinesCat', 'Cinzel', cursive, serif;

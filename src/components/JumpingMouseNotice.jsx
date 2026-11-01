@@ -100,7 +100,9 @@ export default function JumpingMouseNotice({
         style={{
           width: '100%',
           marginBottom: '16px',
-          background: 'linear-gradient(135deg, rgba(13, 44, 73, 0.96) 0%, rgba(6, 22, 37, 0.98) 100%)',
+          background: 'linear-gradient(135deg, rgba(13, 44, 73, 0.75) 0%, rgba(6, 22, 37, 0.8) 100%)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           border: '2px solid var(--coraline-yellow)',
           borderRadius: '20px',
           padding: '14px 16px',

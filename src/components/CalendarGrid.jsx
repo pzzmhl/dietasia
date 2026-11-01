@@ -24,22 +24,22 @@ const DayCell = React.memo(function DayCell({
   dietState,
   onSelectDate
 }) {
-  // Stili e colori calcolati localmente
-  let cellBg = 'rgba(6, 22, 37, 0.65)';
+  // Stili e colori calcolati localmente con trasparenza armoniosa sullo sfondo stellato
+  let cellBg = 'rgba(6, 22, 37, 0.45)';
   let cellBorder = '1px solid var(--border-dark-blue-subtle)';
   let cellShadow = 'none';
 
   if (dietState === 'success') {
-    cellBg = 'rgba(21, 128, 61, 0.4)';
+    cellBg = 'rgba(21, 128, 61, 0.32)';
     cellBorder = '1.5px solid rgba(52, 211, 153, 0.55)';
   } else if (dietState === 'cheat') {
-    cellBg = 'rgba(69, 10, 10, 0.6)';
+    cellBg = 'rgba(69, 10, 10, 0.45)';
     cellBorder = '1.5px solid rgba(239, 68, 68, 0.5)';
   } else if (dietState === 'cheat_key') {
-    cellBg = 'rgba(120, 99, 67, 0.45)';
+    cellBg = 'rgba(120, 99, 67, 0.38)';
     cellBorder = '1.5px solid rgba(199, 164, 14, 0.7)';
   } else if (isToday) {
-    cellBg = 'rgba(120, 99, 67, 0.35)';
+    cellBg = 'rgba(120, 99, 67, 0.28)';
     cellBorder = '1.5px solid var(--coraline-gold)';
   }
 
@@ -192,7 +192,7 @@ export default function CalendarGrid({
             width: '32px',
             height: '32px',
             borderRadius: '8px',
-            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            backgroundColor: 'rgba(6, 22, 37, 0.55)',
             border: '1.5px solid var(--border-dark-blue)',
             color: 'var(--coraline-parchment)',
             cursor: 'pointer',
@@ -200,7 +200,7 @@ export default function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '12px',
-            touchAction: 'manipulation'
+            touchAction: 'pan-y'
           }}
         >
           ◀
@@ -227,7 +227,7 @@ export default function CalendarGrid({
             width: '32px',
             height: '32px',
             borderRadius: '8px',
-            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            backgroundColor: 'rgba(6, 22, 37, 0.55)',
             border: '1.5px solid var(--border-dark-blue)',
             color: 'var(--coraline-parchment)',
             cursor: 'pointer',
@@ -235,7 +235,7 @@ export default function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '12px',
-            touchAction: 'manipulation'
+            touchAction: 'pan-y'
           }}
         >
           ▶

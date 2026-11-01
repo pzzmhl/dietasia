@@ -101,7 +101,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         tabIndex={0}
         aria-label="Chiavi Jolly Mensili"
         style={{
-          backgroundColor: 'rgba(6, 22, 37, 0.88)',
+          backgroundColor: 'rgba(6, 22, 37, 0.58)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           padding: '16px 14px',
           borderRadius: '18px',
           border: activeTooltip === 'keys' 
@@ -109,7 +111,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             : '1.5px solid var(--border-dark-blue-light)',
           boxShadow: activeTooltip === 'keys'
             ? 'inset 0 0 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(216, 198, 21, 0.4)'
-            : 'inset 0 0 16px rgba(0, 0, 0, 0.75)',
+            : 'inset 0 0 16px rgba(0, 0, 0, 0.5)',
           marginBottom: '12px',
           display: 'flex',
           alignItems: 'center',
@@ -218,7 +220,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            backgroundColor: 'rgba(6, 22, 37, 0.52)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             padding: '14px 6px',
             borderRadius: '16px',
             border: activeTooltip === 'success' 
@@ -226,7 +230,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '1.5px solid var(--border-dark-blue-light)',
             boxShadow: activeTooltip === 'success' 
               ? '0 0 14px rgba(52, 211, 153, 0.45)' 
-              : '0 6px 16px rgba(0, 0, 0, 0.5)',
+              : '0 6px 16px rgba(0, 0, 0, 0.4)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -269,7 +273,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            backgroundColor: 'rgba(6, 22, 37, 0.52)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             padding: '14px 6px',
             borderRadius: '16px',
             border: activeTooltip === 'streak' 
@@ -277,7 +283,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '1.5px solid var(--border-dark-blue-light)',
             boxShadow: activeTooltip === 'streak' 
               ? '0 0 14px rgba(216, 198, 21, 0.45)' 
-              : '0 6px 16px rgba(0, 0, 0, 0.5)',
+              : '0 6px 16px rgba(0, 0, 0, 0.4)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -320,7 +326,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            backgroundColor: 'rgba(6, 22, 37, 0.52)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             padding: '14px 6px',
             borderRadius: '16px',
             border: activeTooltip === 'cheat' 
@@ -328,7 +336,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '1.5px solid var(--border-dark-blue-light)',
             boxShadow: activeTooltip === 'cheat' 
               ? '0 0 14px rgba(239, 68, 68, 0.45)' 
-              : '0 6px 16px rgba(0, 0, 0, 0.5)',
+              : '0 6px 16px rgba(0, 0, 0, 0.4)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',

@@ -142,7 +142,9 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
         overflow: 'hidden',
         border: '1.5px solid var(--border-dark-blue-light)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(6, 22, 37, 0.5)',
-        backgroundColor: 'rgba(6, 22, 37, 0.9)',
+        backgroundColor: 'rgba(6, 22, 37, 0.65)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         position: 'relative',
         cursor: isFrozen ? 'pointer' : 'default'
       }}
