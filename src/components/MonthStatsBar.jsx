@@ -70,16 +70,16 @@ export default function MonthStatsBar({
                 position: 'relative'
               }}
             >
-              {/* Alone bianco spettrale per le chiavi usate */}
+              {/* Alone bianco spettrale ristretto per le chiavi usate */}
               {isUsed && (
                 <div 
                   style={{
                     position: 'absolute',
-                    width: '46px',
-                    height: '46px',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(220, 240, 255, 0.2) 50%, transparent 75%)',
-                    filter: 'blur(5px)',
+                    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(220, 240, 255, 0.12) 50%, transparent 70%)',
+                    filter: 'blur(3px)',
                     pointerEvents: 'none',
                     animation: 'ghostlyAuraPulse 3s ease-in-out infinite'
                   }}

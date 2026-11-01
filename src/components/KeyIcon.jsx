@@ -25,9 +25,9 @@ export default function KeyIcon({
         xmlns="http://www.w3.org/2000/svg"
         className={className}
         style={{
-          opacity: isUsed ? 0.8 : 1,
+          opacity: isUsed ? 0.45 : 1,
           filter: isUsed 
-            ? 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 18px rgba(220, 240, 255, 0.75))' 
+            ? 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 7px rgba(220, 240, 255, 0.7))' 
             : 'drop-shadow(0 2px 5px rgba(0,0,0,0.8))',
           ...style
         }}
@@ -53,9 +53,9 @@ export default function KeyIcon({
         width: `${size}px`,
         height: `${size}px`,
         objectFit: 'contain',
-        opacity: isUsed ? 0.78 : 1,
+        opacity: isUsed ? 0.44 : 1,
         filter: isUsed 
-          ? 'brightness(1.1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 18px rgba(225, 240, 255, 0.8)) drop-shadow(0 0 28px rgba(255, 255, 255, 0.45))' 
+          ? 'brightness(1.15) drop-shadow(0 0 3px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 7px rgba(220, 240, 255, 0.75))' 
           : 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 6px rgba(216, 198, 21, 0.35))',
         transition: 'all 0.25s ease',
         ...style
