@@ -106,19 +106,22 @@ export function getNextGifForCategory(category) {
   try {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
-      remainingIds = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        remainingIds = parsed;
+      }
     }
   } catch (e) {
     console.error('Errore lettura deck da localStorage', e);
   }
 
   // Se il mazzo è vuoto o non inizializzato, ricarica tutte le GIF e mescola
-  if (!remainingIds || remainingIds.length === 0) {
+  if (!remainingIds || !Array.isArray(remainingIds) || remainingIds.length === 0) {
     remainingIds = shuffleArray(pool.map((item) => item.id));
   }
 
-  // Estrae la prima GIF dal mazzo
-  const chosenId = remainingIds.shift();
+  // Estrae la prima GIF dal mazzo (con fallback di sicurezza)
+  const chosenId = remainingIds.shift() || (pool[0] && pool[0].id) || 'GGvY01t71eu0I5Ywq6';
 
   // Salva il rimanente aggiornato
   try {

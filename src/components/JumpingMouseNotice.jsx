@@ -17,31 +17,43 @@ export default function JumpingMouseNotice({
   const audioRef = useRef(null);
 
   // Se non ci sono giorni non contrassegnati, non mostrare nulla
-  if (!unmarkedDays || unmarkedDays.length === 0) {
+  if (!Array.isArray(unmarkedDays) || unmarkedDays.length === 0) {
     return null;
   }
 
   // Il primo giorno mancante in ordine cronologico
   const firstMissingDate = unmarkedDays[0];
+  if (!firstMissingDate) return null;
+
   const missingCount = unmarkedDays.length;
 
-  // Formatta la data del primo giorno mancante (es. "1 Nov")
+  // Formattazione manuale sicura senza dipendere da locale engine
   const formatDateLabel = (dStr) => {
     try {
-      const d = new Date(dStr + 'T00:00:00');
-      return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
-    } catch (e) {
+      if (!dStr) return '';
+      const parts = dStr.split('-');
+      if (parts.length === 3) {
+        const day = parseInt(parts[2], 10);
+        const monthIdx = parseInt(parts[1], 10) - 1;
+        const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+        return `${day} ${months[monthIdx] || ''}`;
+      }
       return dStr;
+    } catch (e) {
+      return dStr || '';
     }
   };
 
   const handlePlayAudio = () => {
-    if (audioRef.current && audioSrc) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play()
-        .then(() => setIsPlayingAudio(true))
-        .catch((err) => console.log('Audio autoplay prevented:', err));
-    }
+    try {
+      if (audioRef.current && audioSrc) {
+        audioRef.current.currentTime = 0;
+        const p = audioRef.current.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => setIsPlayingAudio(true)).catch(() => {});
+        }
+      }
+    } catch (e) {}
   };
 
   // Tenta riproduzione audio non appena il modal appare (se supportato dal browser)

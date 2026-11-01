@@ -173,7 +173,7 @@ export default function CalendarGrid({
           const dateStr = formatYMD(displayYear, displayMonth, day);
           const isSelected = dateStr === selectedDate;
           const isToday = dateStr === todayStr;
-          const log = allLogs[dateStr] || {};
+          const log = (allLogs && allLogs[dateStr]) || {};
           const dietState = log.dietState;
 
           // Sfondo e bordo in base alla palette Coraline e allo stato

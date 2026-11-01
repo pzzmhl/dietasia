@@ -43,8 +43,10 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
       return;
     }
     const next = getNextGifForCategory(activeCategoryRef.current);
-    setCurrentGif(next);
-    setFadeKey((prev) => prev + 1);
+    if (next && next.url) {
+      setCurrentGif(next);
+      setFadeKey((prev) => prev + 1);
+    }
   };
 
   // 1. Gestione del timer di rotazione ogni 10 ripetizioni
@@ -77,15 +79,19 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
     }
 
     const nextGif = getNextGifForCategory(category);
-    activeCategoryRef.current = category;
-    setCurrentGif(nextGif);
-    setFadeKey((prev) => prev + 1);
+    if (nextGif && nextGif.url) {
+      activeCategoryRef.current = category;
+      setCurrentGif(nextGif);
+      setFadeKey((prev) => prev + 1);
+    }
 
     // Precarica in background la successiva per transizione fulminea
     setTimeout(() => {
       try {
         const peekNext = getNextGifForCategory(category);
-        preloadGif(peekNext.url);
+        if (peekNext && peekNext.url) {
+          preloadGif(peekNext.url);
+        }
       } catch (e) {}
     }, 1500);
 
@@ -106,7 +112,7 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
     >
       <img
         key={fadeKey}
-        src={currentGif.url}
+        src={currentGif?.url || fallbackBanner}
         alt="Animazione Coraline"
         onError={(e) => {
           // Fallback di sicurezza in caso di assenza temporanea di rete

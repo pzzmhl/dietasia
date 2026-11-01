@@ -67,10 +67,11 @@ export function getDayLog(dateStr) {
  * Calcola quante chiavi sono state usate nel mese specificato
  */
 export function getMonthUsedKeys(allLogs, year, month) {
+  if (!allLogs || typeof allLogs !== 'object') return 0;
   const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
   let count = 0;
   Object.entries(allLogs).forEach(([dateStr, log]) => {
-    if (dateStr.startsWith(prefix) && log.dietState === 'cheat_key') {
+    if (dateStr.startsWith(prefix) && log && log.dietState === 'cheat_key') {
       count++;
     }
   });
@@ -109,6 +110,7 @@ export function saveDayLog(dateStr, updates) {
  * @returns {string[]} Elenco di date 'YYYY-MM-DD' non registrate
  */
 export function getUnmarkedPastDays(allLogs) {
+  if (!allLogs || typeof allLogs !== 'object') return [];
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
@@ -123,7 +125,7 @@ export function getUnmarkedPastDays(allLogs) {
     const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
 
     const log = allLogs[dateStr];
-    if (!log || !log.dietState || log.dietState === 'neutral') {
+    if (!log || typeof log !== 'object' || !log.dietState || log.dietState === 'neutral') {
       unmarked.push(dateStr);
     }
   }

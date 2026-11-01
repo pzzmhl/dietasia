@@ -21,8 +21,8 @@ export default function MonthStatsBar({
   let cheatCount = 0;
   let keyCount = 0;
 
-  Object.entries(allLogs).forEach(([dateStr, log]) => {
-    if (dateStr.startsWith(monthPrefix)) {
+  Object.entries(allLogs || {}).forEach(([dateStr, log]) => {
+    if (dateStr.startsWith(monthPrefix) && log && typeof log === 'object') {
       if (log.dietState === 'success') successCount++;
       else if (log.dietState === 'cheat') cheatCount++;
       else if (log.dietState === 'cheat_key') keyCount++;
