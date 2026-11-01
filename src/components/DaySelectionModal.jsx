@@ -4,13 +4,14 @@ import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
 
 /**
- * Modal Unificato e Chiaro di Selezione Esito Giornaliero:
- * - Intestazione con data estesa e domanda di guida.
- * - 3 Schede unificate, chiare e leggibili con icona, titolo esplicito e descrizione.
- *   1. Pietra Verde -> Dieta Rispettata
- *   2. Chiave Nera -> Sgarro Jolly (con conteggio chiavi rimanenti)
- *   3. Bottone Nero -> Dieta Non Rispettata (sgarro non programmato)
- * - Tasto di ripristino/azzeramento chiaro e accessibile.
+ * Modal Compatto e Iconico per la Registrazione Esito Giornaliero:
+ * - Intestazione con data estesa e testo "Come è andata questa giornata?".
+ * - 4 Riquadri in griglia 2x2 con sole immagini dei simboli:
+ *   1. In alto a sinistra: Dieta Rispettata (Pietra verde)
+ *   2. In alto a destra: Dieta Non Rispettata (Bottone nero)
+ *   3. In basso a sinistra: Sgarro con Chiave (Chiave jolly)
+ *   4. In basso a destra: X molto anonima per chiudere la finestra
+ * - Nessun pulsante X in alto a destra.
  */
 export default function DaySelectionModal({ 
   isOpen, 
@@ -33,7 +34,7 @@ export default function DaySelectionModal({
 
   if (!isOpen || !dateStr) return null;
 
-  // Formattazione data in italiano
+  // Formattazione data in italiano (es. Sabato 28 Novembre 2026)
   const dateObj = new Date(dateStr + 'T00:00:00');
   const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
   const formattedDate = dateObj.toLocaleDateString('it-IT', options);
@@ -65,12 +66,12 @@ export default function DaySelectionModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '350px',
+          maxWidth: '290px',
           background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
           borderRadius: '24px',
           border: '1.5px solid var(--border-dark-blue-light)',
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(26, 69, 110, 0.4)',
-          padding: '22px 18px 18px 18px',
+          padding: '20px 16px 16px 16px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
@@ -81,36 +82,10 @@ export default function DaySelectionModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Pulsante Chiusura "✕" in alto a destra */}
-        <button
-          onClick={onClose}
-          aria-label="Chiudi finestra"
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            width: '30px',
-            height: '30px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(6, 22, 37, 0.85)',
-            border: '1px solid var(--border-dark-blue)',
-            color: 'var(--coraline-parchment)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '13px',
-            fontWeight: 700,
-            touchAction: 'manipulation'
-          }}
-        >
-          ✕
-        </button>
-
-        {/* Intestazione Data & Istruzione con Font Chiaro e Leggibile */}
-        <div style={{ textAlign: 'center', marginBottom: '16px', paddingRight: '22px', paddingLeft: '22px' }}>
+        {/* Intestazione Data & Domanda */}
+        <div style={{ textAlign: 'center', marginBottom: '16px', padding: '0 6px' }}>
           <h3 style={{
-            fontSize: '16px',
+            fontSize: '15px',
             fontFamily: 'var(--font-body)',
             color: 'var(--coraline-parchment)',
             fontWeight: 700,
@@ -129,86 +104,128 @@ export default function DaySelectionModal({
           </p>
         </div>
 
-        {/* OPZIONI DI REGISTRAZIONE: 3 SCHEDE SENZA SOTTOTITOLI, FONT NORMALE E PULITO */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
-
-          {/* 1. DIETA RISPETTATA (PIETRA VERDE) */}
+        {/* GRIGLIA 2x2 DEI 4 RIQUADRI */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '12px',
+          marginBottom: '6px'
+        }}>
+          {/* 1. IN ALTO A SINISTRA: DIETA RISPETTATA (PIETRA VERDE) */}
           <button
-            onClick={() => onSelectStatus('success')}
+            type="button"
+            onClick={() => onSelectStatus(currentStatus === 'success' ? 'neutral' : 'success')}
+            aria-label="Dieta Rispettata"
+            title="Dieta Rispettata"
             style={{
-              width: '100%',
               display: 'flex',
               alignItems: 'center',
-              gap: '14px',
-              padding: '12px 14px',
-              borderRadius: '16px',
+              justifyContent: 'center',
+              height: '90px',
+              borderRadius: '18px',
               backgroundColor: currentStatus === 'success' 
-                ? 'rgba(18, 48, 35, 0.9)' 
-                : 'rgba(6, 22, 37, 0.75)',
+                ? 'rgba(18, 48, 35, 0.92)' 
+                : 'rgba(6, 22, 37, 0.8)',
               border: currentStatus === 'success' 
                 ? '2px solid #4ade80' 
                 : '1.5px solid var(--border-dark-blue)',
               boxShadow: currentStatus === 'success' 
-                ? '0 0 16px rgba(74, 222, 128, 0.35), inset 0 0 12px rgba(21, 128, 61, 0.3)' 
-                : '0 3px 10px rgba(0, 0, 0, 0.4)',
+                ? '0 0 16px rgba(74, 222, 128, 0.4), inset 0 0 12px rgba(21, 128, 61, 0.3)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4)',
               cursor: 'pointer',
-              textAlign: 'left',
+              position: 'relative',
               touchAction: 'manipulation',
               transition: 'all 0.15s ease'
             }}
           >
-            <div style={{
-              width: '46px',
-              height: '46px',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <img
-                src={seeingStoneImg}
-                alt="Pietra Verde"
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))'
-                }}
-              />
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                fontWeight: 600,
-                color: '#4ade80',
-                letterSpacing: '0.2px'
-              }}>
-                Dieta Rispettata
-              </div>
-            </div>
-
+            <img
+              src={seeingStoneImg}
+              alt="Dieta Rispettata"
+              style={{
+                width: '54px',
+                height: '54px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 3px 8px rgba(16, 185, 129, 0.55))'
+              }}
+            />
             {currentStatus === 'success' && (
-              <span style={{ fontSize: '16px', color: '#4ade80', fontWeight: 900 }}>✓</span>
+              <span style={{
+                position: 'absolute',
+                top: '6px',
+                right: '8px',
+                fontSize: '14px',
+                color: '#4ade80',
+                fontWeight: 900
+              }}>✓</span>
             )}
           </button>
 
-          {/* 2. SGARRO CON CHIAVE (CHIAVE JOLLY) */}
+          {/* 2. IN ALTO A DESTRA: DIETA NON RISPETTATA (BOTTONE NERO) */}
           <button
-            onClick={() => onSelectStatus('cheat_key')}
-            disabled={!canUseKey}
+            type="button"
+            onClick={() => onSelectStatus(currentStatus === 'cheat' ? 'neutral' : 'cheat')}
+            aria-label="Dieta Non Rispettata"
+            title="Dieta Non Rispettata"
             style={{
-              width: '100%',
               display: 'flex',
               alignItems: 'center',
-              gap: '14px',
-              padding: '12px 14px',
-              borderRadius: '16px',
+              justifyContent: 'center',
+              height: '90px',
+              borderRadius: '18px',
+              backgroundColor: currentStatus === 'cheat' 
+                ? 'rgba(48, 18, 22, 0.92)' 
+                : 'rgba(6, 22, 37, 0.8)',
+              border: currentStatus === 'cheat' 
+                ? '2px solid #ef4444' 
+                : '1.5px solid var(--border-dark-blue)',
+              boxShadow: currentStatus === 'cheat' 
+                ? '0 0 16px rgba(239, 68, 68, 0.4), inset 0 0 12px rgba(69, 10, 10, 0.3)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4)',
+              cursor: 'pointer',
+              position: 'relative',
+              touchAction: 'manipulation',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <img
+              src={blackButtonImg}
+              alt="Dieta Non Rispettata"
+              style={{
+                width: '52px',
+                height: '52px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95))'
+              }}
+            />
+            {currentStatus === 'cheat' && (
+              <span style={{
+                position: 'absolute',
+                top: '6px',
+                right: '8px',
+                fontSize: '14px',
+                color: '#ef4444',
+                fontWeight: 900
+              }}>✓</span>
+            )}
+          </button>
+
+          {/* 3. IN BASSO A SINISTRA: SGARRO CON CHIAVE */}
+          <button
+            type="button"
+            onClick={() => onSelectStatus(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key')}
+            disabled={!canUseKey}
+            aria-label="Sgarro con Chiave"
+            title="Sgarro con Chiave"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '90px',
+              borderRadius: '18px',
               backgroundColor: currentStatus === 'cheat_key' 
-                ? 'rgba(48, 38, 22, 0.9)' 
+                ? 'rgba(48, 38, 22, 0.92)' 
                 : canUseKey 
-                ? 'rgba(6, 22, 37, 0.75)' 
+                ? 'rgba(6, 22, 37, 0.8)' 
                 : 'rgba(20, 30, 45, 0.3)',
               border: currentStatus === 'cheat_key' 
                 ? '2px solid var(--coraline-yellow)' 
@@ -216,112 +233,66 @@ export default function DaySelectionModal({
                 ? '1.5px solid var(--border-dark-blue)' 
                 : '1px solid #1e293b',
               boxShadow: currentStatus === 'cheat_key' 
-                ? '0 0 16px rgba(216, 198, 21, 0.35), inset 0 0 12px rgba(120, 99, 67, 0.3)' 
-                : '0 3px 10px rgba(0, 0, 0, 0.4)',
+                ? '0 0 16px rgba(216, 198, 21, 0.4), inset 0 0 12px rgba(120, 99, 67, 0.3)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4)',
               cursor: canUseKey ? 'pointer' : 'not-allowed',
-              opacity: canUseKey ? 1 : 0.4,
-              textAlign: 'left',
+              opacity: canUseKey ? 1 : 0.35,
+              position: 'relative',
               touchAction: 'manipulation',
               transition: 'all 0.15s ease'
             }}
           >
-            <div style={{
-              width: '46px',
-              height: '46px',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <img
-                src={keyImg}
-                alt="Chiave Nera Jolly"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8))'
-                }}
-              />
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                fontWeight: 600,
-                color: 'var(--coraline-yellow)',
-                letterSpacing: '0.2px'
-              }}>
-                Sgarro con Chiave
-              </div>
-            </div>
-
+            <img
+              src={keyImg}
+              alt="Sgarro con Chiave"
+              style={{
+                width: '48px',
+                height: '48px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85))'
+              }}
+            />
             {currentStatus === 'cheat_key' && (
-              <span style={{ fontSize: '16px', color: 'var(--coraline-yellow)', fontWeight: 900 }}>✓</span>
+              <span style={{
+                position: 'absolute',
+                top: '6px',
+                right: '8px',
+                fontSize: '14px',
+                color: 'var(--coraline-yellow)',
+                fontWeight: 900
+              }}>✓</span>
             )}
           </button>
 
-          {/* 3. DIETA NON RISPETTATA (BOTTONE NERO) */}
+          {/* 4. IN BASSO A DESTRA: X ANONIMA PER CHIUDERE */}
           <button
-            onClick={() => onSelectStatus('cheat')}
+            type="button"
+            onClick={onClose}
+            aria-label="Chiudi finestra"
+            title="Chiudi"
             style={{
-              width: '100%',
               display: 'flex',
               alignItems: 'center',
-              gap: '14px',
-              padding: '12px 14px',
-              borderRadius: '16px',
-              backgroundColor: currentStatus === 'cheat' 
-                ? 'rgba(48, 18, 22, 0.9)' 
-                : 'rgba(6, 22, 37, 0.75)',
-              border: currentStatus === 'cheat' 
-                ? '2px solid #ef4444' 
-                : '1.5px solid var(--border-dark-blue)',
-              boxShadow: currentStatus === 'cheat' 
-                ? '0 0 16px rgba(239, 68, 68, 0.35), inset 0 0 12px rgba(69, 10, 10, 0.3)' 
-                : '0 3px 10px rgba(0, 0, 0, 0.4)',
+              justifyContent: 'center',
+              height: '90px',
+              borderRadius: '18px',
+              backgroundColor: 'rgba(6, 22, 37, 0.55)',
+              border: '1.5px solid rgba(221, 202, 183, 0.18)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
               cursor: 'pointer',
-              textAlign: 'left',
               touchAction: 'manipulation',
               transition: 'all 0.15s ease'
             }}
           >
-            <div style={{
-              width: '46px',
-              height: '46px',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+            <span style={{
+              fontSize: '26px',
+              fontWeight: 300,
+              color: 'rgba(221, 202, 183, 0.45)',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              lineHeight: 1
             }}>
-              <img
-                src={blackButtonImg}
-                alt="Bottone Nero"
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.95))'
-                }}
-              />
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                fontWeight: 600,
-                color: '#f87171',
-                letterSpacing: '0.2px'
-              }}>
-                Dieta Non Rispettata
-              </div>
-            </div>
-
-            {currentStatus === 'cheat' && (
-              <span style={{ fontSize: '16px', color: '#f87171', fontWeight: 900 }}>✓</span>
-            )}
+              ✕
+            </span>
           </button>
         </div>
 
@@ -329,6 +300,7 @@ export default function DaySelectionModal({
         {currentStatus !== 'neutral' && (
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
             <button
+              type="button"
               onClick={() => onSelectStatus('neutral')}
               style={{
                 background: 'rgba(255, 255, 255, 0.05)',
@@ -336,13 +308,14 @@ export default function DaySelectionModal({
                 borderRadius: '10px',
                 color: 'var(--coraline-parchment)',
                 fontSize: '11px',
+                fontFamily: 'var(--font-body)',
                 cursor: 'pointer',
                 padding: '6px 14px',
                 touchAction: 'manipulation',
                 opacity: 0.85
               }}
             >
-              ↺ Cancella selezione (torna neutro)
+              ↺ Cancella selezione
             </button>
           </div>
         )}
