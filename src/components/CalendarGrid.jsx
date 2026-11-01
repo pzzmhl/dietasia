@@ -13,6 +13,46 @@ const MONTHS_IT = [
 ];
 
 /**
+ * Cella vuota segnaposto per i giorni mancanti a inizio o fine mese.
+ * Visualizza un quadratino discreto, meno marcato e con un trattino centrale (–)
+ * per mantenere la griglia del calendario sempre geometricamente riempita.
+ */
+const EmptyCell = React.memo(function EmptyCell() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        aspectRatio: '1 / 1',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
+        borderRadius: '10px',
+        backgroundColor: 'rgba(6, 22, 37, 0.22)',
+        border: '1px dashed rgba(26, 69, 110, 0.32)',
+        boxShadow: 'inset 0 1px 0 0 rgba(221, 202, 183, 0.04)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        userSelect: 'none',
+        pointerEvents: 'none'
+      }}
+    >
+      <span
+        style={{
+          fontFamily: 'var(--font-gothic)',
+          fontSize: '13px',
+          fontWeight: 600,
+          color: 'rgba(221, 202, 183, 0.32)',
+          lineHeight: 1
+        }}
+      >
+        –
+      </span>
+    </div>
+  );
+});
+
+/**
  * Singola Cella del Calendario memoizzata per azzerare re-render dell'intero mese.
  */
 const DayCell = React.memo(function DayCell({
@@ -164,7 +204,7 @@ export default function CalendarGrid({
 }) {
   const touchStartRef = useRef(null);
 
-  const { firstDayColumn, daysArray, todayStr } = useMemo(() => {
+  const { firstDayColumn, daysArray, todayStr, leadingDaysCount, trailingDaysCount } = useMemo(() => {
     const count = new Date(displayYear, displayMonth + 1, 0).getDate();
     const rawFirst = new Date(displayYear, displayMonth, 1).getDay();
     const col = rawFirst === 0 ? 7 : rawFirst;
@@ -175,10 +215,15 @@ export default function CalendarGrid({
     const d = String(now.getDate()).padStart(2, '0');
     const today = `${now.getFullYear()}-${m}-${d}`;
 
+    const leading = col - 1;
+    const trailing = (7 - ((leading + count) % 7)) % 7;
+
     return {
       firstDayColumn: col,
       daysArray: arr,
-      todayStr: today
+      todayStr: today,
+      leadingDaysCount: leading,
+      trailingDaysCount: trailing
     };
   }, [displayYear, displayMonth]);
 
@@ -341,6 +386,12 @@ export default function CalendarGrid({
           animation: 'monthFadeSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
+        {/* Quadratini segnaposto discreti con trattino per i giorni che mancano a inizio mese */}
+        {Array.from({ length: leadingDaysCount }).map((_, idx) => (
+          <EmptyCell key={`lead-${idx}`} />
+        ))}
+
+        {/* Giorni effettivi del mese */}
         {daysArray.map((day) => {
           const m = String(displayMonth + 1).padStart(2, '0');
           const d = String(day).padStart(2, '0');
@@ -355,7 +406,7 @@ export default function CalendarGrid({
               key={dateStr}
               day={day}
               dateStr={dateStr}
-              isFirstDay={day === 1}
+              isFirstDay={false}
               firstDayColumn={firstDayColumn}
               isSelected={isSelected}
               isToday={isToday}
@@ -364,6 +415,11 @@ export default function CalendarGrid({
             />
           );
         })}
+
+        {/* Quadratini segnaposto discreti con trattino per i giorni che mancano a fine mese */}
+        {Array.from({ length: trailingDaysCount }).map((_, idx) => (
+          <EmptyCell key={`trail-${idx}`} />
+        ))}
       </div>
     </div>
   );
