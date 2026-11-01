@@ -121,7 +121,7 @@ export default function MonthStatsBar({
           backgroundColor: 'rgba(6, 22, 37, 0.85)',
           padding: '16px 10px',
           borderRadius: '16px',
-          border: '1.5px solid rgba(52, 211, 153, 0.45)',
+          border: '1.5px solid var(--border-dark-blue-light)',
           textAlign: 'center',
           boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)'
         }}>
@@ -156,7 +156,7 @@ export default function MonthStatsBar({
           backgroundColor: 'rgba(6, 22, 37, 0.85)',
           padding: '16px 10px',
           borderRadius: '16px',
-          border: '1.5px solid rgba(220, 38, 38, 0.45)',
+          border: '1.5px solid var(--border-dark-blue-light)',
           textAlign: 'center',
           boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)'
         }}>
