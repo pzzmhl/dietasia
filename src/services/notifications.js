@@ -145,3 +145,4 @@ export async function sendTestNotification() {
     return false;
   }
 }
+

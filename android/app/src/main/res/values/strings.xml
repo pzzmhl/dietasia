@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Coraline Tracker</string>
-    <string name="title_activity_main">Coraline Tracker</string>
+    <string name="app_name">Coraline Tracker (Beta)</string>
+    <string name="title_activity_main">Coraline Tracker (Beta)</string>
     <string name="package_name">com.asia.coralinehabit</string>
     <string name="custom_url_scheme">com.asia.coralinehabit</string>
 </resources>

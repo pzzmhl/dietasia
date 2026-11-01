@@ -1,6 +1,6 @@
 {
   "appId": "com.asia.coralinehabit",
-  "appName": "Coraline Tracker",
+  "appName": "Coraline Tracker (Beta)",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
