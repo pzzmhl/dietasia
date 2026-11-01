@@ -9,6 +9,7 @@ import JumpingMouseNotice from './components/JumpingMouseNotice';
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
+  sendDailyReminderImmediateTest,
   sendWybieStreakNotification,
   sendOtherMotherKeysDepletedNotification 
 } from './services/notifications';
@@ -270,6 +271,49 @@ export default function App() {
     }
   }, [dayModalState.dateStr, selectedDate, allLogs, remainingKeys]);
 
+  // Funzioni di Test e Anteprima Notifiche
+  const testReminder20 = useCallback(() => {
+    sendDailyReminderImmediateTest();
+  }, []);
+
+  const testWybie = useCallback(() => {
+    sendWybieStreakNotification(7);
+    setStoryModalState({
+      isOpen: true,
+      type: 'wybie_streak',
+      streak: 7
+    });
+  }, []);
+
+  const testOtherMother = useCallback(() => {
+    sendOtherMotherKeysDepletedNotification();
+    setStoryModalState({
+      isOpen: true,
+      type: 'other_mother_keys',
+      streak: 0
+    });
+  }, []);
+
+  const testAllSequence = useCallback(() => {
+    // 1. Notifica Ore 20:00
+    sendDailyReminderImmediateTest();
+
+    // 2. Notifica Wybie e popup dopo 1.2s
+    setTimeout(() => {
+      sendWybieStreakNotification(7);
+      setStoryModalState({
+        isOpen: true,
+        type: 'wybie_streak',
+        streak: 7
+      });
+    }, 1200);
+
+    // 3. Notifica Altra Madre dopo 4.5s
+    setTimeout(() => {
+      sendOtherMotherKeysDepletedNotification();
+    }, 4500);
+  }, []);
+
   const currentDayLog = dayModalState.dateStr 
     ? (allLogs[dayModalState.dateStr] || { dietState: 'neutral' })
     : { dietState: 'neutral' };
@@ -312,6 +356,102 @@ export default function App() {
         allLogs={allLogs}
         keysPerMonth={keysPerMonth}
       />
+
+      {/* SEZIONE BANCO DI PROVA NOTIFICHE */}
+      <div 
+        style={{
+          marginTop: '6px',
+          marginBottom: '80px',
+          padding: '14px 12px',
+          borderRadius: '16px',
+          border: '1.5px dashed var(--coraline-brown)',
+          backgroundColor: 'rgba(6, 22, 37, 0.75)',
+          textAlign: 'center'
+        }}
+      >
+        <p style={{
+          fontFamily: 'var(--font-coraline)',
+          fontSize: '11.5px',
+          color: 'var(--coraline-yellow)',
+          margin: '0 0 10px 0',
+          letterSpacing: '0.8px'
+        }}>
+          ✦ Banco di Prova Notifiche ✦
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+          <button
+            onClick={testReminder20}
+            style={{
+              padding: '9px 6px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(13, 44, 73, 0.85)',
+              border: '1px solid var(--border-dark-blue)',
+              color: 'var(--coraline-parchment)',
+              fontFamily: 'var(--font-coraline)',
+              fontSize: '10px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            ⏰ Notifica Ore 20:00
+          </button>
+
+          <button
+            onClick={testWybie}
+            style={{
+              padding: '9px 6px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(48, 38, 22, 0.85)',
+              border: '1px solid rgba(216, 198, 21, 0.5)',
+              color: 'var(--coraline-yellow)',
+              fontFamily: 'var(--font-coraline)',
+              fontSize: '10px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            👦 Wybie (Streak)
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <button
+            onClick={testOtherMother}
+            style={{
+              padding: '9px 6px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(48, 18, 22, 0.85)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              color: '#fca5a5',
+              fontFamily: 'var(--font-coraline)',
+              fontSize: '10px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            🗝️ Altra Madre (Chiavi)
+          </button>
+
+          <button
+            onClick={testAllSequence}
+            style={{
+              padding: '9px 6px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(18, 48, 35, 0.85)',
+              border: '1px solid rgba(74, 222, 128, 0.5)',
+              color: '#86efac',
+              fontFamily: 'var(--font-coraline)',
+              fontSize: '10px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            ▶️ Mostra Tutte in Sequenza
+          </button>
+        </div>
+      </div>
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
