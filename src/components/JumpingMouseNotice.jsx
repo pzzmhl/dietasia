@@ -96,8 +96,14 @@ export default function JumpingMouseNotice({
         />
       )}
 
-      {/* BANNER / AVVISO DEL TOPO SALTATORE */}
+      {/* BANNER / AVVISO DEL TOPO SALTATORE (CLICCABILE PER APRIRE IL PRIMO GIORNO MANCANTE) */}
       <div
+        role="button"
+        tabIndex={0}
+        onClick={() => {
+          triggerHapticFeedback('selection');
+          onSelectDay(firstMissingDate);
+        }}
         style={{
           width: '100%',
           marginBottom: '16px',
@@ -112,12 +118,19 @@ export default function JumpingMouseNotice({
           display: 'flex',
           alignItems: 'center',
           gap: '14px',
+          cursor: 'pointer',
+          touchAction: 'manipulation',
           animation: 'mouseNoticeEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
         {/* Pulsantino Chiusura / Riduci "✕" */}
         <button
-          onClick={handleDismiss}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerHapticFeedback('selection');
+            handleDismiss();
+          }}
           aria-label="Chiudi avviso"
           style={{
             position: 'absolute',
@@ -150,10 +163,15 @@ export default function JumpingMouseNotice({
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            cursor: audioSrc ? 'pointer' : 'default',
+            cursor: 'pointer',
             margin: '-4px 0 -4px -6px'
           }}
-          onClick={handlePlayAudio}
+          onClick={(e) => {
+            if (audioSrc) {
+              e.stopPropagation();
+              handlePlayAudio();
+            }
+          }}
           title={audioSrc ? 'Tocca per ascoltare la tromba!' : undefined}
         >
           {/* Micro onde sonore che escono dal padiglione della tromba */}
@@ -204,9 +222,9 @@ export default function JumpingMouseNotice({
             }}
           >
             {missingCount === 1 ? (
-              <>C'è <strong>1 giorno</strong> non contrassegnato che deve essere completato.</>
+              <>Il giorno <strong>{formatDateLabel(firstMissingDate)}</strong> non è contrassegnato. Tocca per completarlo.</>
             ) : (
-              <>Ci sono <strong>{missingCount} giorni</strong> non contrassegnati che devono essere completati.</>
+              <>Ci sono <strong>{missingCount} giorni</strong> (dal {formatDateLabel(firstMissingDate)}) da completare.</>
             )}
           </p>
         </div>

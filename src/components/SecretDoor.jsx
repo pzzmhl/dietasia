@@ -15,26 +15,34 @@ export default function SecretDoor({ onOpenSettings }) {
   const [nowPlaying, setNowPlaying] = useState(null);
   const doorRef = useRef(null);
   const longPressTimerRef = useRef(null);
+  const toastTimerRef = useRef(null);
+  const unlockTimerRef = useRef(null);
   const isLongPressRef = useRef(false);
 
-  // Rileva quando l'utente arriva in fondo alla pagina
+  // Rileva quando l'utente arriva in fondo alla pagina e pulisce i timer allo smontaggio
   useEffect(() => {
     const el = doorRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.45) {
-          setIsRevealed(true);
+    let observer = null;
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.45) {
+            setIsRevealed(true);
+          }
+        },
+        {
+          threshold: [0.1, 0.45, 0.8]
         }
-      },
-      {
-        threshold: [0.1, 0.45, 0.8]
-      }
-    );
+      );
+      observer.observe(el);
+    }
 
-    observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      if (observer) observer.disconnect();
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current);
+    };
   }, []);
 
   const handlePointerDown = () => {
@@ -72,10 +80,12 @@ export default function SecretDoor({ onOpenSettings }) {
     const playedTrack = openCoralineSpotifyShuffle();
     if (playedTrack) {
       setNowPlaying(playedTrack.title);
-      setTimeout(() => setNowPlaying(null), 4500);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setNowPlaying(null), 4500);
     }
 
-    setTimeout(() => {
+    if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current);
+    unlockTimerRef.current = setTimeout(() => {
       setIsUnlocking(false);
     }, 400);
   };

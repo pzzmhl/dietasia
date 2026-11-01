@@ -7,6 +7,7 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 
 const NOTIFICATION_ID = 42;
+let channelInitialized = false;
 
 /**
  * Richiede i permessi per le notifiche sia su Android che su Web
@@ -33,8 +34,10 @@ export async function requestNotificationPermission() {
 
 /**
  * Inizializza il canale notifiche ad alta priorità su Android (API 26+)
+ * Eseguito una sola volta per sessione grazie alla cache in memoria.
  */
 export async function initNotificationChannels() {
+  if (channelInitialized) return;
   try {
     await LocalNotifications.createChannel({
       id: 'coraline_reminders',
@@ -44,18 +47,46 @@ export async function initNotificationChannels() {
       visibility: 1,
       vibration: true
     });
+    channelInitialized = true;
   } catch (e) {
     // Non-Android o canale già presente
   }
 }
 
 /**
- * Pianifica il promemoria giornaliero alle ore 20:00 (o timeStr indicato).
+ * Cancella il promemoria giornaliero attivo
+ */
+export async function cancelDailyReminder() {
+  try {
+    await LocalNotifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Pianifica il promemoria giornaliero all'orario preferito dall'utente (default 20:00).
+ * Rispetta l'impostazione `coraline_reminder_enabled` salvata nelle Opzioni.
  * Se la giornata di oggi è già stata registrata con successo o sgarro,
  * la notifica odierna viene evitata e programmata direttamente per il giorno successivo.
  */
-export async function scheduleDailyReminder(timeStr = '20:00', isTodayLogged = false) {
-  const [hoursStr, minutesStr] = timeStr.split(':');
+export async function scheduleDailyReminder(timeStr, isTodayLogged = false) {
+  let effectiveTime = timeStr;
+  try {
+    const isEnabled = localStorage.getItem('coraline_reminder_enabled') !== 'false';
+    if (!isEnabled) {
+      await cancelDailyReminder();
+      return false;
+    }
+    if (!effectiveTime) {
+      effectiveTime = localStorage.getItem('coraline_reminder_time') || '20:00';
+    }
+  } catch (e) {
+    if (!effectiveTime) effectiveTime = '20:00';
+  }
+
+  const [hoursStr, minutesStr] = effectiveTime.split(':');
   const targetHour = parseInt(hoursStr, 10) || 20;
   const targetMinute = parseInt(minutesStr, 10) || 0;
 

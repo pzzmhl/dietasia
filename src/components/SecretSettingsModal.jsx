@@ -10,8 +10,8 @@ import {
 } from '../utils/storage';
 import { 
   scheduleDailyReminder, 
-  sendTestReminderNotification,
-  requestNotificationPermission 
+  cancelDailyReminder,
+  sendTestReminderNotification 
 } from '../services/notifications';
 import { 
   triggerHapticFeedback, 
@@ -58,11 +58,11 @@ export default function SecretSettingsModal({
     }
   });
 
-  const [dimStars, setDimStars] = useState(() => {
+  const [vortexBg, setVortexBg] = useState(() => {
     try {
-      return localStorage.getItem('coraline_dim_stars') === 'true';
+      return localStorage.getItem('coraline_vortex_enabled') !== 'false';
     } catch (e) {
-      return false;
+      return true;
     }
   });
 
@@ -87,7 +87,6 @@ export default function SecretSettingsModal({
   if (!isOpen) return null;
 
   const currentLogs = getAllLogs();
-  const totalDays = Object.keys(currentLogs).length;
   let successCount = 0;
   let cheatCount = 0;
   let keyCount = 0;
@@ -98,6 +97,7 @@ export default function SecretSettingsModal({
       else if (log.dietState === 'cheat_key') keyCount++;
     }
   });
+  const totalDays = successCount + cheatCount + keyCount;
 
   // GESTIONE PROMEMORIA
   const handleToggleReminder = async (enabled) => {
@@ -106,6 +106,8 @@ export default function SecretSettingsModal({
       localStorage.setItem('coraline_reminder_enabled', enabled ? 'true' : 'false');
       if (enabled) {
         await scheduleDailyReminder(reminderTime, false);
+      } else {
+        await cancelDailyReminder();
       }
     } catch (e) {}
     triggerHapticFeedback('selection');
@@ -162,12 +164,12 @@ export default function SecretSettingsModal({
     triggerHapticFeedback('selection');
   };
 
-  const handleToggleDimStars = (enabled) => {
-    setDimStars(enabled);
+  const handleToggleVortexBg = (enabled) => {
+    setVortexBg(enabled);
     try {
-      localStorage.setItem('coraline_dim_stars', enabled ? 'true' : 'false');
+      localStorage.setItem('coraline_vortex_enabled', enabled ? 'true' : 'false');
       if (typeof document !== 'undefined') {
-        document.body.classList.toggle('dim-stars-bg', enabled);
+        document.body.classList.toggle('no-vortex-bg', !enabled);
       }
     } catch (e) {}
     triggerHapticFeedback('selection');
@@ -868,7 +870,7 @@ export default function SecretSettingsModal({
               </label>
             </div>
 
-            {/* 2. LUMINOSITÀ STELLE DI SFONDO */}
+            {/* 2. TRAMA VORTICE NELLE SCHEDE */}
             <div style={{
               backgroundColor: 'rgba(4, 16, 28, 0.7)',
               borderRadius: '16px',
@@ -880,18 +882,18 @@ export default function SecretSettingsModal({
             }}>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coraline-parchment)' }}>
-                  Sfondo Notturno Attenuato
+                  Trama Vortice nelle Schede
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--coraline-brown)' }}>
-                  Riduci la luminosità del cielo stellato
+                  Mostra la spirale soffusa in Calendario e Dashboard
                 </div>
               </div>
 
               <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
-                  checked={dimStars}
-                  onChange={(e) => handleToggleDimStars(e.target.checked)}
+                  checked={vortexBg}
+                  onChange={(e) => handleToggleVortexBg(e.target.checked)}
                   style={{
                     width: '20px',
                     height: '20px',

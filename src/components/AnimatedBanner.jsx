@@ -3,6 +3,7 @@ import fallbackBanner from '../assets/coraline-banner.gif';
 import {
   getRandomStartupGif,
   getNextGifForCategory,
+  peekNextGifForCategory,
   mapStatusToCategory,
   preloadGif
 } from '../services/coralineGifs';
@@ -104,16 +105,17 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
       setFadeKey((prev) => prev + 1);
     }
 
-    // Precarica in background la successiva per transizione fulminea al prossimo esito
-    setTimeout(() => {
+    // Precarica in background la successiva (senza consumarla dal mazzo!) per transizione fulminea
+    const preloadTimer = setTimeout(() => {
       try {
-        const peekNext = getNextGifForCategory(category);
+        const peekNext = peekNextGifForCategory(category);
         if (peekNext && peekNext.url) {
           preloadGif(peekNext.url);
         }
       } catch (e) {}
     }, 1500);
 
+    return () => clearTimeout(preloadTimer);
   }, [latestOutcomeTrigger]);
 
   // Tocco sul banner quando è fermo per riavviare le 10 ripetizioni

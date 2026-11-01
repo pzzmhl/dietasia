@@ -32,6 +32,8 @@ import jumpingMouseImg from './assets/jumping-mouse.webp';
 import otherMotherImg from './assets/other-mother-key.webp';
 import wybieImg from './assets/wybie-proud.webp';
 import catModalBg from './assets/cat-modal-bg.webp';
+import secretDoorImg from './assets/secret-door.webp';
+import vortexBg from './assets/coraline-vortex-bg.webp';
 
 import { 
   getTodayDateString, 
@@ -166,12 +168,21 @@ export default function App() {
     };
   }, []);
 
-  // Carica i dati salvati e ottimizza il rendering iniziale senza bloccare il thread UI
+  // Carica i dati salvati, applica le preferenze visive e ottimizza il rendering iniziale
   useEffect(() => {
     setAllLogs(getAllLogs());
 
+    try {
+      if (typeof document !== 'undefined') {
+        const floatOff = localStorage.getItem('coraline_floating_fx') === 'false';
+        const vortexOff = localStorage.getItem('coraline_vortex_enabled') === 'false';
+        document.body.classList.toggle('no-floating-fx', floatOff);
+        document.body.classList.toggle('no-vortex-bg', vortexOff);
+      }
+    } catch (e) {}
+
     // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard & Gatto)
-    [catStandingImg, keyImg].forEach((src) => {
+    [catStandingImg, keyImg, vortexBg].forEach((src) => {
       const img = new Image();
       img.src = src;
     });
@@ -187,7 +198,8 @@ export default function App() {
       otherMotherImg,
       wybieImg,
       jumpingMouseImg,
-      catModalBg
+      catModalBg,
+      secretDoorImg
     ];
 
     const preloadDeferred = () => {
@@ -274,10 +286,10 @@ export default function App() {
     initNotificationChannels();
   }, []);
 
-  // Pianifica o aggiorna la notifica quotidiana delle 20:00:
+  // Pianifica o aggiorna la notifica quotidiana rispettando l'orario e lo stato scelto nelle Opzioni:
   // Se oggi è già segnato, la notifica per oggi viene evitata e programmata per domani!
   useEffect(() => {
-    scheduleDailyReminder('20:00', isTodayAlreadyLogged);
+    scheduleDailyReminder(undefined, isTodayAlreadyLogged);
   }, [isTodayAlreadyLogged]);
 
   // Selezione esito dal pop-up ottimizzata
@@ -291,11 +303,9 @@ export default function App() {
     const usedBefore = getMonthUsedKeys(allLogs, y, m - 1);
     const keysLeftInTargetMonth = Math.max(0, keysPerMonth - usedBefore);
 
-    const updated = saveDayLog(targetDate, { dietState: newStatus });
-    const updatedLogs = { ...allLogs, [targetDate]: updated || { dietState: newStatus } };
-    if (updated) {
-      setAllLogs(updatedLogs);
-    }
+    saveDayLog(targetDate, { dietState: newStatus });
+    const updatedLogs = getAllLogs();
+    setAllLogs(updatedLogs);
 
     // 1. Chiude il modal di selezione del giorno
     setDayModalState({ isOpen: false, dateStr: null });
@@ -338,8 +348,10 @@ export default function App() {
       const newStreak = getConsecutiveDietStreak(updatedLogs, targetDate);
       const lastCelebrated = Number(localStorage.getItem('coraline_last_celebrated_streak') || 0);
 
-      // NOTIFICA 1: Wybie celebra traguardi di costanza (es. 3, 5, 7, 10, 14, 21, 30 giorni o nuovo record >= 3)
-      const isMilestone = newStreak >= 3 && (newStreak > lastCelebrated || [3, 5, 7, 10, 14, 21, 30].includes(newStreak));
+      // NOTIFICA 1: Wybie celebra traguardi di costanza (3 giorni, ogni settimana 7/14/21/28... o 30 giorni)
+      // Negli altri giorni interviene il Gatto con le sue frasi incoraggianti!
+      const isMilestoneDay = newStreak === 3 || (newStreak >= 7 && newStreak % 7 === 0) || (newStreak >= 30 && newStreak % 30 === 0);
+      const isMilestone = isMilestoneDay && newStreak !== lastCelebrated;
 
       if (isMilestone) {
         try {
@@ -394,7 +406,7 @@ export default function App() {
         localStorage.setItem('coraline_last_celebrated_streak', '0');
       } catch (e) {}
     }
-  }, [dayModalState.dateStr, selectedDate, allLogs, remainingKeys]);
+  }, [dayModalState.dateStr, selectedDate, allLogs, keysPerMonth, remainingKeys]);
 
   const currentDayLog = dayModalState.dateStr 
     ? (allLogs[dayModalState.dateStr] || { dietState: 'neutral' })

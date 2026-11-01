@@ -71,35 +71,40 @@ export function getMonthUsedKeys(allLogs, year, month) {
 }
 
 /**
- * Salva o aggiorna lo stato per una specifica data in modo atomico su storage primario e snapshot
+ * Salva o aggiorna lo stato per una specifica data in modo atomico e immutabile
+ * su storage primario e snapshot. Se lo stato torna a 'neutral', rimuove la chiave
+ * per mantenere il database pulito e i conteggi esatti.
  * @param {string} dateStr 'YYYY-MM-DD'
  * @param {object} updates
  */
 export function saveDayLog(dateStr, updates) {
   try {
-    const all = getAllLogs();
-    const current = all[dateStr] || {
-      dietState: 'neutral'
-    };
+    const prevAll = getAllLogs();
+    const nextAll = { ...prevAll };
 
-    all[dateStr] = {
-      ...current,
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
+    if (updates && updates.dietState === 'neutral') {
+      delete nextAll[dateStr];
+    } else {
+      const current = nextAll[dateStr] || { dietState: 'neutral' };
+      nextAll[dateStr] = {
+        ...current,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+    }
 
-    logsMemoryCache = all;
+    logsMemoryCache = nextAll;
 
     // Sincronizzazione atomica ridondante (doppio snapshot)
     try {
-      const serialized = JSON.stringify(all);
+      const serialized = JSON.stringify(nextAll);
       localStorage.setItem(STORAGE_KEY, serialized);
       localStorage.setItem(BACKUP_SNAPSHOT_KEY, serialized);
     } catch (writeErr) {
       console.error("Errore scrittura localStorage/snapshot:", writeErr);
     }
 
-    return all[dateStr];
+    return nextAll[dateStr] || { dietState: 'neutral', updatedAt: new Date().toISOString() };
   } catch (err) {
     console.error("Errore salvataggio dati locali:", err);
     return null;
@@ -112,11 +117,14 @@ export function saveDayLog(dateStr, updates) {
  */
 export function exportBackupData() {
   const logs = getAllLogs();
+  const activeLogsCount = Object.values(logs).filter(
+    (entry) => entry && entry.dietState && entry.dietState !== 'neutral'
+  ).length;
   const payload = {
     app: 'coraline-diet-tracker-asia',
     version: 1,
     exportedAt: new Date().toISOString(),
-    totalDaysLogged: Object.keys(logs).length,
+    totalDaysLogged: activeLogsCount,
     streak: getConsecutiveDietStreak(logs),
     logs
   };
@@ -126,7 +134,7 @@ export function exportBackupData() {
 /**
  * Importa e valida un file o testo di backup, ripristinando storage e snapshot
  * @param {string} jsonString
- * @returns {{ success: boolean, count: number, logs: object }}
+ * @returns {{ success: boolean, count: number, importedCount: number, logs: object, allLogs: object }}
  */
 export function importBackupData(jsonString) {
   if (!jsonString || typeof jsonString !== 'string') {
@@ -149,18 +157,19 @@ export function importBackupData(jsonString) {
     throw new Error("La struttura del backup non contiene registrazioni valide.");
   }
 
-  // Validazione rigorosa e sanitizzazione di ogni data
+  // Validazione rigorosa e sanitizzazione di ogni data (esclude stati 'neutral' vuoti)
   const sanitized = {};
-  const validStates = ['neutral', 'success', 'cheat', 'cheat_key'];
+  const validStates = ['success', 'cheat', 'cheat_key'];
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
   Object.entries(candidateLogs).forEach(([dateStr, entry]) => {
     if (dateRegex.test(dateStr) && entry && typeof entry === 'object') {
-      const state = validStates.includes(entry.dietState) ? entry.dietState : 'neutral';
-      sanitized[dateStr] = {
-        dietState: state,
-        updatedAt: entry.updatedAt || new Date().toISOString()
-      };
+      if (validStates.includes(entry.dietState)) {
+        sanitized[dateStr] = {
+          dietState: entry.dietState,
+          updatedAt: entry.updatedAt || new Date().toISOString()
+        };
+      }
     }
   });
 
@@ -178,7 +187,9 @@ export function importBackupData(jsonString) {
   return {
     success: true,
     count: importedCount,
-    logs: sanitized
+    importedCount,
+    logs: sanitized,
+    allLogs: sanitized
   };
 }
 
@@ -238,12 +249,12 @@ export function getUnmarkedPastDays(allLogs) {
 
 /**
  * Calcola i giorni di dieta consecutivi (streak di successi).
- * - Se viene fornita una data di riferimento (es. il giorno appena contrassegnato con 'success'),
- *   calcola la catena continua di successi che include quella data (sia a ritroso che in avanti).
- * - Se non viene fornita una referenceDateStr, calcola la catena continua legata a oggi (o ieri),
- *   tenendo conto anche di eventuali giorni pre-registrati / testati in avanti.
- * - Inoltre, restituisce il valore più significativo fra la catena attiva e la sequenza
- *   consecutiva massima presente nei log.
+ * - Le giornate con 'success' incrementano il contatore (+1).
+ * - Le giornate con 'cheat_key' (Chiave Nera Jolly) congelano/proteggono la catena senza spezzarla
+ *   (ma senza incrementare il contatore dei giorni di dieta pura).
+ * - Le giornate con 'cheat' (Bottone Nero) o buchi non registrati spezzano la serie e la azzerano.
+ * - Se viene fornita `referenceDateStr`, calcola la catena attiva attorno a quella data.
+ * - Se non viene fornita, calcola la catena attiva fino a oggi (o ieri, o l'ultima data compilata).
  * 
  * @param {Record<string, any>} allLogs
  * @param {string} [referenceDateStr] Data opzionale in formato 'YYYY-MM-DD'
@@ -266,121 +277,104 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
     return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
   };
 
-  // 1. Se viene indicata una data di riferimento specifica (es. giorno cliccato dall'utente):
-  if (referenceDateStr && typeof referenceDateStr === 'string') {
-    const refLog = allLogs[referenceDateStr];
-    if (refLog && refLog.dietState === 'success') {
-      let streak = 1;
-      const refDate = parseYMD(referenceDateStr);
-      if (refDate) {
-        // A ritroso (giorni precedenti)
-        const pastDate = new Date(refDate);
-        while (streak < 3650) {
-          pastDate.setDate(pastDate.getDate() - 1);
-          const pStr = formatYMD(pastDate);
-          if (allLogs[pStr] && allLogs[pStr].dietState === 'success') {
-            streak++;
-          } else {
-            break;
-          }
-        }
-        // In avanti (giorni successivi se pre-registrati o testati)
-        const futureDate = new Date(refDate);
-        while (streak < 3650) {
-          futureDate.setDate(futureDate.getDate() + 1);
-          const fStr = formatYMD(futureDate);
-          if (allLogs[fStr] && allLogs[fStr].dietState === 'success') {
-            streak++;
-          } else {
-            break;
-          }
-        }
-        return streak;
+  const computeChainAroundDate = (anchorDateStr) => {
+    const anchorLog = allLogs[anchorDateStr];
+    if (!anchorLog || (anchorLog.dietState !== 'success' && anchorLog.dietState !== 'cheat_key')) {
+      return 0;
+    }
+
+    const anchorDate = parseYMD(anchorDateStr);
+    if (!anchorDate) return 0;
+
+    let streak = anchorLog.dietState === 'success' ? 1 : 0;
+    let steps = 0;
+
+    // Scansione a ritroso
+    const pastDate = new Date(anchorDate);
+    while (steps < 3650) {
+      steps++;
+      pastDate.setDate(pastDate.getDate() - 1);
+      const pStr = formatYMD(pastDate);
+      const state = allLogs[pStr]?.dietState;
+      if (state === 'success') {
+        streak++;
+      } else if (state === 'cheat_key') {
+        // La Chiave Jolly protegge la serie senza incrementarla
+        continue;
+      } else {
+        break;
       }
     }
+
+    // Scansione in avanti (per date già compilate o testate nel calendario)
+    const futureDate = new Date(anchorDate);
+    steps = 0;
+    while (steps < 3650) {
+      steps++;
+      futureDate.setDate(futureDate.getDate() + 1);
+      const fStr = formatYMD(futureDate);
+      const state = allLogs[fStr]?.dietState;
+      if (state === 'success') {
+        streak++;
+      } else if (state === 'cheat_key') {
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  };
+
+  // 1. Se viene indicata una data di riferimento specifica (es. giorno appena cliccato):
+  if (referenceDateStr && typeof referenceDateStr === 'string') {
+    return computeChainAroundDate(referenceDateStr);
   }
 
-  // 2. Se non c'è una data di riferimento, calcola la catena continua legata a oggi (o ieri)
+  // 2. Verifica la catena attiva legata a oggi o ieri
   const now = new Date();
   now.setHours(12, 0, 0, 0);
   const todayStr = formatYMD(now);
-  const todayLog = allLogs[todayStr];
+  const todayState = allLogs[todayStr]?.dietState;
 
-  let chainToday = 0;
-  if (todayLog && todayLog.dietState === 'success') {
-    chainToday = 1;
-    // Indietro
-    const pDate = new Date(now);
-    while (chainToday < 3650) {
-      pDate.setDate(pDate.getDate() - 1);
-      const pStr = formatYMD(pDate);
-      if (allLogs[pStr] && allLogs[pStr].dietState === 'success') {
-        chainToday++;
-      } else {
-        break;
-      }
-    }
-    // Avanti
-    const fDate = new Date(now);
-    while (chainToday < 3650) {
-      fDate.setDate(fDate.getDate() + 1);
-      const fStr = formatYMD(fDate);
-      if (allLogs[fStr] && allLogs[fStr].dietState === 'success') {
-        chainToday++;
-      } else {
-        break;
-      }
-    }
-  } else if (!todayLog || todayLog.dietState === 'neutral') {
-    // Oggi non è ancora segnato: verifica catena a ritroso da ieri
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yStr = formatYMD(yesterday);
-    if (allLogs[yStr] && allLogs[yStr].dietState === 'success') {
-      chainToday = 1;
-      const pDate = new Date(yesterday);
-      while (chainToday < 3650) {
-        pDate.setDate(pDate.getDate() - 1);
-        const pStr = formatYMD(pDate);
-        if (allLogs[pStr] && allLogs[pStr].dietState === 'success') {
-          chainToday++;
-        } else {
-          break;
-        }
-      }
+  if (todayState === 'cheat') {
+    // Se oggi ha registrato un Bottone Nero, lo streak attuale è interrotto (a meno che non stia testando date future)
+    const futureCheck = new Date(now);
+    futureCheck.setDate(futureCheck.getDate() + 1);
+    const tomorrowStr = formatYMD(futureCheck);
+    if (!allLogs[tomorrowStr] || allLogs[tomorrowStr].dietState === 'neutral') {
+      return 0;
     }
   }
 
-  // 3. Calcola la massima serie consecutiva presente in tutti i dati registrati
-  const successDates = Object.keys(allLogs)
-    .filter((dStr) => allLogs[dStr] && allLogs[dStr].dietState === 'success')
+  if (todayState === 'success' || todayState === 'cheat_key') {
+    return computeChainAroundDate(todayStr);
+  }
+
+  // Oggi non è ancora compilato: controlliamo ieri
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatYMD(yesterday);
+  const yesterdayState = allLogs[yesterdayStr]?.dietState;
+
+  if (yesterdayState === 'success' || yesterdayState === 'cheat_key') {
+    return computeChainAroundDate(yesterdayStr);
+  }
+
+  // 3. Fallback per test su altri giorni/mesi del calendario:
+  // Prende l'ultima data cronologicamente compilata. Se è un Bottone Nero ('cheat'), lo streak è 0.
+  const activeDates = Object.keys(allLogs)
+    .filter((dStr) => allLogs[dStr] && allLogs[dStr].dietState && allLogs[dStr].dietState !== 'neutral')
     .sort();
 
-  let maxStreak = 0;
-  let curStreak = 0;
-  let prevDateObj = null;
+  if (activeDates.length === 0) return 0;
 
-  for (const dStr of successDates) {
-    const dObj = parseYMD(dStr);
-    if (!dObj) continue;
+  const latestDateStr = activeDates[activeDates.length - 1];
+  const latestState = allLogs[latestDateStr]?.dietState;
 
-    if (prevDateObj) {
-      const diffMs = dObj.getTime() - prevDateObj.getTime();
-      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays === 1) {
-        curStreak++;
-      } else {
-        curStreak = 1;
-      }
-    } else {
-      curStreak = 1;
-    }
-
-    prevDateObj = dObj;
-    if (curStreak > maxStreak) {
-      maxStreak = curStreak;
-    }
+  if (latestState === 'cheat') {
+    return 0;
   }
 
-  return Math.max(chainToday, maxStreak);
+  return computeChainAroundDate(latestDateStr);
 }

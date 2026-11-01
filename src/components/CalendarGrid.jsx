@@ -58,8 +58,6 @@ const EmptyCell = React.memo(function EmptyCell() {
 const DayCell = React.memo(function DayCell({
   day,
   dateStr,
-  isFirstDay,
-  firstDayColumn,
   isSelected,
   isToday,
   dietState,
@@ -109,7 +107,6 @@ const DayCell = React.memo(function DayCell({
     <button
       onClick={handleClick}
       style={{
-        ...(isFirstDay ? { gridColumnStart: firstDayColumn } : {}),
         aspectRatio: '1 / 1',
         width: '100%',
         minWidth: 0,
@@ -406,8 +403,6 @@ export default function CalendarGrid({
               key={dateStr}
               day={day}
               dateStr={dateStr}
-              isFirstDay={false}
-              firstDayColumn={firstDayColumn}
               isSelected={isSelected}
               isToday={isToday}
               dietState={dietState}

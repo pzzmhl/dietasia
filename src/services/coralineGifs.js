@@ -139,6 +139,33 @@ export function getNextGifForCategory(category) {
   };
 }
 
+/**
+ * Legge in sola-lettura (senza estrarre né consumare dal mazzo) la prossima GIF
+ * della categoria per permettere il precaricamento predittivo in background.
+ */
+export function peekNextGifForCategory(category) {
+  const targetCategory = (category === 'key' || category === 'success' || category === 'cheat')
+    ? category
+    : 'all';
+
+  const storageKey = `coraline_deck_${targetCategory}`;
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]) {
+        return {
+          id: parsed[0],
+          url: getGiphyUrl(parsed[0]),
+          category: targetCategory
+        };
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
 // GIF ufficiale di apertura neutra con Coraline (sopracciglio alzato / pigiama blu)
 export const CORALINE_DEFAULT_STARTUP_GIF = {
   id: 'GGvY01t71eu0I5Ywq6',
