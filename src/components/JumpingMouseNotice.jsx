@@ -76,7 +76,7 @@ export default function JumpingMouseNotice({
         style={{
           position: 'fixed',
           bottom: '20px',
-          right: '18px',
+          left: '18px',
           zIndex: 9990,
           backgroundColor: '#0d2c49',
           border: '2px solid var(--coraline-yellow)',

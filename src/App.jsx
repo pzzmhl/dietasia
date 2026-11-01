@@ -7,7 +7,7 @@ import SettingsModal from './components/SettingsModal';
 import CatModal from './components/CatModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import NotificationSettingsModal from './components/NotificationSettingsModal';
-import IntroSplashVideo from './components/IntroSplashVideo';
+import catStandingImg from './assets/cat-standing.png';
 import blackButtonImg from './assets/black-button.png';
 import jumpingMouseImg from './assets/jumping-mouse.png';
 import { 
@@ -37,20 +37,29 @@ export default function App() {
   // Modal Notifiche Quotidiane (Topi Saltatori)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
-  // Anteprima Video di Apertura all'avvio dell'app
-  const [showIntro, setShowIntro] = useState(true);
-
   // Modal Selezione Esito Giorno
   const [dayModalState, setDayModalState] = useState({
     isOpen: false,
     dateStr: null
   });
 
-  // Modal del Tutor Gatto Nero
-  const [catModalState, setCatModalState] = useState({
-    isOpen: false,
-    quote: '',
-    context: 'success'
+  // Modal del Tutor Gatto Nero e Memorizzazione Ultima Frase
+  const [catModalState, setCatModalState] = useState(() => {
+    try {
+      const savedQuote = localStorage.getItem('coraline_last_cat_quote');
+      const savedContext = localStorage.getItem('coraline_last_cat_context') || 'success';
+      return {
+        isOpen: false,
+        quote: savedQuote || "I gatti non hanno bisogno di nomi. Noi sappiamo già chi siamo... ma tu ricordati di segnare il tuo diario.",
+        context: savedContext
+      };
+    } catch (e) {
+      return {
+        isOpen: false,
+        quote: "I gatti non hanno bisogno di nomi. Noi sappiamo già chi siamo.",
+        context: 'success'
+      };
+    }
   });
 
   // Trigger per aggiornare istantaneamente la GIF nel banner animato
@@ -141,6 +150,11 @@ export default function App() {
       const quoteContext = isNowLastKey ? 'last_key' : 'key';
       const quote = getRandomCatQuote(quoteContext);
 
+      try {
+        localStorage.setItem('coraline_last_cat_quote', quote);
+        localStorage.setItem('coraline_last_cat_context', quoteContext);
+      } catch (e) {}
+
       setTimeout(() => {
         setCatModalState({
           isOpen: true,
@@ -150,6 +164,12 @@ export default function App() {
       }, 180);
     } else if (newStatus === 'success' || newStatus === 'cheat') {
       const quote = getRandomCatQuote(newStatus);
+
+      try {
+        localStorage.setItem('coraline_last_cat_quote', quote);
+        localStorage.setItem('coraline_last_cat_context', newStatus);
+      } catch (e) {}
+
       setTimeout(() => {
         setCatModalState({
           isOpen: true,
@@ -173,9 +193,6 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* ANTEPRIMA VIDEO DI BENVENUTO AD OGNI APERTURA */}
-      {showIntro && <IntroSplashVideo onFinish={() => setShowIntro(false)} />}
-
       {/* HEADER COMPATTO CON IDENTITÀ CORALINE & PULSANTE IMPOSTAZIONI */}
       <header style={{
         padding: '12px 14px',
@@ -312,6 +329,56 @@ export default function App() {
       }}>
         ✦ Tocca un giorno per cucire il tuo destino ✦
       </footer>
+
+      {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
+      <button
+        onClick={() => setCatModalState((prev) => ({ ...prev, isOpen: true }))}
+        aria-label="Ascolta il Gatto Nero"
+        title="Tocca per riascoltare l'ultima frase del Gatto"
+        style={{
+          position: 'fixed',
+          bottom: '10px',
+          right: '12px',
+          zIndex: 9980,
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+          outline: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          animation: 'catCornerBreathe 3s ease-in-out infinite',
+          transition: 'transform 0.18s ease'
+        }}
+        onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
+        onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+        onTouchStart={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
+        onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+      >
+        <img
+          src={catStandingImg}
+          alt="Gatto Nero di Coraline"
+          style={{
+            height: '130px',
+            width: 'auto',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(13, 44, 73, 0.6))',
+            pointerEvents: 'none'
+          }}
+        />
+      </button>
+
+      <style>{`
+        @keyframes catCornerBreathe {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-6px) rotate(1.2deg);
+          }
+        }
+      `}</style>
 
       {/* POP-UP COMPATTO PER LA SELEZIONE ESITO DEL GIORNO */}
       <DaySelectionModal
