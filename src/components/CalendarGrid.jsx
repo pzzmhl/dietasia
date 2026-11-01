@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import seeingStoneImg from '../assets/seeing-stone.png';
 import blackButtonImg from '../assets/black-button.png';
 
@@ -12,24 +12,19 @@ const MONTHS_IT = [
 
 /**
  * Calendario Mensile a Griglia stile Coraline:
- * Applicata la palette ufficiale:
- * - #0d2c49 (Navy notte)
- * - #ddcab7 (Pergamena)
- * - #786343 (Marrone spago)
- * - #c7a40e (Oro impermeabile antico)
- * - #d8c615 (Giallo impermeabile vivo)
+ * - Riceve mese/anno sincronizzati dalla barra statistiche di App.
+ * - Al tocco su una data apre il modal compatto di selezione.
  */
-export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} }) {
-  const selectedDateObj = new Date(selectedDate + 'T00:00:00');
-  const [displayYear, setDisplayYear] = useState(selectedDateObj.getFullYear());
-  const [displayMonth, setDisplayMonth] = useState(selectedDateObj.getMonth());
-
-  useEffect(() => {
-    const d = new Date(selectedDate + 'T00:00:00');
-    setDisplayYear(d.getFullYear());
-    setDisplayMonth(d.getMonth());
-  }, [selectedDate]);
-
+export default function CalendarGrid({ 
+  selectedDate, 
+  onSelectDate, 
+  allLogs = {},
+  displayYear,
+  displayMonth,
+  onPrevMonth,
+  onNextMonth,
+  onTodayClick
+}) {
   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
 
   const rawFirstDay = new Date(displayYear, displayMonth, 1).getDay();
@@ -39,30 +34,6 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
     const m = String(month + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
     return `${year}-${m}-${d}`;
-  };
-
-  const handlePrevMonth = () => {
-    if (displayMonth === 0) {
-      setDisplayMonth(11);
-      setDisplayYear((prev) => prev - 1);
-    } else {
-      setDisplayMonth((prev) => prev - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (displayMonth === 11) {
-      setDisplayMonth(0);
-      setDisplayYear((prev) => prev + 1);
-    } else {
-      setDisplayMonth((prev) => prev + 1);
-    }
-  };
-
-  const handleTodayClick = () => {
-    const now = new Date();
-    const todayStr = formatYMD(now.getFullYear(), now.getMonth(), now.getDate());
-    onSelectDate(todayStr);
   };
 
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -100,7 +71,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
             {MONTHS_IT[displayMonth]} {displayYear}
           </h2>
           <button
-            onClick={handleTodayClick}
+            onClick={onTodayClick}
             style={{
               fontSize: '10px',
               fontFamily: 'var(--font-gothic)',
@@ -119,7 +90,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <button
-            onClick={handlePrevMonth}
+            onClick={onPrevMonth}
             aria-label="Mese precedente"
             style={{
               width: '32px',
@@ -139,7 +110,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
           </button>
 
           <button
-            onClick={handleNextMonth}
+            onClick={onNextMonth}
             aria-label="Mese successivo"
             style={{
               width: '32px',

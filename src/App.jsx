@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
-import DietStatusSelector from './components/DietStatusSelector';
+import DaySelectionModal from './components/DaySelectionModal';
 import CatModal from './components/CatModal';
 import seeingStoneImg from './assets/seeing-stone.png';
 import blackButtonImg from './assets/black-button.png';
@@ -8,9 +9,22 @@ import { getTodayDateString, getAllLogs, saveDayLog } from './utils/storage';
 import { getRandomCatQuote } from './data/catQuotes';
 
 export default function App() {
-  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
+  const todayStr = getTodayDateString();
+  const todayObj = new Date(todayStr + 'T00:00:00');
+
+  const [selectedDate, setSelectedDate] = useState(todayStr);
+  const [displayYear, setDisplayYear] = useState(todayObj.getFullYear());
+  const [displayMonth, setDisplayMonth] = useState(todayObj.getMonth());
   const [allLogs, setAllLogs] = useState({});
-  const [modalState, setModalState] = useState({
+
+  // Stato per il Pop-up di Selezione Esito Giorno
+  const [dayModalState, setDayModalState] = useState({
+    isOpen: false,
+    dateStr: null
+  });
+
+  // Stato per il Pop-up del Tutor Gatto Nero
+  const [catModalState, setCatModalState] = useState({
     isOpen: false,
     quote: '',
     context: 'success'
@@ -21,48 +35,69 @@ export default function App() {
     setAllLogs(getAllLogs());
   }, []);
 
-  const currentLog = allLogs[selectedDate] || {
-    dietState: 'neutral'
-  };
-
-  // Formattazione data selezionata in italiano
-  const formatDateTitle = (dateStr) => {
-    const todayStr = getTodayDateString();
-    const dateObj = new Date(dateStr + 'T00:00:00');
-    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-    const formatted = dateObj.toLocaleDateString('it-IT', options);
-    const capitalized = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-
-    if (dateStr === todayStr) {
-      return `Oggi • ${capitalized}`;
+  // Navigazione mese
+  const handlePrevMonth = () => {
+    if (displayMonth === 0) {
+      setDisplayMonth(11);
+      setDisplayYear((prev) => prev - 1);
+    } else {
+      setDisplayMonth((prev) => prev - 1);
     }
-    return capitalized;
   };
 
-  // Gestione cambio stato dieta: trigger immediato del Gatto Nero
-  const handleSelectDietStatus = (newStatus) => {
-    const updated = saveDayLog(selectedDate, { dietState: newStatus });
+  const handleNextMonth = () => {
+    if (displayMonth === 11) {
+      setDisplayMonth(0);
+      setDisplayYear((prev) => prev + 1);
+    } else {
+      setDisplayMonth((prev) => prev + 1);
+    }
+  };
+
+  const handleTodayClick = () => {
+    const now = new Date();
+    setDisplayYear(now.getFullYear());
+    setDisplayMonth(now.getMonth());
+    setSelectedDate(todayStr);
+  };
+
+  // Quando l'utente tocca un giorno del calendario: apre il pop-up compatto
+  const handleDayClick = (dateStr) => {
+    setSelectedDate(dateStr);
+    setDayModalState({
+      isOpen: true,
+      dateStr
+    });
+  };
+
+  // Selezione esito dal pop-up
+  const handleSelectStatusFromModal = (newStatus) => {
+    const targetDate = dayModalState.dateStr || selectedDate;
+    const updated = saveDayLog(targetDate, { dietState: newStatus });
     if (updated) {
-      setAllLogs((prev) => ({ ...prev, [selectedDate]: updated }));
+      setAllLogs((prev) => ({ ...prev, [targetDate]: updated }));
     }
 
+    // 1. Chiude il modal di selezione del giorno
+    setDayModalState({ isOpen: false, dateStr: null });
+
+    // 2. Se è stato scelto successo o sgarro, compare il Gatto Nero
     if (newStatus === 'success' || newStatus === 'cheat') {
       const quote = getRandomCatQuote(newStatus);
-      setModalState({
-        isOpen: true,
-        quote,
-        context: newStatus
-      });
+      // Breve ritardo fluido per far sfumare il primo modal
+      setTimeout(() => {
+        setCatModalState({
+          isOpen: true,
+          quote,
+          context: newStatus
+        });
+      }, 180);
     }
   };
 
-  // Statistiche rapide
-  const totalDaysLogged = Object.values(allLogs).filter(
-    (l) => l.dietState && l.dietState !== 'neutral'
-  ).length;
-  const successfulDays = Object.values(allLogs).filter(
-    (l) => l.dietState === 'success'
-  ).length;
+  const currentDayLog = dayModalState.dateStr 
+    ? (allLogs[dayModalState.dateStr] || { dietState: 'neutral' })
+    : { dietState: 'neutral' };
 
   return (
     <div style={{
@@ -73,7 +108,7 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* HEADER: PALETTE UFFICIALE CORALINE (#0d2c49, #c7a40e, #ddcab7, #786343) */}
+      {/* HEADER COMPATTO CON IDENTITÀ CORALINE */}
       <header style={{
         padding: '12px 14px',
         display: 'flex',
@@ -85,54 +120,21 @@ export default function App() {
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(6, 22, 37, 0.6)',
-        marginBottom: '16px'
+        marginBottom: '14px'
       }}>
-        {/* Contatori sintetici */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Badge Giorni Rispettati (Pietra Verde) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: 'rgba(6, 22, 37, 0.75)',
-            padding: '6px 10px',
-            borderRadius: '10px',
-            border: '1px solid rgba(52, 211, 153, 0.35)'
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '18px' }}>🪡</span>
+          <span style={{
+            fontFamily: 'var(--font-gothic)',
+            fontSize: '15px',
+            fontWeight: 800,
+            color: 'var(--coraline-parchment)',
+            letterSpacing: '0.8px'
           }}>
-            <img src={seeingStoneImg} alt="" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
-            <span style={{
-              fontFamily: 'var(--font-gothic)',
-              fontSize: '13px',
-              fontWeight: 800,
-              color: '#4ade80'
-            }}>
-              {successfulDays} <span style={{ fontSize: '10px', color: 'var(--coraline-parchment)', opacity: 0.8, fontWeight: 500 }}>rispettati</span>
-            </span>
-          </div>
-
-          {/* Badge Giorni Totali Tracciati */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: 'rgba(6, 22, 37, 0.75)',
-            padding: '6px 10px',
-            borderRadius: '10px',
-            border: '1px solid rgba(199, 164, 14, 0.3)'
-          }}>
-            <span style={{ fontSize: '13px' }}>🗝️</span>
-            <span style={{
-              fontFamily: 'var(--font-gothic)',
-              fontSize: '13px',
-              fontWeight: 800,
-              color: 'var(--coraline-parchment)'
-            }}>
-              {totalDaysLogged} <span style={{ fontSize: '10px', color: 'var(--coraline-parchment)', opacity: 0.8, fontWeight: 500 }}>totali</span>
-            </span>
-          </div>
+            Diario di Asia
+          </span>
         </div>
 
-        {/* Bottone Nero di Coraline autentico con badge Beta */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{
             fontSize: '11px',
@@ -148,8 +150,8 @@ export default function App() {
             src={blackButtonImg}
             alt="Bottone Coraline"
             style={{
-              width: '36px',
-              height: '36px',
+              width: '32px',
+              height: '32px',
               objectFit: 'contain',
               filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.85))'
             }}
@@ -157,36 +159,23 @@ export default function App() {
         </div>
       </header>
 
-      {/* CALENDARIO MENSILE A GRIGLIA */}
-      <CalendarGrid
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
+      {/* 1. BARRA STATISTICHE & PROIEZIONE MENSILE (AGO E FILO) */}
+      <MonthStatsBar
+        displayYear={displayYear}
+        displayMonth={displayMonth}
         allLogs={allLogs}
       />
 
-      {/* DATA CORRENTE SELEZIONATA */}
-      <div style={{
-        marginBottom: '12px',
-        padding: '0 4px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <h2 style={{
-          fontSize: '17px',
-          fontFamily: 'var(--font-gothic)',
-          color: 'var(--coraline-parchment)',
-          fontWeight: 700,
-          letterSpacing: '0.4px'
-        }}>
-          {formatDateTitle(selectedDate)}
-        </h2>
-      </div>
-
-      {/* SELETTORE DIRETTO ESITO DIETA */}
-      <DietStatusSelector
-        status={currentLog.dietState}
-        onSelectStatus={handleSelectDietStatus}
+      {/* 2. GRIGLIA MENSILE DEL CALENDARIO (TRIGGER SU CLICK PER POP-UP) */}
+      <CalendarGrid
+        selectedDate={selectedDate}
+        onSelectDate={handleDayClick}
+        allLogs={allLogs}
+        displayYear={displayYear}
+        displayMonth={displayMonth}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+        onTodayClick={handleTodayClick}
       />
 
       {/* FOOTER GOTICO MINIMALISTA */}
@@ -198,15 +187,24 @@ export default function App() {
         color: 'var(--coraline-brown)',
         borderTop: '1px dashed rgba(199, 164, 14, 0.25)'
       }}>
-        ✦ 🪡 ✦
+        ✦ Tocca un giorno per cucire il tuo destino ✦
       </footer>
+
+      {/* POP-UP COMPATTO PER LA SELEZIONE ESITO DEL GIORNO */}
+      <DaySelectionModal
+        isOpen={dayModalState.isOpen}
+        dateStr={dayModalState.dateStr}
+        currentStatus={currentDayLog.dietState}
+        onSelectStatus={handleSelectStatusFromModal}
+        onClose={() => setDayModalState({ isOpen: false, dateStr: null })}
+      />
 
       {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}
       <CatModal
-        isOpen={modalState.isOpen}
-        quote={modalState.quote}
-        context={modalState.context}
-        onClose={() => setModalState((prev) => ({ ...prev, isOpen: false }))}
+        isOpen={catModalState.isOpen}
+        quote={catModalState.quote}
+        context={catModalState.context}
+        onClose={() => setCatModalState((prev) => ({ ...prev, isOpen: false }))}
       />
     </div>
   );
