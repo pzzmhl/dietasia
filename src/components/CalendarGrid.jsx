@@ -176,7 +176,7 @@ export default function CalendarGrid({
         boxSizing: 'border-box'
       }}
     >
-      {/* Intestazione Mese & Pulsanti Navigazione */}
+      {/* Intestazione Mese con font Dashboard al centro e freccette ai lati */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -184,61 +184,62 @@ export default function CalendarGrid({
         marginBottom: '14px',
         padding: '0 4px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-gothic)',
-            fontSize: '17px',
+        {/* Freccia Sinistra (Mese Precedente) */}
+        <button
+          onClick={onPrevMonth}
+          aria-label="Mese precedente"
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            border: '1.5px solid var(--border-dark-blue)',
             color: 'var(--coraline-parchment)',
-            fontWeight: 800,
-            letterSpacing: '0.5px'
-          }}>
-            {MONTHS_IT[displayMonth]} {displayYear}
-          </h2>
-        </div>
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            touchAction: 'manipulation'
+          }}
+        >
+          ◀
+        </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <button
-            onClick={onPrevMonth}
-            aria-label="Mese precedente"
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(6, 22, 37, 0.85)',
-              border: '1px solid var(--border-dark-blue)',
-              color: 'var(--coraline-parchment)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '13px',
-              touchAction: 'manipulation'
-            }}
-          >
-            ◀
-          </button>
+        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Identico alla Dashboard) */}
+        <h2 style={{
+          fontFamily: 'var(--font-coraline)',
+          fontSize: '16px',
+          color: 'var(--coraline-yellow)',
+          textAlign: 'center',
+          margin: 0,
+          letterSpacing: '1px',
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(216, 198, 21, 0.35)'
+        }}>
+          {MONTHS_IT[displayMonth]}
+        </h2>
 
-          <button
-            onClick={onNextMonth}
-            aria-label="Mese successivo"
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(6, 22, 37, 0.85)',
-              border: '1px solid var(--border-dark-blue)',
-              color: 'var(--coraline-parchment)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '13px',
-              touchAction: 'manipulation'
-            }}
-          >
-            ▶
-          </button>
-        </div>
+        {/* Freccia Destra (Mese Successivo) */}
+        <button
+          onClick={onNextMonth}
+          aria-label="Mese successivo"
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(6, 22, 37, 0.85)',
+            border: '1.5px solid var(--border-dark-blue)',
+            color: 'var(--coraline-parchment)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            touchAction: 'manipulation'
+          }}
+        >
+          ▶
+        </button>
       </div>
 
       {/* Intestazione Giorni della Settimana (LUN -> DOM) */}
