@@ -22,10 +22,10 @@
   --border-dark-blue-light: rgba(26, 69, 110, 0.85);
   --border-dark-blue-subtle: rgba(26, 69, 110, 0.45);
 
-  /* Sfondi, Card e Superfici Leggermente Trasparenti (Glassmorphism Dark Sfumatissimo) */
+  /* Sfondi, Card e Superfici */
   --bg-deep: #071727;
-  --bg-card: rgba(8, 22, 38, 0.44);
-  --bg-card-inner: rgba(5, 18, 30, 0.36);
+  --bg-card: rgba(13, 44, 73, 0.85);
+  --bg-card-inner: rgba(6, 22, 37, 0.9);
 
   /* Tipografia */
   --font-coraline: 'CoralinesCat', 'Cinzel', cursive, serif;
@@ -59,7 +59,7 @@ body {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
-  background-color: #030810;
+  background-color: var(--bg-deep);
   color: var(--coraline-parchment);
   font-family: var(--font-body);
   user-select: none;
@@ -102,7 +102,7 @@ button:active:not(:disabled),
 
 /* Atmosfera notturna con la palette Coraline */
 body {
-  background-color: #030810;
+  background-color: var(--bg-deep);
   min-height: 100vh;
 }
 

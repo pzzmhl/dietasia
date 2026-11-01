@@ -32,7 +32,6 @@ import jumpingMouseImg from './assets/jumping-mouse.webp';
 import otherMotherImg from './assets/other-mother-key.webp';
 import wybieImg from './assets/wybie-proud.webp';
 import catModalBg from './assets/cat-modal-bg.webp';
-import starryNightBg from './assets/starry-night-bg.webp';
 
 import { 
   getTodayDateString, 
@@ -171,8 +170,8 @@ export default function App() {
   useEffect(() => {
     setAllLogs(getAllLogs());
 
-    // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard, Sfondo & Gatto)
-    [catStandingImg, keyImg, starryNightBg].forEach((src) => {
+    // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard & Gatto)
+    [catStandingImg, keyImg].forEach((src) => {
       const img = new Image();
       img.src = src;
     });
@@ -403,45 +402,6 @@ export default function App() {
 
   return (
     <>
-      {/* SFONDO NOTTURNO CON STELLE DI CORALINE (TOTALMENTE IMMOBILE E ANCORATO) */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 0,
-          overflow: 'hidden',
-          pointerEvents: 'none',
-          userSelect: 'none'
-        }}
-      >
-        <img
-          src={starryNightBg}
-          alt=""
-          loading="eager"
-          decoding="sync"
-          style={{
-            position: 'absolute',
-            top: '-5%',
-            left: '-5%',
-            width: '110%',
-            height: '110%',
-            objectFit: 'cover',
-            objectPosition: 'center top',
-            filter: 'blur(8px)',
-            WebkitFilter: 'blur(8px)',
-            pointerEvents: 'none',
-            userSelect: 'none',
-            transform: 'none'
-          }}
-        />
-      </div>
-
       <div style={{
         minHeight: '100vh',
         width: '100%',

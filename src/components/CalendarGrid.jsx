@@ -25,8 +25,8 @@ const DayCell = React.memo(function DayCell({
   dietState,
   onSelectDate
 }) {
-  // Stili e colori calcolati localmente con trasparenza armoniosa sullo sfondo stellato
-  let cellBg = 'rgba(6, 22, 37, 0.28)';
+  // Stili e colori calcolati localmente con armonia sullo sfondo blu di Coraline
+  let cellBg = 'rgba(6, 22, 37, 0.45)';
   let cellBorder = '1px solid var(--border-dark-blue-subtle)';
   let cellShadow = 'inset 0 1px 0 0 rgba(221, 202, 183, 0.12)';
 
@@ -40,7 +40,7 @@ const DayCell = React.memo(function DayCell({
     cellBg = 'rgba(120, 99, 67, 0.38)';
     cellBorder = '1.5px solid rgba(199, 164, 14, 0.7)';
   } else if (isToday) {
-    cellBg = 'rgba(120, 99, 67, 0.20)';
+    cellBg = 'rgba(120, 99, 67, 0.28)';
     cellBorder = '1.5px solid var(--coraline-gold)';
   }
 
