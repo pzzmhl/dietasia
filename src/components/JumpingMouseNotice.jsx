@@ -219,11 +219,10 @@ export default function JumpingMouseNotice({
             style={{
               margin: '0 0 4px 0',
               color: 'var(--coraline-yellow)',
-              fontSize: '14px',
-              fontWeight: 800,
-              letterSpacing: '0.6px',
-              textTransform: 'uppercase',
-              fontFamily: 'var(--font-gothic)'
+              fontSize: '13.5px',
+              fontWeight: 'normal',
+              letterSpacing: '0.8px',
+              fontFamily: 'var(--font-coraline)'
             }}
           >
             Allarme Topi Saltatori!
