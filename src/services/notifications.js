@@ -135,6 +135,70 @@ export async function cancelDailyReminder() {
 }
 
 /**
+ * Notifica 1: Wybie celebra il traguardo di giorni di dieta consecutivi (streak)
+ */
+export async function sendWybieStreakNotification(streak) {
+  await requestNotificationPermission();
+
+  const title = '✦ Wybie è fiero di te, Asia! ✦';
+  const body = `Ehi Asia, ${streak} giorni di fila senza sgarrare! Persino la nonna sarebbe impressionata, stai battendo l'Altro Mondo!`;
+
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          title,
+          body,
+          id: 1000 + Number(streak),
+          channelId: 'coraline_reminders',
+          schedule: { at: new Date(Date.now() + 500) },
+          smallIcon: 'ic_launcher'
+        }
+      ]
+    });
+    return true;
+  } catch (err) {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/favicon.ico' });
+      return true;
+    }
+    return false;
+  }
+}
+
+/**
+ * Notifica 2: L'Altra Madre ingoia l'ultima chiave (sgarri mensili esauriti)
+ */
+export async function sendOtherMotherKeysDepletedNotification() {
+  await requestNotificationPermission();
+
+  const title = "✦ L'Altra Madre ha ingoiato l'ultima chiave! ✦";
+  const body = "Hai esaurito tutti i tuoi sgarri del mese, Asia! L'Altra Madre ha preso l'ultima Chiave Nera... niente più errori o vorrà cucirti i bottoni!";
+
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          title,
+          body,
+          id: 2001,
+          channelId: 'coraline_reminders',
+          schedule: { at: new Date(Date.now() + 500) },
+          smallIcon: 'ic_launcher'
+        }
+      ]
+    });
+    return true;
+  } catch (err) {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/favicon.ico' });
+      return true;
+    }
+    return false;
+  }
+}
+
+/**
  * Invia una notifica di prova immediata per verificare che funzioni
  */
 export async function sendTestNotification() {

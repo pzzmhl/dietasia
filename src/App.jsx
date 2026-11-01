@@ -4,8 +4,14 @@ import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
 import CatModal from './components/CatModal';
+import StoryEventModal from './components/StoryEventModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
-import { requestNotificationPermission, scheduleDailyReminder } from './services/notifications';
+import { 
+  requestNotificationPermission, 
+  scheduleDailyReminder,
+  sendWybieStreakNotification,
+  sendOtherMotherKeysDepletedNotification 
+} from './services/notifications';
 
 // Immagini critiche per il rendering immediato e il preloading
 import catStandingImg from './assets/cat-standing.png';
@@ -17,6 +23,8 @@ import seeingStoneImg from './assets/seeing-stone.png';
 import keyImg from './assets/key.png';
 import streakStarImg from './assets/streak-star.png';
 import jumpingMouseImg from './assets/jumping-mouse.png';
+import otherMotherImg from './assets/other-mother-key.png';
+import wybieImg from './assets/wybie-proud.png';
 import catModalBg from './assets/cat-modal-bg.jpg';
 
 import { 
@@ -24,7 +32,8 @@ import {
   getAllLogs, 
   saveDayLog, 
   getMonthUsedKeys,
-  getUnmarkedPastDays 
+  getUnmarkedPastDays,
+  getConsecutiveDietStreak 
 } from './utils/storage';
 import { getRandomCatQuote } from './data/catQuotes';
 
@@ -42,6 +51,13 @@ export default function App() {
   const [dayModalState, setDayModalState] = useState({
     isOpen: false,
     dateStr: null
+  });
+
+  // Modal Eventi di Trama Speciali (Altra Madre sgarri esauriti & Wybie traguardo streak)
+  const [storyModalState, setStoryModalState] = useState({
+    isOpen: false,
+    type: 'wybie_streak',
+    streak: 0
   });
 
   // Modal del Tutor Gatto Nero e Memorizzazione Ultima Frase
@@ -79,6 +95,8 @@ export default function App() {
       blackButtonImg,
       seeingStoneImg,
       streakStarImg,
+      otherMotherImg,
+      wybieImg,
       keyImg,
       jumpingMouseImg,
       catModalBg
@@ -160,8 +178,9 @@ export default function App() {
     const wasAlreadyKey = oldLog.dietState === 'cheat_key';
 
     const updated = saveDayLog(targetDate, { dietState: newStatus });
+    const updatedLogs = { ...allLogs, [targetDate]: updated || { dietState: newStatus } };
     if (updated) {
-      setAllLogs((prev) => ({ ...prev, [targetDate]: updated }));
+      setAllLogs(updatedLogs);
     }
 
     // 1. Chiude il modal di selezione del giorno
@@ -170,37 +189,89 @@ export default function App() {
     // 2. Trigger per cambiare la GIF del banner in base all'esito
     setOutcomeTrigger({ status: newStatus, timestamp: Date.now() });
 
-    // 3. Logica reattiva del Gatto Nero
+    // 3. Logica Notifiche & Reazioni Evento
     if (newStatus === 'cheat_key') {
       const isNowLastKey = !wasAlreadyKey && (remainingKeys - 1 <= 0);
-      const quoteContext = isNowLastKey ? 'last_key' : 'key';
-      const quote = getRandomCatQuote(quoteContext);
 
+      if (isNowLastKey) {
+        // NOTIFICA 2: Sgarri terminati! L'Altra Madre ingoia l'ultima chiave
+        sendOtherMotherKeysDepletedNotification();
+        setTimeout(() => {
+          setStoryModalState({
+            isOpen: true,
+            type: 'other_mother_keys',
+            streak: 0
+          });
+        }, 120);
+      } else {
+        // Ancora qualche chiave rimasta: parla il Gatto
+        const quote = getRandomCatQuote('key');
+        try {
+          localStorage.setItem('coraline_last_cat_quote', quote);
+          localStorage.setItem('coraline_last_cat_context', 'key');
+        } catch (e) {}
+
+        setTimeout(() => {
+          setCatModalState({
+            isOpen: true,
+            quote,
+            context: 'key'
+          });
+        }, 120);
+      }
+    } else if (newStatus === 'success') {
+      // Calcola il nuovo streak di dieta consecutiva
+      const newStreak = getConsecutiveDietStreak(updatedLogs);
+      const lastCelebrated = Number(localStorage.getItem('coraline_last_celebrated_streak') || 0);
+
+      // NOTIFICA 1: Wybie celebra traguardi di costanza (es. 3, 5, 7, 10, 14, 21, 30 giorni o nuovo record >= 3)
+      const isMilestone = newStreak >= 3 && (newStreak > lastCelebrated || [3, 5, 7, 10, 14, 21, 30].includes(newStreak));
+
+      if (isMilestone) {
+        try {
+          localStorage.setItem('coraline_last_celebrated_streak', String(newStreak));
+        } catch (e) {}
+
+        sendWybieStreakNotification(newStreak);
+        setTimeout(() => {
+          setStoryModalState({
+            isOpen: true,
+            type: 'wybie_streak',
+            streak: newStreak
+          });
+        }, 120);
+      } else {
+        const quote = getRandomCatQuote('success');
+        try {
+          localStorage.setItem('coraline_last_cat_quote', quote);
+          localStorage.setItem('coraline_last_cat_context', 'success');
+        } catch (e) {}
+
+        setTimeout(() => {
+          setCatModalState({
+            isOpen: true,
+            quote,
+            context: 'success'
+          });
+        }, 120);
+      }
+    } else if (newStatus === 'cheat') {
+      // Se registra uno sgarro non autorizzato, resetta il tracker del traguardo streak
+      try {
+        localStorage.setItem('coraline_last_celebrated_streak', '0');
+      } catch (e) {}
+
+      const quote = getRandomCatQuote('cheat');
       try {
         localStorage.setItem('coraline_last_cat_quote', quote);
-        localStorage.setItem('coraline_last_cat_context', quoteContext);
+        localStorage.setItem('coraline_last_cat_context', 'cheat');
       } catch (e) {}
 
       setTimeout(() => {
         setCatModalState({
           isOpen: true,
           quote,
-          context: quoteContext
-        });
-      }, 120);
-    } else if (newStatus === 'success' || newStatus === 'cheat') {
-      const quote = getRandomCatQuote(newStatus);
-
-      try {
-        localStorage.setItem('coraline_last_cat_quote', quote);
-        localStorage.setItem('coraline_last_cat_context', newStatus);
-      } catch (e) {}
-
-      setTimeout(() => {
-        setCatModalState({
-          isOpen: true,
-          quote,
-          context: newStatus
+          context: 'cheat'
         });
       }, 120);
     }
@@ -316,6 +387,14 @@ export default function App() {
         quote={catModalState.quote}
         context={catModalState.context}
         onClose={() => setCatModalState((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* OVERLAY EVENTI SPECIALI DI TRAMA (ALTRA MADRE CHIAVI FINITE & WYBIE STREAK) */}
+      <StoryEventModal
+        isOpen={storyModalState.isOpen}
+        type={storyModalState.type}
+        streak={storyModalState.streak}
+        onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
       />
     </div>
   );
