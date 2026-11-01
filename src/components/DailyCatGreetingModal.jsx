@@ -69,7 +69,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           position: 'absolute',
           inset: 0,
           backgroundImage: `
-            radial-gradient(circle at center, rgba(4, 16, 28, 0.5) 0%, rgba(2, 8, 15, 0.92) 80%),
+            radial-gradient(circle at center, rgba(4, 16, 28, 0.5) 0%, rgba(2, 8, 15, 0.94) 80%),
             url(${vortexBg})
           `,
           backgroundPosition: 'center center',
@@ -81,39 +81,33 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
         }}
       />
 
-      {/* HEADER SUPERIORE: PULSANTE CHIUDI (✕) IN ALTO A DESTRA */}
+      {/* HEADER SUPERIORE: SALUTO CON IL FONT UFFICIALE DI CORALINE (SENZA X) */}
       <div
         style={{
           width: '100%',
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'center',
           alignItems: 'center',
           position: 'relative',
-          zIndex: 2
+          zIndex: 2,
+          paddingTop: '6px'
         }}
       >
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label="Chiudi e vai al diario"
+        <div
           style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(221, 202, 183, 0.75)',
-            fontSize: '22px',
-            lineHeight: 1,
-            cursor: 'pointer',
-            padding: '8px',
-            touchAction: 'manipulation',
-            transition: 'color 0.2s ease, transform 0.2s ease',
-            outline: 'none'
+            fontFamily: 'var(--font-coraline)',
+            fontSize: '24px',
+            color: 'var(--coraline-yellow)',
+            letterSpacing: '1.2px',
+            textAlign: 'center',
+            textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(216, 198, 21, 0.5)'
           }}
         >
-          ✕
-        </button>
+          ✦ {greeting} ✦
+        </div>
       </div>
 
-      {/* CONTENUTO CENTRALE: SALUTO + FRASE + GATTO FLUTTUANTE */}
+      {/* CONTENUTO CENTRALE: IL GATTO GIGANTE FLUTTUANTE + LA FRASE */}
       <div
         style={{
           width: '100%',
@@ -127,56 +121,25 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           margin: 'auto 0'
         }}
       >
-        {/* Saluto in piccolo (Buongiorno / Buon pomeriggio / Buonasera Asia) */}
-        <div
-          style={{
-            fontSize: '12px',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            letterSpacing: '1.6px',
-            textTransform: 'uppercase',
-            color: 'rgba(221, 202, 183, 0.7)',
-            marginBottom: '16px'
-          }}
-        >
-          {greeting}
-        </div>
-
-        {/* Frase del Gatto in grande al centro */}
-        <h1
-          style={{
-            fontSize: '21px',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            lineHeight: 1.45,
-            color: '#fdfbf7',
-            letterSpacing: '-0.3px',
-            margin: '0 0 24px 0',
-            textShadow: '0 2px 14px rgba(0, 0, 0, 0.95), 0 0 20px rgba(13, 44, 73, 0.6)'
-          }}
-        >
-          {quote}
-        </h1>
-
-        {/* Il Gatto Nero che fluttua morbidamente sotto la frase */}
+        {/* Il Gatto Nero GIGANTE che prende quasi lo schermo */}
         <div
           style={{
             position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: '6px'
+            marginBottom: '18px'
           }}
         >
-          {/* Alone soffuso dietro al gatto */}
+          {/* Alone di mistero dietro al gatto gigante */}
           <div
             style={{
               position: 'absolute',
-              width: '100px',
-              height: '100px',
+              width: '220px',
+              height: '220px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(74, 222, 128, 0.22) 0%, rgba(13, 44, 73, 0.15) 50%, transparent 70%)',
-              filter: 'blur(12px)',
+              background: 'radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, rgba(13, 44, 73, 0.18) 50%, transparent 70%)',
+              filter: 'blur(20px)',
               pointerEvents: 'none'
             }}
           />
@@ -187,19 +150,36 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
             loading="eager"
             decoding="async"
             style={{
-              width: '95px',
-              height: 'auto',
+              height: '250px',
+              maxHeight: '36vh',
+              width: 'auto',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(74, 222, 128, 0.35))',
-              animation: 'dailyCatFloat 3.6s ease-in-out infinite',
+              filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 16px rgba(74, 222, 128, 0.4))',
+              animation: 'dailyCatFloat 3.8s ease-in-out infinite',
               pointerEvents: 'none',
               willChange: 'transform'
             }}
           />
         </div>
+
+        {/* Frase del Gatto sotto al gatto */}
+        <div
+          style={{
+            fontSize: '17px',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            lineHeight: 1.45,
+            color: '#fdfbf7',
+            letterSpacing: '-0.2px',
+            padding: '0 8px',
+            textShadow: '0 2px 14px rgba(0, 0, 0, 0.95), 0 0 16px rgba(13, 44, 73, 0.7)'
+          }}
+        >
+          "{quote}"
+        </div>
       </div>
 
-      {/* FOOTER INFERIORE: PULSANTE CIRCOLARE CON FRECCIA AVANTI (→) */}
+      {/* FOOTER INFERIORE: PULSANTE CIRCOLARE GIALLO CORALINE CON FRECCIA AVANTI (→) */}
       <div
         style={{
           width: '100%',
@@ -216,16 +196,16 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           onClick={handleDismiss}
           aria-label="Avanti, entra nel diario"
           style={{
-            width: '58px',
-            height: '58px',
+            width: '60px',
+            height: '60px',
             borderRadius: '50%',
-            backgroundColor: '#f5efe6',
-            border: 'none',
+            backgroundColor: 'var(--coraline-yellow)',
+            border: '2px solid #fef08a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.7), 0 0 16px rgba(245, 239, 230, 0.35)',
+            boxShadow: '0 8px 26px rgba(0, 0, 0, 0.8), 0 0 22px rgba(216, 198, 21, 0.65), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
             transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease',
             outline: 'none',
             touchAction: 'manipulation'
@@ -235,17 +215,17 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           onTouchStart={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
           onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         >
-          {/* Freccia avanti in stile pulito minimale (come nell'immagine di riferimento) */}
+          {/* Freccia avanti scura in netto contrasto sul cerchio giallo */}
           <svg
-            width="22"
-            height="22"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#121820"
-            strokeWidth="2.5"
+            stroke="#061625"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ display: 'block', transform: 'translateX(1px)' }}
+            style={{ display: 'block', transform: 'translateX(1.5px)' }}
           >
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />
