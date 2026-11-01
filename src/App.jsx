@@ -92,8 +92,14 @@ export default function App() {
   const usedKeysForMonth = getMonthUsedKeys(allLogs, displayYear, displayMonth);
   const remainingKeys = Math.max(0, keysPerMonth - usedKeysForMonth);
 
+  // Modalità simulazione Topo Saltatore (attiva su richiesta utente)
+  const [simulatedMouseAlert, setSimulatedMouseAlert] = useState(true);
+
   // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore
-  const unmarkedDays = getUnmarkedPastDays(allLogs);
+  const realUnmarkedDays = getUnmarkedPastDays(allLogs);
+  const unmarkedDays = realUnmarkedDays.length > 0 
+    ? realUnmarkedDays 
+    : (simulatedMouseAlert ? ['2026-11-01', '2026-10-31', '2026-10-30'] : []);
 
   // Salvataggio impostazioni chiavi al mese
   const handleSaveKeysPerMonth = (newCount) => {
@@ -186,8 +192,30 @@ export default function App() {
           </span>
         </div>
 
-        {/* Pulsanti Header: Impostazioni (Ingranaggio) & Bottone Nero */}
+        {/* Pulsanti Header: Simula Topo (Tromba), Impostazioni (Ingranaggio) & Bottone Nero */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Tasto rapido Simula Notifica Topo */}
+          <button
+            onClick={() => setSimulatedMouseAlert((prev) => !prev)}
+            aria-label="Simula Notifica Topo"
+            title="Simula Notifica Topo Saltatore"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: simulatedMouseAlert ? 'rgba(216, 198, 21, 0.25)' : 'rgba(6, 22, 37, 0.85)',
+              border: simulatedMouseAlert ? '1.5px solid var(--coraline-yellow)' : '1px solid var(--border-dark-blue)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '15px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            🎺
+          </button>
+
           {/* Pulsante Ingranaggio Impostazioni */}
           <button
             onClick={() => setIsSettingsOpen(true)}
