@@ -102,3 +102,32 @@ export function saveDayLog(dateStr, updates) {
     return null;
   }
 }
+
+/**
+ * Trova i giorni passati (dal 1° del mese corrente a oggi) che non sono stati ancora contrassegnati
+ * @param {Record<string, any>} allLogs
+ * @returns {string[]} Elenco di date 'YYYY-MM-DD' non registrate
+ */
+export function getUnmarkedPastDays(allLogs) {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  const currentDay = today.getDate();
+
+  const unmarked = [];
+
+  // Scansiona dal primo giorno del mese fino a oggi
+  for (let day = 1; day <= currentDay; day++) {
+    const dayStr = String(day).padStart(2, '0');
+    const monthStr = String(currentMonth + 1).padStart(2, '0');
+    const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+
+    const log = allLogs[dateStr];
+    if (!log || !log.dietState || log.dietState === 'neutral') {
+      unmarked.push(dateStr);
+    }
+  }
+
+  return unmarked;
+}
+

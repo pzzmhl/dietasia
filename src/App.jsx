@@ -5,6 +5,7 @@ import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
 import SettingsModal from './components/SettingsModal';
 import CatModal from './components/CatModal';
+import JumpingMouseNotice from './components/JumpingMouseNotice';
 import blackButtonImg from './assets/black-button.png';
 import { 
   getTodayDateString, 
@@ -12,7 +13,8 @@ import {
   saveDayLog, 
   getKeysPerMonth, 
   setKeysPerMonth, 
-  getMonthUsedKeys 
+  getMonthUsedKeys,
+  getUnmarkedPastDays 
 } from './utils/storage';
 import { getRandomCatQuote } from './data/catQuotes';
 
@@ -89,6 +91,9 @@ export default function App() {
   // Calcola quante chiavi sono state usate e quante ne restano nel mese selezionato
   const usedKeysForMonth = getMonthUsedKeys(allLogs, displayYear, displayMonth);
   const remainingKeys = Math.max(0, keysPerMonth - usedKeysForMonth);
+
+  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore
+  const unmarkedDays = getUnmarkedPastDays(allLogs);
 
   // Salvataggio impostazioni chiavi al mese
   const handleSaveKeysPerMonth = (newCount) => {
@@ -221,6 +226,12 @@ export default function App() {
 
       {/* BANNER ANIMATO SOPRA AL CALENDARIO (ROTAZIONE RANDOMICA & CATEGORIZZATA) */}
       <AnimatedBanner latestOutcomeTrigger={outcomeTrigger} />
+
+      {/* AVVISO DEI TOPI SALTATORI PER GIORNI NON CONTRASSEGNATI */}
+      <JumpingMouseNotice
+        unmarkedDays={unmarkedDays}
+        onSelectDay={handleDayClick}
+      />
 
       {/* 1. GRIGLIA MENSILE DEL CALENDARIO (CON SUPPORTO CHIAVI JOLLY) */}
       <CalendarGrid
