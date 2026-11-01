@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import BlackButtonIcon from './BlackButtonIcon';
+import seeingStoneImg from '../assets/seeing-stone.png';
+import blackButtonImg from '../assets/black-button.png';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -10,10 +11,10 @@ const MONTHS_IT = [
 ];
 
 /**
- * Calendario Mensile a Griglia ultra-ottimizzato per schermi Android e iOS.
- * - Stesso gap sia per intestazione che per celle (allineamento millimetrico delle colonne).
- * - Uso di gridColumnStart sul giorno 1: elimina i disallineamenti di altezza e offset.
- * - min-width: 0 per prevenire overflow orizzontale su schermi stretti (es. 360px).
+ * Calendario Mensile a Griglia stile Coraline.
+ * - Simboli ufficiali: Pietra Verde (Dieta Rispettata) & Bottone Nero Reale (Sgarro).
+ * - Sfondo cella verde per dieta rispettata, bordeaux scuro per sgarro.
+ * - Inizio settimana da Lunedì.
  */
 export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} }) {
   const selectedDateObj = new Date(selectedDate + 'T00:00:00');
@@ -29,10 +30,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
 
   // In JavaScript: 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato.
-  // Converte a colonna CSS Grid (1..7) per Lunedì..Domenica:
-  // Lunedì (1) -> 1
-  // Martedì (2) -> 2
-  // Domenica (0) -> 7
+  // Lunedì (1) -> colonna 1, ..., Domenica (0) -> colonna 7
   const rawFirstDay = new Date(displayYear, displayMonth, 1).getDay();
   const firstDayColumn = rawFirstDay === 0 ? 7 : rawFirstDay;
 
@@ -70,7 +68,6 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
   const now = new Date();
   const todayStr = formatYMD(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // Gap comune uniforme per evitare qualsiasi sfasamento tra header e griglia
   const GRID_GAP = '4px';
 
   return (
@@ -162,7 +159,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
         </div>
       </div>
 
-      {/* Intestazione Giorni della Settimana (LUN -> DOM) con identico gap */}
+      {/* Intestazione Giorni della Settimana (LUN -> DOM) */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
@@ -189,7 +186,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
         })}
       </div>
 
-      {/* Griglia Giorni del Mese con identico gap e colonne allineate al millimetro */}
+      {/* Griglia Giorni del Mese */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', 
@@ -204,12 +201,40 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
           const log = allLogs[dateStr] || {};
           const dietState = log.dietState;
 
+          // Sfondo e bordo in base allo stato (Verde per successo, Bordeaux scuro per sgarro)
+          let cellBg = 'rgba(15, 16, 38, 0.6)';
+          let cellBorder = '1px dashed rgba(224, 159, 62, 0.22)';
+          let cellShadow = 'none';
+
+          if (dietState === 'success') {
+            cellBg = 'rgba(18, 54, 38, 0.55)';
+            cellBorder = '1.5px dashed rgba(52, 211, 153, 0.45)';
+          } else if (dietState === 'cheat') {
+            cellBg = 'rgba(46, 11, 16, 0.65)';
+            cellBorder = '1.5px dashed rgba(220, 38, 38, 0.4)';
+          } else if (isToday) {
+            cellBg = 'rgba(35, 25, 66, 0.7)';
+            cellBorder = '1.5px solid rgba(224, 159, 62, 0.5)';
+          }
+
+          if (isSelected) {
+            cellBorder = dietState === 'success' 
+              ? '2px solid #34d399' 
+              : dietState === 'cheat' 
+              ? '2px solid #ef4444' 
+              : '2px solid #e09f3e';
+            cellShadow = dietState === 'success'
+              ? '0 0 14px rgba(52, 211, 153, 0.5)'
+              : dietState === 'cheat'
+              ? '0 0 14px rgba(220, 38, 38, 0.5)'
+              : '0 0 12px rgba(224, 159, 62, 0.45)';
+          }
+
           return (
             <button
               key={dateStr}
               onClick={() => onSelectDate(dateStr)}
               style={{
-                // Il primo giorno del mese si posiziona esattamente nella sua colonna CSS
                 ...(day === 1 ? { gridColumnStart: firstDayColumn } : {}),
                 aspectRatio: '1 / 1',
                 width: '100%',
@@ -217,23 +242,9 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                 padding: '2px',
                 boxSizing: 'border-box',
                 borderRadius: '10px',
-                backgroundColor: isSelected
-                  ? 'rgba(224, 159, 62, 0.28)'
-                  : dietState === 'success'
-                  ? 'rgba(224, 159, 62, 0.12)'
-                  : dietState === 'cheat'
-                  ? 'rgba(40, 15, 25, 0.5)'
-                  : isToday
-                  ? 'rgba(35, 25, 66, 0.7)'
-                  : 'rgba(15, 16, 38, 0.6)',
-                border: isSelected
-                  ? '2px solid #e09f3e'
-                  : isToday
-                  ? '1.5px solid rgba(224, 159, 62, 0.5)'
-                  : '1px dashed rgba(224, 159, 62, 0.22)',
-                boxShadow: isSelected
-                  ? '0 0 12px rgba(224, 159, 62, 0.45)'
-                  : 'none',
+                backgroundColor: cellBg,
+                border: cellBorder,
+                boxShadow: cellShadow,
                 color: isSelected ? '#ffffff' : '#e2e8f0',
                 fontFamily: 'var(--font-gothic)',
                 fontSize: '14px',
@@ -247,42 +258,46 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               }}
             >
               {dietState === 'success' ? (
-                /* SIMBOLO GRANDE DIETA SEGUITA: Sostituisce completamente il numero del giorno */
+                /* SIMBOLO GRANDE: PIETRA DELLA VISTA VERDE DI CORALINE */
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   width: '100%',
-                  height: '100%'
+                  height: '100%',
+                  padding: '1px'
                 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M 4 12 L 9.5 17.5 L 20 6"
-                      stroke="#e09f3e"
-                      strokeWidth="3.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M 4 12 L 9.5 17.5 L 20 6"
-                      stroke="#f8fafc"
-                      strokeWidth="1.2"
-                      strokeDasharray="2 1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <img
+                    src={seeingStoneImg}
+                    alt="Dieta Rispettata - Pietra Verde"
+                    style={{
+                      width: '84%',
+                      height: '84%',
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.45))'
+                    }}
+                  />
                 </div>
               ) : dietState === 'cheat' ? (
-                /* SIMBOLO GRANDE BOTTONE NERO: Sostituisce completamente il numero del giorno */
+                /* SIMBOLO GRANDE: BOTTONE NERO ORIGINALE DI CORALINE */
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   width: '100%',
-                  height: '100%'
+                  height: '100%',
+                  padding: '1px'
                 }}>
-                  <BlackButtonIcon size={26} />
+                  <img
+                    src={blackButtonImg}
+                    alt="Sgarrato - Bottone Nero"
+                    style={{
+                      width: '84%',
+                      height: '84%',
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8))'
+                    }}
+                  />
                 </div>
               ) : (
                 /* GIORNO NON COMPILATO: Mostra il numero standard */

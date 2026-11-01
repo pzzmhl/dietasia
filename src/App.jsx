@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import CalendarGrid from './components/CalendarGrid';
 import DietStatusSelector from './components/DietStatusSelector';
 import CatModal from './components/CatModal';
-import BlackButtonIcon from './components/BlackButtonIcon';
+import seeingStoneImg from './assets/seeing-stone.png';
+import blackButtonImg from './assets/black-button.png';
 import { getTodayDateString, getAllLogs, saveDayLog } from './utils/storage';
 import { getRandomCatQuote } from './data/catQuotes';
 
@@ -73,7 +74,7 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* HEADER PULITO: IDENTITÀ VISIVA CON IL BOTTONE NERO E IMPUNTURE GOTICHE */}
+      {/* HEADER PULITO CON IMPUNTURE GOTICHE E ICONE UFFICIALI */}
       <header style={{
         padding: '12px 14px',
         display: 'flex',
@@ -86,8 +87,8 @@ export default function App() {
         WebkitBackdropFilter: 'blur(10px)',
         marginBottom: '16px'
       }}>
-        {/* Simboli gotici & Contatori sintetici */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Contatori sintetici: Giorni Rispettati (Pietra Verde) e Totali */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -95,16 +96,16 @@ export default function App() {
             backgroundColor: 'rgba(15, 16, 38, 0.7)',
             padding: '6px 10px',
             borderRadius: '10px',
-            border: '1px solid rgba(224, 159, 62, 0.25)'
+            border: '1px solid rgba(52, 211, 153, 0.3)'
           }}>
-            <span style={{ fontSize: '14px' }}>✨</span>
+            <img src={seeingStoneImg} alt="" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
             <span style={{
               fontFamily: 'var(--font-gothic)',
               fontSize: '13px',
               fontWeight: 800,
-              color: '#e09f3e'
+              color: '#4ade80'
             }}>
-              {successfulDays} <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500 }}>giorni</span>
+              {successfulDays} <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500 }}>rispettati</span>
             </span>
           </div>
 
@@ -117,7 +118,7 @@ export default function App() {
             borderRadius: '10px',
             border: '1px solid rgba(224, 159, 62, 0.25)'
           }}>
-            <span style={{ fontSize: '14px' }}>🗝️</span>
+            <span style={{ fontSize: '13px' }}>🗝️</span>
             <span style={{
               fontFamily: 'var(--font-gothic)',
               fontSize: '13px',
@@ -140,7 +141,16 @@ export default function App() {
           }}>
             Beta
           </span>
-          <BlackButtonIcon size={38} />
+          <img
+            src={blackButtonImg}
+            alt="Bottone Coraline"
+            style={{
+              width: '36px',
+              height: '36px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8))'
+            }}
+          />
         </div>
       </header>
 
@@ -170,7 +180,7 @@ export default function App() {
         </h2>
       </div>
 
-      {/* SELETTORE DIRETTO ESITO DIETA (3 STATI: NEUTRO / SPUNTA DORATA / BOTTONE NERO) */}
+      {/* SELETTORE DIRETTO ESITO DIETA */}
       <DietStatusSelector
         status={currentLog.dietState}
         onSelectStatus={handleSelectDietStatus}
