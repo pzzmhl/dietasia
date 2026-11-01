@@ -212,15 +212,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* 1. BARRA STATISTICHE, MONITOR CHIAVI JOLLY E PROIEZIONE (AGO E FILO) */}
-      <MonthStatsBar
-        displayYear={displayYear}
-        displayMonth={displayMonth}
-        allLogs={allLogs}
-        keysPerMonth={keysPerMonth}
-      />
-
-      {/* 2. GRIGLIA MENSILE DEL CALENDARIO (CON SUPPORTO CHIAVI JOLLY) */}
+      {/* 1. GRIGLIA MENSILE DEL CALENDARIO (CON SUPPORTO CHIAVI JOLLY) */}
       <CalendarGrid
         selectedDate={selectedDate}
         onSelectDate={handleDayClick}
@@ -230,6 +222,14 @@ export default function App() {
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
         onTodayClick={handleTodayClick}
+      />
+
+      {/* 2. DASHBOARD INGRANDITA SOTTO IL CALENDARIO (CHIAVI GRANDI, METRICHE E PROIEZIONE) */}
+      <MonthStatsBar
+        displayYear={displayYear}
+        displayMonth={displayMonth}
+        allLogs={allLogs}
+        keysPerMonth={keysPerMonth}
       />
 
       {/* FOOTER GOTICO MINIMALISTA */}

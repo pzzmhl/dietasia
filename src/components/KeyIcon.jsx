@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import keyImg from '../assets/key.png';
 
 /**
- * Componente per la Chiave Nera di Coraline.
- * - Carica in alta qualità l'immagine png della chiave.
- * - Supporta stato 'active' o 'used' (sfumata/opacizzata).
- * - Fornisce fallback SVG istantaneo in caso di problemi di caricamento.
+ * Componente per la Chiave Nera di Coraline:
+ * - Immagine originale ad alta definizione con dimensioni generose.
+ * - Stato 'active' (nitida, con bagliore oro) vs 'used' (sfumata a serratura usata).
+ * - Fallback SVG istantaneo.
  */
 export default function KeyIcon({ 
-  size = 28, 
+  size = 38, 
   isUsed = false, 
   className = '', 
   style = {} 
@@ -16,7 +16,6 @@ export default function KeyIcon({
   const [hasError, setHasError] = useState(false);
 
   if (hasError) {
-    // Fallback SVG fedele alla Chiave Bottone di Coraline
     return (
       <svg
         width={size}
@@ -52,10 +51,10 @@ export default function KeyIcon({
         width: `${size}px`,
         height: `${size}px`,
         objectFit: 'contain',
-        opacity: isUsed ? 0.28 : 1,
+        opacity: isUsed ? 0.22 : 1,
         filter: isUsed 
-          ? 'grayscale(1) brightness(0.6)' 
-          : 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 4px rgba(199, 164, 14, 0.25))',
+          ? 'grayscale(1) brightness(0.5)' 
+          : 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 6px rgba(216, 198, 21, 0.35))',
         transition: 'all 0.2s ease',
         ...style
       }}

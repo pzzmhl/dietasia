@@ -166,7 +166,7 @@ export default function DaySelectionModal({
           disabled={!canUseKey}
           style={{
             width: '100%',
-            padding: '12px 14px',
+            padding: '13px 14px',
             marginBottom: '10px',
             backgroundColor: currentStatus === 'cheat_key' 
               ? 'rgba(120, 99, 67, 0.75)' 
@@ -191,17 +191,17 @@ export default function DaySelectionModal({
           onMouseDown={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(0.98)')}
           onMouseUp={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(1)')}
         >
-          <KeyIcon size={26} isUsed={!canUseKey && currentStatus !== 'cheat_key'} />
+          <KeyIcon size={34} isUsed={!canUseKey && currentStatus !== 'cheat_key'} />
           <div style={{ textAlign: 'left', flex: 1 }}>
             <div style={{ 
               fontFamily: 'var(--font-gothic)', 
-              fontSize: '13px', 
+              fontSize: '13.5px', 
               fontWeight: 800, 
               color: canUseKey ? 'var(--coraline-yellow)' : '#94a3b8' 
             }}>
               Usa Chiave Nera
             </div>
-            <div style={{ fontSize: '10.5px', color: canUseKey ? 'var(--coraline-parchment)' : '#64748b', opacity: 0.85 }}>
+            <div style={{ fontSize: '11px', color: canUseKey ? 'var(--coraline-parchment)' : '#64748b', opacity: 0.85 }}>
               {canUseKey 
                 ? `Sgarro programmato (${remainingKeys} rimaste)` 
                 : "Chiavi esaurite per questo mese"}
