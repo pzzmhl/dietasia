@@ -48,6 +48,7 @@ html {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none; /* Impedisce che il trascinamento a fine corsa muova o stiri lo sfondo */
 }
 
 body {
@@ -58,6 +59,7 @@ body {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   background-color: #030810;
+  overscroll-behavior-y: none; /* Ancoraggio immobile totale dello sfondo in Android 12+ */
   color: var(--coraline-parchment);
   font-family: var(--font-body);
   user-select: none;

@@ -363,29 +363,45 @@ export default function App() {
 
   return (
     <>
-      {/* SFONDO NOTTURNO CON STELLE DI CORALINE (SFUOCATO & HARDWARE-ACCELERATED) */}
+      {/* SFONDO NOTTURNO CON STELLE DI CORALINE (TOTALMENTE IMMOBILE E ANCORATO) */}
       <div
         aria-hidden="true"
         style={{
           position: 'fixed',
-          top: '-20px',
-          left: '-20px',
-          right: '-20px',
-          bottom: '-20px',
-          width: 'calc(100vw + 40px)',
-          height: 'calc(100vh + 40px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100%',
           zIndex: 0,
-          backgroundImage: `url(${starryNightBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          backgroundRepeat: 'no-repeat',
-          filter: 'blur(8px)',
-          WebkitFilter: 'blur(8px)',
-          transform: 'scale(1.05) translateZ(0)',
+          overflow: 'hidden',
           pointerEvents: 'none',
-          touchAction: 'none'
+          touchAction: 'none',
+          userSelect: 'none'
         }}
-      />
+      >
+        <img
+          src={starryNightBg}
+          alt=""
+          loading="eager"
+          decoding="sync"
+          style={{
+            position: 'absolute',
+            top: '-5%',
+            left: '-5%',
+            width: '110%',
+            height: '110%',
+            objectFit: 'cover',
+            objectPosition: 'center top',
+            filter: 'blur(8px)',
+            WebkitFilter: 'blur(8px)',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            transform: 'none'
+          }}
+        />
+      </div>
 
       <div style={{
         minHeight: '100vh',

@@ -56,3 +56,4 @@ export const triggerHapticFeedback = async (type = 'selection') => {
     // Silenzioso su dispositivi senza hardware aptico
   }
 };
+
