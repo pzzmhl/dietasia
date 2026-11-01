@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import CalendarStrip from './components/CalendarStrip';
+import CalendarGrid from './components/CalendarGrid';
 import DietStatusSelector from './components/DietStatusSelector';
-import WaterTracker from './components/WaterTracker';
 import CatModal from './components/CatModal';
 import BlackButtonIcon from './components/BlackButtonIcon';
 import { getTodayDateString, getAllLogs, saveDayLog } from './utils/storage';
@@ -22,8 +21,7 @@ export default function App() {
   }, []);
 
   const currentLog = allLogs[selectedDate] || {
-    dietState: 'neutral',
-    waterGlasses: 0
+    dietState: 'neutral'
   };
 
   // Formattazione data selezionata in italiano
@@ -40,7 +38,7 @@ export default function App() {
     return capitalized;
   };
 
-  // Gestione cambio stato dieta
+  // Gestione cambio stato dieta: trigger immediato del Gatto Nero
   const handleSelectDietStatus = (newStatus) => {
     const updated = saveDayLog(selectedDate, { dietState: newStatus });
     if (updated) {
@@ -58,134 +56,96 @@ export default function App() {
     }
   };
 
-  // Gestione conferma salvataggio acqua
-  const handleSaveWater = (glasses) => {
-    const updated = saveDayLog(selectedDate, { waterGlasses: glasses });
-    if (updated) {
-      setAllLogs((prev) => ({ ...prev, [selectedDate]: updated }));
-    }
-
-    // Trigger del Tutor Gatto Nero
-    const quote = getRandomCatQuote(glasses >= 8 ? 'success' : 'water');
-    setModalState({
-      isOpen: true,
-      quote,
-      context: 'water'
-    });
-  };
-
-  // Calcola statistiche veloci per Asia
-  const totalDaysLogged = Object.values(allLogs).filter(l => l.dietState && l.dietState !== 'neutral').length;
-  const successfulDays = Object.values(allLogs).filter(l => l.dietState === 'success').length;
+  // Calcolo statistiche rapide
+  const totalDaysLogged = Object.values(allLogs).filter(
+    (l) => l.dietState && l.dietState !== 'neutral'
+  ).length;
+  const successfulDays = Object.values(allLogs).filter(
+    (l) => l.dietState === 'success'
+  ).length;
 
   return (
     <div style={{
       minHeight: '100vh',
       maxWidth: '480px',
       margin: '0 auto',
-      padding: 'env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 32px) 16px',
+      padding: 'env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 24px) 16px',
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* HEADER TEMA CORALINE */}
+      {/* HEADER PULITO: IDENTITÀ VISIVA CON IL BOTTONE NERO E IMPUNTURE GOTICHE */}
       <header style={{
-        padding: '16px 4px 12px 4px',
+        padding: '12px 14px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '1.5px dashed rgba(224, 159, 62, 0.3)',
+        border: '1.5px dashed rgba(224, 159, 62, 0.4)',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(26, 20, 56, 0.75)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         marginBottom: '16px'
       }}>
-        <div>
+        {/* Simboli gotici & Contatori sintetici */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '6px',
+            backgroundColor: 'rgba(15, 16, 38, 0.7)',
+            padding: '6px 10px',
+            borderRadius: '10px',
+            border: '1px solid rgba(224, 159, 62, 0.25)'
           }}>
-            <h1 style={{
-              fontFamily: 'var(--font-gothic)',
-              fontSize: '22px',
-              fontWeight: 900,
-              letterSpacing: '1px',
-              color: '#f8fafc',
-              textShadow: '0 2px 10px rgba(0,0,0,0.7)'
-            }}>
-              Coraline <span style={{ color: 'var(--accent-yellow)' }}>Tracker</span>
-            </h1>
+            <span style={{ fontSize: '14px' }}>✨</span>
             <span style={{
-              fontSize: '10px',
-              backgroundColor: '#841b2d',
-              color: '#fecdd3',
-              padding: '2px 7px',
-              borderRadius: '999px',
-              fontWeight: 700,
-              letterSpacing: '0.5px'
+              fontFamily: 'var(--font-gothic)',
+              fontSize: '13px',
+              fontWeight: 800,
+              color: '#e09f3e'
             }}>
-              BETA
+              {successfulDays} <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500 }}>giorni</span>
             </span>
           </div>
-          <p style={{
-            fontSize: '12px',
-            color: '#94a3b8',
-            marginTop: '2px',
-            fontFamily: 'var(--font-body)'
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: 'rgba(15, 16, 38, 0.7)',
+            padding: '6px 10px',
+            borderRadius: '10px',
+            border: '1px solid rgba(224, 159, 62, 0.25)'
           }}>
-            Diario di bordo segreto per <strong style={{ color: '#e09f3e' }}>Asia</strong>
-          </p>
+            <span style={{ fontSize: '14px' }}>🗝️</span>
+            <span style={{
+              fontFamily: 'var(--font-gothic)',
+              fontSize: '13px',
+              fontWeight: 800,
+              color: '#f8fafc'
+            }}>
+              {totalDaysLogged} <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500 }}>totali</span>
+            </span>
+          </div>
         </div>
 
-        {/* Bottone icona Coraline decorativo con riflesso */}
-        <div title="Nessun bottone negli occhi!">
-          <BlackButtonIcon size={40} />
+        {/* L'Iconico Bottone Nero di Coraline integrato nell'Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-gothic)',
+            color: 'rgba(224, 159, 62, 0.75)',
+            letterSpacing: '1px',
+            textTransform: 'uppercase'
+          }}>
+            Beta
+          </span>
+          <BlackButtonIcon size={38} />
         </div>
       </header>
 
-      {/* QUICK BADGES DI MOTIVAZIONE */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '10px',
-        marginBottom: '16px'
-      }}>
-        <div style={{
-          backgroundColor: 'rgba(20, 16, 42, 0.6)',
-          borderRadius: '12px',
-          padding: '10px 12px',
-          border: '1px dashed rgba(224, 159, 62, 0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <span style={{ fontSize: '18px' }}>🗝️</span>
-          <div>
-            <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Giorni Tracciati</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: '#f8fafc', fontFamily: 'var(--font-gothic)' }}>
-              {totalDaysLogged}
-            </div>
-          </div>
-        </div>
-
-        <div style={{
-          backgroundColor: 'rgba(20, 16, 42, 0.6)',
-          borderRadius: '12px',
-          padding: '10px 12px',
-          border: '1px dashed rgba(224, 159, 62, 0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <span style={{ fontSize: '18px' }}>✨</span>
-          <div>
-            <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Obiettivi Rispettati</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: '#e09f3e', fontFamily: 'var(--font-gothic)' }}>
-              {successfulDays}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CALENDARIO SCORREVOLE & GRIGLIA MENSILE */}
-      <CalendarStrip
+      {/* UNICA VISTA CALENDARIO MENSILE A GRIGLIA (SETTIMANA DA LUNEDÌ) */}
+      <CalendarGrid
         selectedDate={selectedDate}
         onSelectDate={setSelectedDate}
         allLogs={allLogs}
@@ -193,46 +153,30 @@ export default function App() {
 
       {/* INTESTAZIONE DATA CORRENTE SELEZIONATA */}
       <div style={{
-        marginBottom: '14px',
+        marginBottom: '12px',
         padding: '0 4px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between'
       }}>
-        <div>
-          <span style={{
-            fontSize: '11px',
-            color: 'var(--accent-yellow)',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-            fontWeight: 600
-          }}>
-            Registro Giornaliero
-          </span>
-          <h2 style={{
-            fontSize: '18px',
-            fontFamily: 'var(--font-gothic)',
-            color: '#f8fafc',
-            fontWeight: 700
-          }}>
-            {formatDateTitle(selectedDate)}
-          </h2>
-        </div>
+        <h2 style={{
+          fontSize: '17px',
+          fontFamily: 'var(--font-gothic)',
+          color: '#f8fafc',
+          fontWeight: 700,
+          letterSpacing: '0.4px'
+        }}>
+          {formatDateTitle(selectedDate)}
+        </h2>
       </div>
 
-      {/* SELETTORE ESITO DIETA (3 STATI: NEUTRAL / SUCCESSO / BOTTone NERO) */}
+      {/* SELETTORE DIRETTO ESITO DIETA (3 STATI: NEUTRO / SPUNTA DORATA / BOTTONE NERO) */}
       <DietStatusSelector
         status={currentLog.dietState}
         onSelectStatus={handleSelectDietStatus}
       />
 
-      {/* TRACKING DELL'ACQUA */}
-      <WaterTracker
-        initialGlasses={currentLog.waterGlasses || 0}
-        onSaveWater={handleSaveWater}
-      />
-
-      {/* FOOTER DELICATO GOTICO */}
+      {/* FOOTER GOTICO MINIMALISTA */}
       <footer style={{
         marginTop: 'auto',
         textAlign: 'center',
@@ -241,10 +185,10 @@ export default function App() {
         color: '#64748b',
         borderTop: '1px dashed rgba(255, 255, 255, 0.08)'
       }}>
-        «Stai attenta a ciò che desideri, Asia.» • Coraline Tracker v1.0 Beta
+        ✦ 🪡 ✦
       </footer>
 
-      {/* MODAL DEL TUTOR (IL GATTO NERO DI CORALINE) */}
+      {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}
       <CatModal
         isOpen={modalState.isOpen}
         quote={modalState.quote}
@@ -254,4 +198,3 @@ export default function App() {
     </div>
   );
 }
-

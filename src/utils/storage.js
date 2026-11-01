@@ -13,7 +13,7 @@ export function getTodayDateString() {
 
 /**
  * Carica l'intero database locale
- * @returns {Record<string, { dietState: 'neutral' | 'success' | 'cheat', waterGlasses: number, updatedAt: string }>}
+ * @returns {Record<string, { dietState: 'neutral' | 'success' | 'cheat', updatedAt: string }>}
  */
 export function getAllLogs() {
   try {
@@ -33,13 +33,12 @@ export function getDayLog(dateStr) {
   const all = getAllLogs();
   return all[dateStr] || {
     dietState: 'neutral', // 'neutral' | 'success' | 'cheat'
-    waterGlasses: 0,
     updatedAt: null
   };
 }
 
 /**
- * Salva o aggiorna i dati per una specifica data
+ * Salva o aggiorna lo stato per una specifica data
  * @param {string} dateStr 'YYYY-MM-DD'
  * @param {object} updates
  */
@@ -47,8 +46,7 @@ export function saveDayLog(dateStr, updates) {
   try {
     const all = getAllLogs();
     const current = all[dateStr] || {
-      dietState: 'neutral',
-      waterGlasses: 0
+      dietState: 'neutral'
     };
 
     all[dateStr] = {
@@ -64,4 +62,3 @@ export function saveDayLog(dateStr, updates) {
     return null;
   }
 }
-
