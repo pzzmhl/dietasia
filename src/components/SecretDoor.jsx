@@ -122,40 +122,6 @@ export default function SecretDoor({ onOpenSettings }) {
             animation: isRevealed ? 'secretDoorGlowPulse 3s ease-in-out infinite' : 'none'
           }}
         />
-
-        {/* Dicitura Gotica che compare quando la porta sbuca completamente */}
-        <div
-          style={{
-            marginTop: '10px',
-            textAlign: 'center',
-            opacity: isRevealed ? 1 : 0.35,
-            transform: isRevealed ? 'translate3d(0, 0, 0)' : 'translate3d(0, 6px, 0)',
-            transition: 'all 0.35s ease',
-            pointerEvents: 'none'
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'var(--font-coraline)',
-              fontSize: '12px',
-              color: '#4ade80',
-              letterSpacing: '1px',
-              textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(74, 222, 128, 0.5)'
-            }}
-          >
-            ✦ La Porticina Segreta ✦
-          </div>
-          <div
-            style={{
-              fontSize: '10px',
-              fontFamily: 'var(--font-body)',
-              color: 'rgba(221, 202, 183, 0.7)',
-              marginTop: '2px'
-            }}
-          >
-            {isRevealed ? 'Tocca per aprire le Impostazioni' : 'Scorri o tocca per sbloccare'}
-          </div>
-        </div>
       </button>
 
       <style>{`

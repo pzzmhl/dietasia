@@ -183,6 +183,16 @@ export function importBackupData(jsonString) {
 }
 
 /**
+ * Cancella tutti i log registrati (Reset completo del diario)
+ */
+export function clearAllLogs() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
+  localStorage.setItem(BACKUP_SNAPSHOT_KEY, JSON.stringify({}));
+  logsMemoryCache = {};
+  return {};
+}
+
+/**
  * Trova i giorni passati (dal 1° del mese corrente a oggi) che richiedono attenzione.
  * - I giorni precedenti a oggi sono considerati non contrassegnati se sono 'neutral' o assenti.
  * - Il giorno odierno viene considerato non contrassegnato SOLO se sono già passate le 20:00.

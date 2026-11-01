@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import streakStarImg from '../assets/streak-star.webp';
@@ -16,6 +16,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
   keysPerMonth = 4 
 }) {
   const [activeTooltip, setActiveTooltip] = useState(null);
+  const tooltipTimeoutRef = useRef(null);
 
   const { successCount, cheatCount, remainingKeys, streakCount } = useMemo(() => {
     const monthPrefix = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}`;
@@ -41,10 +42,36 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     };
   }, [allLogs, displayYear, displayMonth, keysPerMonth]);
 
+  // Gestione comparsa tooltip con dismiss automatico dopo 5 secondi
   const toggleTooltip = (type) => {
     triggerHapticFeedback('selection');
-    setActiveTooltip((prev) => (prev === type ? null : type));
+
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = null;
+    }
+
+    setActiveTooltip((prev) => {
+      const next = prev === type ? null : type;
+      if (next) {
+        // Scompare automaticamente dopo 5 secondi esatti (5000 ms)
+        tooltipTimeoutRef.current = setTimeout(() => {
+          setActiveTooltip(null);
+          tooltipTimeoutRef.current = null;
+        }, 5000);
+      }
+      return next;
+    });
   };
+
+  // Pulizia del timer allo smontaggio del componente
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Dettagli diciture al tocco
   const tooltipDetails = {
@@ -96,7 +123,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         Dashboard
       </h3>
 
-      {/* SEZIONE 1: LE 4 CHIAVI NERE GIGANTI (TAP PER DICITURA) */}
+      {/* SEZIONE 1: LE CHIAVI NERE GIGANTI (LAYOUT FLESSIBILE ADATTIVO SENZA OVERFLOW) */}
       <div 
         onClick={() => toggleTooltip('keys')}
         role="button"
@@ -106,7 +133,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           backgroundColor: 'rgba(6, 22, 37, 0.58)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
-          padding: '16px 14px',
+          padding: keysPerMonth <= 4 ? '14px 12px' : '10px 8px',
           borderRadius: '18px',
           border: activeTooltip === 'keys' 
             ? '1.5px solid var(--coraline-yellow)' 
@@ -116,95 +143,62 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             : 'inset 0 1.5px 0 rgba(221, 202, 183, 0.2), inset 0 0 16px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.35)',
           marginBottom: '12px',
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '16px',
+          gap: keysPerMonth <= 4 ? '14px' : keysPerMonth <= 6 ? '10px' : '6px',
           cursor: 'pointer',
           touchAction: 'pan-y',
-          transition: 'all 0.2s ease'
+          transition: 'all 0.2s ease',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
         }}
       >
-        {Array.from({ length: keysPerMonth }).map((_, idx) => {
-          const isUsed = idx >= remainingKeys;
-          return (
-            <div 
-              key={idx}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transform: isUsed ? 'scale(0.92)' : 'scale(1.08)',
-                transition: 'all 0.25s ease',
-                position: 'relative',
-                animation: `dashboardKeyFloat 3.2s ease-in-out infinite ${idx * 0.35}s`,
-                willChange: 'transform'
-              }}
-            >
-              {/* Alone bianco spettrale ristretto per le chiavi usate */}
-              {isUsed && (
-                <div 
-                  style={{
-                    position: 'absolute',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(220, 240, 255, 0.12) 50%, transparent 70%)',
-                    filter: 'blur(3px)',
-                    pointerEvents: 'none',
-                    animation: 'ghostlyAuraPulse 3s ease-in-out infinite'
-                  }}
-                />
-              )}
-              {/* Chiave Nera di Coraline in formato GIGANTE (60px) */}
-              <KeyIcon size={60} isUsed={isUsed} />
-            </div>
-          );
-        })}
-      </div>
+        {(() => {
+          // Dimensionamento responsivo dinamico: scala progressivamente da 54px a 35px
+          // quando il numero di chiavi supera 4, impaginandosi perfettamente su 1 o 2 righe
+          const keySize = keysPerMonth <= 4 ? 54 : keysPerMonth <= 6 ? 42 : 35;
+          const auraSize = keysPerMonth <= 4 ? '32px' : keysPerMonth <= 6 ? '24px' : '18px';
 
-      {/* DICITURA INTERATTIVA A COMPARSA AL TAP SULL'ICONA */}
-      {currentTooltip && (
-        <div 
-          onClick={() => setActiveTooltip(null)}
-          style={{
-            margin: '0 0 14px 0',
-            padding: '10px 14px',
-            backgroundColor: 'rgba(4, 16, 28, 0.96)',
-            border: `1.5px dashed ${currentTooltip.color}`,
-            borderRadius: '14px',
-            textAlign: 'center',
-            boxShadow: `0 6px 20px rgba(0, 0, 0, 0.8), 0 0 12px ${currentTooltip.glow}`,
-            animation: 'tooltipBadgePop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            cursor: 'pointer',
-            touchAction: 'manipulation'
-          }}
-        >
-          <span style={{
-            fontSize: '12px',
-            color: 'var(--coraline-parchment)',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            lineHeight: 1.35,
-            flex: 1,
-            textAlign: 'center'
-          }}>
-            ✦ {currentTooltip.text}
-          </span>
-          <span style={{
-            color: 'var(--coraline-parchment)',
-            opacity: 0.6,
-            fontSize: '12px',
-            fontWeight: 700,
-            marginLeft: '4px'
-          }}>
-            ✕
-          </span>
-        </div>
-      )}
+          return Array.from({ length: keysPerMonth }).map((_, idx) => {
+            const isUsed = idx >= remainingKeys;
+            return (
+              <div 
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: isUsed ? 'scale(0.92)' : 'scale(1.05)',
+                  transition: 'all 0.25s ease',
+                  position: 'relative',
+                  animation: `dashboardKeyFloat 3.2s ease-in-out infinite ${idx * 0.35}s`,
+                  willChange: 'transform',
+                  margin: keysPerMonth > 4 ? '2px 0' : '0'
+                }}
+              >
+                {/* Alone bianco spettrale ristretto per le chiavi usate */}
+                {isUsed && (
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      width: auraSize,
+                      height: auraSize,
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(220, 240, 255, 0.12) 50%, transparent 70%)',
+                      filter: 'blur(3px)',
+                      pointerEvents: 'none',
+                      animation: 'ghostlyAuraPulse 3s ease-in-out infinite'
+                    }}
+                  />
+                )}
+                {/* Chiave Nera di Coraline proporzionata */}
+                <KeyIcon size={keySize} isUsed={isUsed} />
+              </div>
+            );
+          });
+        })()}
+      </div>
 
       {/* SEZIONE 2: LE 3 SCHEDE METRICHE (PIETRA VERDE, GIORNI CONSECUTIVI, BOTTONE NERO) */}
       <div style={{
@@ -378,6 +372,56 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           </div>
         </div>
       </div>
+
+      {/* DICITURA INTERATTIVA A COMPARSA AL TAP SULL'ICONA - POSIZIONATA SOTTO A TUTTA LA DASHBOARD */}
+      {currentTooltip && (
+        <div 
+          onClick={() => {
+            if (tooltipTimeoutRef.current) {
+              clearTimeout(tooltipTimeoutRef.current);
+              tooltipTimeoutRef.current = null;
+            }
+            setActiveTooltip(null);
+          }}
+          style={{
+            marginTop: '12px',
+            padding: '10px 14px',
+            backgroundColor: 'rgba(4, 16, 28, 0.96)',
+            border: `1.5px dashed ${currentTooltip.color}`,
+            borderRadius: '14px',
+            textAlign: 'center',
+            boxShadow: `0 6px 20px rgba(0, 0, 0, 0.8), 0 0 12px ${currentTooltip.glow}`,
+            animation: 'tooltipBadgePop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+            cursor: 'pointer',
+            touchAction: 'manipulation'
+          }}
+        >
+          <span style={{
+            fontSize: '12px',
+            color: 'var(--coraline-parchment)',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            lineHeight: 1.35,
+            flex: 1,
+            textAlign: 'center'
+          }}>
+            ✦ {currentTooltip.text}
+          </span>
+          <span style={{
+            color: 'var(--coraline-parchment)',
+            opacity: 0.6,
+            fontSize: '12px',
+            fontWeight: 700,
+            marginLeft: '4px'
+          }}>
+            ✕
+          </span>
+        </div>
+      )}
 
       <style>{`
         @keyframes ghostlyAuraPulse {

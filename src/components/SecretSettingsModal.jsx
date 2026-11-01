@@ -5,7 +5,8 @@ import seeingStoneImg from '../assets/seeing-stone.webp';
 import { 
   exportBackupData, 
   importBackupData, 
-  getAllLogs 
+  getAllLogs,
+  clearAllLogs
 } from '../utils/storage';
 import { 
   scheduleDailyReminder, 
@@ -25,7 +26,7 @@ export default function SecretSettingsModal({
   onChangeKeysPerMonth = () => {},
   onRestoreSuccess = () => {} 
 }) {
-  const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'backup' | 'info'
+  const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'backup' | 'preferences'
   
   // STATI IMPOSTAZIONI
   const [reminderEnabled, setReminderEnabled] = useState(() => {
@@ -47,6 +48,26 @@ export default function SecretSettingsModal({
   const [hapticsOn, setHapticsOn] = useState(() => isHapticsEnabled());
   const [testNotificationStatus, setTestNotificationStatus] = useState(null);
 
+  // STATI PREFERENZE
+  const [floatingFx, setFloatingFx] = useState(() => {
+    try {
+      return localStorage.getItem('coraline_floating_fx') !== 'false';
+    } catch (e) {
+      return true;
+    }
+  });
+
+  const [dimStars, setDimStars] = useState(() => {
+    try {
+      return localStorage.getItem('coraline_dim_stars') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const [resetFeedback, setResetFeedback] = useState(null);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+
   // STATI BACKUP
   const [copied, setCopied] = useState(false);
   const [pasteText, setPasteText] = useState('');
@@ -57,6 +78,8 @@ export default function SecretSettingsModal({
     if (isOpen) {
       setStatusMessage(null);
       setTestNotificationStatus(null);
+      setResetFeedback(null);
+      setConfirmClearOpen(false);
     }
   }, [isOpen]);
 
@@ -124,6 +147,47 @@ export default function SecretSettingsModal({
     setHapticsOn(enabled);
     setHapticsEnabled(enabled);
     if (enabled) triggerHapticFeedback('selection');
+  };
+
+  // GESTIONE PREFERENZE
+  const handleToggleFloatingFx = (enabled) => {
+    setFloatingFx(enabled);
+    try {
+      localStorage.setItem('coraline_floating_fx', enabled ? 'true' : 'false');
+      if (typeof document !== 'undefined') {
+        document.body.classList.toggle('no-floating-fx', !enabled);
+      }
+    } catch (e) {}
+    triggerHapticFeedback('selection');
+  };
+
+  const handleToggleDimStars = (enabled) => {
+    setDimStars(enabled);
+    try {
+      localStorage.setItem('coraline_dim_stars', enabled ? 'true' : 'false');
+      if (typeof document !== 'undefined') {
+        document.body.classList.toggle('dim-stars-bg', enabled);
+      }
+    } catch (e) {}
+    triggerHapticFeedback('selection');
+  };
+
+  const handleResetWybieCelebrations = () => {
+    try {
+      localStorage.removeItem('coraline_last_celebrated_streak');
+      setResetFeedback('✓ Storico Wybie azzerato! Al prossimo traguardo verrai festeggiata.');
+      setTimeout(() => setResetFeedback(null), 4000);
+    } catch (e) {}
+    triggerHapticFeedback('selection');
+  };
+
+  const handleClearAllLogs = () => {
+    triggerHapticFeedback('cheat');
+    clearAllLogs();
+    onRestoreSuccess({});
+    setConfirmClearOpen(false);
+    setResetFeedback('✓ Tutti i dati del diario sono stati azzerati.');
+    setTimeout(() => setResetFeedback(null), 4000);
   };
 
   // GESTIONE BACKUP (Download file)
@@ -290,13 +354,6 @@ export default function SecretSettingsModal({
               }}>
                 La Porticina Segreta
               </h2>
-              <div style={{
-                fontSize: '11px',
-                color: 'var(--coraline-brown)',
-                fontFamily: 'var(--font-body)'
-              }}>
-                Impostazioni & Diario dell'Altro Mondo
-              </div>
             </div>
           </div>
 
@@ -320,7 +377,7 @@ export default function SecretSettingsModal({
           </button>
         </div>
 
-        {/* NAVIGAZIONE A TAB */}
+        {/* NAVIGAZIONE A TAB (SOLO TESTO, SENZA ICONE) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
@@ -334,7 +391,7 @@ export default function SecretSettingsModal({
               setActiveTab('settings');
             }}
             style={{
-              padding: '8px 4px',
+              padding: '9px 4px',
               borderRadius: '12px',
               border: activeTab === 'settings' ? '1.5px solid #4ade80' : '1px solid var(--border-dark-blue)',
               backgroundColor: activeTab === 'settings' ? 'rgba(74, 222, 128, 0.18)' : 'rgba(6, 22, 37, 0.5)',
@@ -346,7 +403,7 @@ export default function SecretSettingsModal({
               touchAction: 'manipulation'
             }}
           >
-            ⚙ Opzioni
+            Opzioni
           </button>
 
           <button
@@ -356,7 +413,7 @@ export default function SecretSettingsModal({
               setActiveTab('backup');
             }}
             style={{
-              padding: '8px 4px',
+              padding: '9px 4px',
               borderRadius: '12px',
               border: activeTab === 'backup' ? '1.5px solid var(--coraline-yellow)' : '1px solid var(--border-dark-blue)',
               backgroundColor: activeTab === 'backup' ? 'rgba(216, 198, 21, 0.18)' : 'rgba(6, 22, 37, 0.5)',
@@ -368,21 +425,21 @@ export default function SecretSettingsModal({
               touchAction: 'manipulation'
             }}
           >
-            💾 Backup
+            Backup
           </button>
 
           <button
             type="button"
             onClick={() => {
               triggerHapticFeedback('selection');
-              setActiveTab('info');
+              setActiveTab('preferences');
             }}
             style={{
-              padding: '8px 4px',
+              padding: '9px 4px',
               borderRadius: '12px',
-              border: activeTab === 'info' ? '1.5px solid var(--coraline-gold)' : '1px solid var(--border-dark-blue)',
-              backgroundColor: activeTab === 'info' ? 'rgba(199, 164, 14, 0.18)' : 'rgba(6, 22, 37, 0.5)',
-              color: activeTab === 'info' ? 'var(--coraline-gold)' : 'var(--coraline-parchment)',
+              border: activeTab === 'preferences' ? '1.5px solid var(--coraline-gold)' : '1px solid var(--border-dark-blue)',
+              backgroundColor: activeTab === 'preferences' ? 'rgba(199, 164, 14, 0.18)' : 'rgba(6, 22, 37, 0.5)',
+              color: activeTab === 'preferences' ? 'var(--coraline-gold)' : 'var(--coraline-parchment)',
               fontFamily: 'var(--font-body)',
               fontSize: '12px',
               fontWeight: 700,
@@ -390,7 +447,7 @@ export default function SecretSettingsModal({
               touchAction: 'manipulation'
             }}
           >
-            ✦ Info
+            Preferenze
           </button>
         </div>
 
@@ -773,55 +830,201 @@ export default function SecretSettingsModal({
           </div>
         )}
 
-        {/* TAB 3: INFORMAZIONI APP */}
-        {activeTab === 'info' && (
-          <div style={{
-            backgroundColor: 'rgba(4, 16, 28, 0.7)',
-            borderRadius: '16px',
-            padding: '16px',
-            border: '1px solid var(--border-dark-blue-light)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '10px'
-          }}>
-            <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+        {/* TAB 3: PREFERENZE AVANZATE */}
+        {activeTab === 'preferences' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* 1. FLUTTUAZIONE STOP-MOTION */}
+            <div style={{
+              backgroundColor: 'rgba(4, 16, 28, 0.7)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              border: '1px solid var(--border-dark-blue-light)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coraline-parchment)' }}>
+                  Fluttuazione Oggetti Dashboard
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--coraline-brown)' }}>
+                  Movimento stop-motion organico delle icone
+                </div>
+              </div>
+
+              <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={floatingFx}
+                  onChange={(e) => handleToggleFloatingFx(e.target.checked)}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    accentColor: '#4ade80',
+                    cursor: 'pointer'
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* 2. LUMINOSITÀ STELLE DI SFONDO */}
+            <div style={{
+              backgroundColor: 'rgba(4, 16, 28, 0.7)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              border: '1px solid var(--border-dark-blue-light)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coraline-parchment)' }}>
+                  Sfondo Notturno Attenuato
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--coraline-brown)' }}>
+                  Riduci la luminosità del cielo stellato
+                </div>
+              </div>
+
+              <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={dimStars}
+                  onChange={(e) => handleToggleDimStars(e.target.checked)}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    accentColor: '#4ade80',
+                    cursor: 'pointer'
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* 3. RIAVVIA NOTIFICHE & CELEBRAZIONI WYBIE */}
+            <div style={{
+              backgroundColor: 'rgba(4, 16, 28, 0.7)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              border: '1px solid var(--border-dark-blue-light)'
+            }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coraline-yellow)', marginBottom: '4px' }}>
+                ✦ Celebrazioni di Wybie
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--coraline-brown)', marginBottom: '10px' }}>
+                Riavvia lo storico dei traguardi raggiunti per poter riascoltare le congratulazioni senza cancellare il diario
+              </div>
+
+              <button
+                type="button"
+                onClick={handleResetWybieCelebrations}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(13, 44, 73, 0.8)',
+                  border: '1.5px solid var(--coraline-yellow)',
+                  borderRadius: '12px',
+                  color: 'var(--coraline-yellow)',
+                  padding: '9px 12px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  touchAction: 'manipulation'
+                }}
+              >
+                Riavvia Notifiche Traguardi Wybie
+              </button>
+            </div>
+
+            {/* 4. RESET COMPLETO DATI */}
+            <div style={{
+              backgroundColor: 'rgba(4, 16, 28, 0.7)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              border: '1px solid rgba(239, 68, 68, 0.3)'
+            }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#f87171', marginBottom: '4px' }}>
+                ✦ Zona di Reset Diario
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--coraline-brown)', marginBottom: '10px' }}>
+                Cancella tutti i giorni registrati nel calendario per ricominciare da zero
+              </div>
+
+              {!confirmClearOpen ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback('selection');
+                    setConfirmClearOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(50, 18, 22, 0.7)',
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    borderRadius: '12px',
+                    color: '#f87171',
+                    padding: '9px 12px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    touchAction: 'manipulation'
+                  }}
+                >
+                  Cancella Tutti i Dati del Diario
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={handleClearAllLogs}
+                    style={{
+                      flex: 1,
+                      backgroundColor: 'rgba(239, 68, 68, 0.35)',
+                      border: '1.5px solid #ef4444',
+                      borderRadius: '10px',
+                      color: '#fca5a5',
+                      padding: '8px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Conferma Reset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmClearOpen(false)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: 'rgba(6, 22, 37, 0.8)',
+                      border: '1px solid var(--border-dark-blue)',
+                      borderRadius: '10px',
+                      color: 'var(--coraline-parchment)',
+                      padding: '8px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Annulla
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* MESSAGGI DI NOTIFICA PREFERENZE */}
+            {resetFeedback && (
               <div style={{
-                fontFamily: 'var(--font-coraline)',
-                fontSize: '16px',
-                color: 'var(--coraline-yellow)'
+                padding: '8px 12px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(21, 128, 61, 0.25)',
+                border: '1px solid #4ade80',
+                color: '#4ade80',
+                fontSize: '11px',
+                textAlign: 'center'
               }}>
-                Coraline Tracker (Beta)
+                {resetFeedback}
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--coraline-brown)' }}>
-                Dedicato ad Asia ✦
-              </div>
-            </div>
-
-            <div style={{
-              fontSize: '12px',
-              color: 'var(--coraline-parchment)',
-              lineHeight: 1.5,
-              borderTop: '1px dashed rgba(26, 69, 110, 0.5)',
-              paddingTop: '10px'
-            }}>
-              <div>• <strong>Versione:</strong> 2.6-beta (Build Android)</div>
-              <div>• <strong>Database:</strong> Locale SQLite / WebStorage cifrato</div>
-              <div>• <strong>Notifiche:</strong> Background Engine Android Nativo</div>
-              <div>• <strong>Sensori:</strong> Feedback Aptico Hardware Haptic Engine</div>
-              <div>• <strong>Stile:</strong> Stop-Motion Dark Fantasy (Laika Inspired)</div>
-            </div>
-
-            <div style={{
-              marginTop: '6px',
-              padding: '8px',
-              backgroundColor: 'rgba(6, 22, 37, 0.6)',
-              borderRadius: '8px',
-              fontSize: '10px',
-              color: 'rgba(221, 202, 183, 0.6)',
-              textAlign: 'center'
-            }}>
-              Nessun dato viene inviato a server esterni. I tuoi progressi rimangono al sicuro sul tuo dispositivo.
-            </div>
+            )}
           </div>
         )}
       </div>
