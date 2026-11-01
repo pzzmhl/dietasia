@@ -282,7 +282,7 @@ export default function CalendarGrid({
                   />
                 </div>
               ) : dietState === 'cheat_key' ? (
-                /* SIMBOLO GRANDE: CHIAVE NERA JOLLY INGRANDITA */
+                /* SIMBOLO GRANDE: CHIAVE NERA JOLLY INGRANDITA CON AURA BIANCA SPETTRALE */
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -293,12 +293,12 @@ export default function CalendarGrid({
                 }}>
                   <img
                     src={keyImg}
-                    alt="Chiave Nera Jolly"
+                    alt="Chiave Nera Jolly Usata"
                     style={{
                       width: '86%',
                       height: '86%',
                       objectFit: 'contain',
-                      filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 4px rgba(216, 198, 21, 0.45))'
+                      filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 12px rgba(225, 240, 255, 0.8)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9))'
                     }}
                   />
                 </div>

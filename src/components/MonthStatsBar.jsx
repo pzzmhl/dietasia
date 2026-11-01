@@ -60,21 +60,50 @@ export default function MonthStatsBar({
           return (
             <div 
               key={idx}
-              title={isUsed ? "Chiave utilizzata" : "Chiave disponibile"}
+              title={isUsed ? "Chiave utilizzata (Spettrale)" : "Chiave disponibile"}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transform: isUsed ? 'scale(0.88)' : 'scale(1.08)',
-                transition: 'all 0.25s ease'
+                transform: isUsed ? 'scale(0.92)' : 'scale(1.08)',
+                transition: 'all 0.25s ease',
+                position: 'relative'
               }}
             >
+              {/* Alone bianco spettrale per le chiavi usate */}
+              {isUsed && (
+                <div 
+                  style={{
+                    position: 'absolute',
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(220, 240, 255, 0.2) 50%, transparent 75%)',
+                    filter: 'blur(5px)',
+                    pointerEvents: 'none',
+                    animation: 'ghostlyAuraPulse 3s ease-in-out infinite'
+                  }}
+                />
+              )}
               {/* Chiave Nera di Coraline in formato GIGANTE (60px) */}
               <KeyIcon size={60} isUsed={isUsed} />
             </div>
           );
         })}
       </div>
+
+      <style>{`
+        @keyframes ghostlyAuraPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.22);
+            opacity: 0.95;
+          }
+        }
+      `}</style>
 
       {/* SEZIONE 2: PIETRA VERDE E BOTTONE NERO IN FORMATO GIGANTE (2 COLONNE) */}
       <div style={{
