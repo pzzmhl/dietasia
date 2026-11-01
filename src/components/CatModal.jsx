@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import catSuccessImg from '../assets/cat-success.png';     // Dieta Corretta / Rispettata (Pietra Verde) -> Gatto con occhioni azzurri
-import catFailImg from '../assets/cat-fail.png';           // Dieta Scorretta / Non Seguita (Bottone Nero) -> Gatto scettico
-import catCheatKeyImg from '../assets/cat-cheat-key.png';  // Sgarro con Chiave Jolly -> Gatto con topolino circense in bocca
-import catModalBg from '../assets/cat-modal-bg.jpg';
+import catSuccessImg from '../assets/cat-success.webp';     // Dieta Corretta / Rispettata (Pietra Verde) -> Gatto con occhioni azzurri
+import catFailImg from '../assets/cat-fail.webp';           // Dieta Scorretta / Non Seguita (Bottone Nero) -> Gatto scettico
+import catCheatKeyImg from '../assets/cat-cheat-key.webp';  // Sgarro con Chiave Jolly -> Gatto con topolino circense in bocca
+import catModalBg from '../assets/cat-modal-bg.webp';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline):

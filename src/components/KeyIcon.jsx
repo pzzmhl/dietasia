@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import keyImg from '../assets/key.png';
+import keyImg from '../assets/key.webp';
 
 /**
  * Componente per la Chiave Nera di Coraline:

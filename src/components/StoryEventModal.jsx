@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import otherMotherImg from '../assets/other-mother-key.png';
-import wybieImg from '../assets/wybie-proud.png';
-import catModalBg from '../assets/cat-modal-bg.jpg';
+import otherMotherImg from '../assets/other-mother-key.webp';
+import wybieImg from '../assets/wybie-proud.webp';
+import catModalBg from '../assets/cat-modal-bg.webp';
 
 /**
  * Modal Eventi Speciali della Storia di Coraline:

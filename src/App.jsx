@@ -16,18 +16,18 @@ import {
 } from './services/notifications';
 
 // Immagini critiche per il rendering immediato e il preloading
-import catStandingImg from './assets/cat-standing.png';
-import catSuccessImg from './assets/cat-success.png';
-import catFailImg from './assets/cat-fail.png';
-import catCheatKeyImg from './assets/cat-cheat-key.png';
-import blackButtonImg from './assets/black-button.png';
-import seeingStoneImg from './assets/seeing-stone.png';
-import keyImg from './assets/key.png';
-import streakStarImg from './assets/streak-star.png';
-import jumpingMouseImg from './assets/jumping-mouse.png';
-import otherMotherImg from './assets/other-mother-key.png';
-import wybieImg from './assets/wybie-proud.png';
-import catModalBg from './assets/cat-modal-bg.jpg';
+import catStandingImg from './assets/cat-standing.webp';
+import catSuccessImg from './assets/cat-success.webp';
+import catFailImg from './assets/cat-fail.webp';
+import catCheatKeyImg from './assets/cat-cheat-key.webp';
+import blackButtonImg from './assets/black-button.webp';
+import seeingStoneImg from './assets/seeing-stone.webp';
+import keyImg from './assets/key.webp';
+import streakStarImg from './assets/streak-star.webp';
+import jumpingMouseImg from './assets/jumping-mouse.webp';
+import otherMotherImg from './assets/other-mother-key.webp';
+import wybieImg from './assets/wybie-proud.webp';
+import catModalBg from './assets/cat-modal-bg.webp';
 
 import { 
   getTodayDateString, 
@@ -135,13 +135,18 @@ export default function App() {
     };
   }, []);
 
-  // Carica i dati salvati e precarica le immagini critiche in memoria RAM all'avvio
+  // Carica i dati salvati e ottimizza il rendering iniziale senza bloccare il thread UI
   useEffect(() => {
     setAllLogs(getAllLogs());
 
-    // Preload rapido delle immagini di interfaccia per azzerare flash o ritardi al tocco
-    const criticalImages = [
-      catStandingImg,
+    // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard & Gatto)
+    [catStandingImg, keyImg].forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    // 2. Precaricamento in background a bassa priorità (Idle time) per i popup secondari
+    const deferredImages = [
       catSuccessImg,
       catFailImg,
       catCheatKeyImg,
@@ -150,15 +155,22 @@ export default function App() {
       streakStarImg,
       otherMotherImg,
       wybieImg,
-      keyImg,
       jumpingMouseImg,
       catModalBg
     ];
 
-    criticalImages.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
+    const preloadDeferred = () => {
+      deferredImages.forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    };
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(preloadDeferred, { timeout: 2000 });
+    } else {
+      setTimeout(preloadDeferred, 1200);
+    }
   }, []);
 
   // Navigazione mese memoizzata

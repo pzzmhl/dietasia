@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import seeingStoneImg from '../assets/seeing-stone.png';
-import blackButtonImg from '../assets/black-button.png';
-import streakStarImg from '../assets/streak-star.png';
+import seeingStoneImg from '../assets/seeing-stone.webp';
+import blackButtonImg from '../assets/black-button.webp';
+import streakStarImg from '../assets/streak-star.webp';
 import KeyIcon from './KeyIcon';
 import { getConsecutiveDietStreak } from '../utils/storage';
 

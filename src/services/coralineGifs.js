@@ -55,10 +55,10 @@ export const CORALINE_GIF_REGISTRY = {
   ]
 };
 
-// Genera l'URL diretto ad alta definizione da Giphy CDN
+// Genera l'URL diretto ottimizzato per mobile da Giphy CDN (versione 200w.gif: ~350KB anziché 7.5MB)
 export function getGiphyUrl(id) {
   if (!id) return fallbackBanner;
-  return `https://i.giphy.com/media/${id}/giphy.gif`;
+  return `https://i.giphy.com/media/${id}/200w.gif`;
 }
 
 // Fisher-Yates Shuffle

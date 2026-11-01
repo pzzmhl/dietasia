@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import seeingStoneImg from '../assets/seeing-stone.png';
-import blackButtonImg from '../assets/black-button.png';
-import keyImg from '../assets/key.png';
+import seeingStoneImg from '../assets/seeing-stone.webp';
+import blackButtonImg from '../assets/black-button.webp';
+import keyImg from '../assets/key.webp';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import seeingStoneImg from '../assets/seeing-stone.png';
-import blackButtonImg from '../assets/black-button.png';
-import keyImg from '../assets/key.png';
+import seeingStoneImg from '../assets/seeing-stone.webp';
+import blackButtonImg from '../assets/black-button.webp';
+import keyImg from '../assets/key.webp';
 
 /**
  * Modal Unificato e Chiaro di Selezione Esito Giornaliero:

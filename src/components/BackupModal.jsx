@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import catModalBg from '../assets/cat-modal-bg.jpg';
-import keyImg from '../assets/key.png';
+import catModalBg from '../assets/cat-modal-bg.webp';
+import keyImg from '../assets/key.webp';
 import { exportBackupData, importBackupData, getAllLogs } from '../utils/storage';
 
 export default function BackupModal({ isOpen, onClose, onRestoreSuccess }) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import jumpingMouseImg from '../assets/jumping-mouse.png';
+import jumpingMouseImg from '../assets/jumping-mouse.webp';
 
 /**
  * Avviso Topo Saltatore del Circo di Bobinsky:
