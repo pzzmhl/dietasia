@@ -167,7 +167,7 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
           </p>
         </div>
 
-        {/* BOTTONE D'AZIONE IN FONT CORALINE */}
+        {/* BOTTONE D'AZIONE CON FONT LEGGIBILE E CHIARO */}
         <button
           onClick={onClose}
           style={{
@@ -177,9 +177,10 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
             border: `1.5px solid ${config.buttonBorder}`,
             borderRadius: '14px',
             color: '#ffffff',
-            fontFamily: 'var(--font-coraline)',
-            fontSize: '11px',
-            letterSpacing: '0.8px',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            fontSize: '13.5px',
+            letterSpacing: '0.4px',
             cursor: 'pointer',
             boxShadow: `0 4px 14px rgba(0, 0, 0, 0.6), 0 0 10px ${config.glowColor}`,
             touchAction: 'manipulation',

@@ -107,29 +107,29 @@ export default function DaySelectionModal({
           ✕
         </button>
 
-        {/* Intestazione Data & Istruzione */}
+        {/* Intestazione Data & Istruzione con Font Chiaro e Leggibile */}
         <div style={{ textAlign: 'center', marginBottom: '16px', paddingRight: '22px', paddingLeft: '22px' }}>
           <h3 style={{
-            fontSize: '15px',
-            fontFamily: 'var(--font-gothic)',
+            fontSize: '16px',
+            fontFamily: 'var(--font-body)',
             color: 'var(--coraline-parchment)',
-            fontWeight: 800,
+            fontWeight: 700,
             lineHeight: 1.3,
             margin: '0 0 4px 0'
           }}>
             {capitalizedDate}
           </h3>
           <p style={{
-            fontSize: '11.5px',
+            fontSize: '12px',
+            fontFamily: 'var(--font-body)',
             color: 'var(--coraline-brown)',
-            fontStyle: 'italic',
             margin: 0
           }}>
             Come è andata questa giornata?
           </p>
         </div>
 
-        {/* OPZIONI DI REGISTRAZIONE: 3 SCHEDE CHIARE, UNIFICATE E COERENTI */}
+        {/* OPZIONI DI REGISTRAZIONE: 3 SCHEDE SENZA SOTTOTITOLI, FONT NORMALE E PULITO */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
 
           {/* 1. DIETA RISPETTATA (PIETRA VERDE) */}
@@ -179,29 +179,22 @@ export default function DaySelectionModal({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontFamily: 'var(--font-coraline)',
-                fontSize: '12.5px',
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                fontWeight: 600,
                 color: '#4ade80',
-                letterSpacing: '0.6px',
-                marginBottom: '2px'
+                letterSpacing: '0.2px'
               }}>
                 Dieta Rispettata
-              </div>
-              <div style={{
-                fontSize: '11px',
-                color: 'var(--coraline-parchment)',
-                opacity: 0.85
-              }}>
-                Nessun passo falso, obiettivo raggiunto
               </div>
             </div>
 
             {currentStatus === 'success' && (
-              <span style={{ fontSize: '15px', color: '#4ade80', fontWeight: 900 }}>✓</span>
+              <span style={{ fontSize: '16px', color: '#4ade80', fontWeight: 900 }}>✓</span>
             )}
           </button>
 
-          {/* 2. SGARRO JOLLY (CHIAVE NERA) */}
+          {/* 2. SGARRO CON CHIAVE (CHIAVE JOLLY) */}
           <button
             onClick={() => onSelectStatus('cheat_key')}
             disabled={!canUseKey}
@@ -254,27 +247,18 @@ export default function DaySelectionModal({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontFamily: 'var(--font-coraline)',
-                fontSize: '12.5px',
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                fontWeight: 600,
                 color: 'var(--coraline-yellow)',
-                letterSpacing: '0.6px',
-                marginBottom: '2px'
+                letterSpacing: '0.2px'
               }}>
-                Sgarro con Chiave Jolly
-              </div>
-              <div style={{
-                fontSize: '11px',
-                color: canUseKey ? 'var(--coraline-parchment)' : '#94a3b8',
-                opacity: 0.85
-              }}>
-                {canUseKey 
-                  ? `${remainingKeys} ${remainingKeys === 1 ? 'chiave disponibile' : 'chiavi disponibili'} questo mese`
-                  : 'Chiavi esaurite per questo mese'}
+                Sgarro con Chiave
               </div>
             </div>
 
             {currentStatus === 'cheat_key' && (
-              <span style={{ fontSize: '15px', color: 'var(--coraline-yellow)', fontWeight: 900 }}>✓</span>
+              <span style={{ fontSize: '16px', color: 'var(--coraline-yellow)', fontWeight: 900 }}>✓</span>
             )}
           </button>
 
@@ -325,25 +309,18 @@ export default function DaySelectionModal({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontFamily: 'var(--font-coraline)',
-                fontSize: '12.5px',
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                fontWeight: 600,
                 color: '#f87171',
-                letterSpacing: '0.6px',
-                marginBottom: '2px'
+                letterSpacing: '0.2px'
               }}>
                 Dieta Non Rispettata
-              </div>
-              <div style={{
-                fontSize: '11px',
-                color: 'var(--coraline-parchment)',
-                opacity: 0.85
-              }}>
-                Sgarro non programmato senza chiave
               </div>
             </div>
 
             {currentStatus === 'cheat' && (
-              <span style={{ fontSize: '15px', color: '#f87171', fontWeight: 900 }}>✓</span>
+              <span style={{ fontSize: '16px', color: '#f87171', fontWeight: 900 }}>✓</span>
             )}
           </button>
         </div>

@@ -225,17 +225,17 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           />
         </div>
 
-        {/* PULSANTE DI CONFERMA / CHIUSURA CON TONI SOFFUSI */}
+        {/* PULSANTE DI CONFERMA / CHIUSURA CON TONI SOFFUSI E FONT LEGGIBILE */}
         <button
           onClick={onClose}
           style={{
             width: '100%',
             backgroundColor: buttonBg,
             color: buttonTextColor,
-            fontFamily: 'var(--font-coraline)',
-            fontWeight: 'normal',
-            fontSize: '12px',
-            letterSpacing: '0.8px',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            fontSize: '13.5px',
+            letterSpacing: '0.4px',
             padding: '11px 16px',
             borderRadius: '14px',
             border: `1.5px solid ${borderColor}`,
