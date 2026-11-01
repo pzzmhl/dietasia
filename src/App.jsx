@@ -28,6 +28,7 @@ import jumpingMouseImg from './assets/jumping-mouse.webp';
 import otherMotherImg from './assets/other-mother-key.webp';
 import wybieImg from './assets/wybie-proud.webp';
 import catModalBg from './assets/cat-modal-bg.webp';
+import starryNightBg from './assets/starry-night-bg.webp';
 
 import { 
   getTodayDateString, 
@@ -139,8 +140,8 @@ export default function App() {
   useEffect(() => {
     setAllLogs(getAllLogs());
 
-    // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard & Gatto)
-    [catStandingImg, keyImg].forEach((src) => {
+    // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard, Sfondo & Gatto)
+    [catStandingImg, keyImg, starryNightBg].forEach((src) => {
       const img = new Image();
       img.src = src;
     });
@@ -366,8 +367,25 @@ export default function App() {
       margin: '0 auto',
       padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px env(safe-area-inset-bottom, 24px) 16px',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      position: 'relative'
     }}>
+      {/* SFONDO NOTTURNO CON STELLE DI CORALINE (FULL-SCREEN HARDWARE-ACCELERATED) */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: -1,
+          backgroundImage: `url(${starryNightBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
+          transform: 'translateZ(0)'
+        }}
+      />
+
       {/* 1. ZONA GIF: BANNER ANIMATO (SPAZIATO DALL'ALTO, NON ANCORATO AL BORDO SUPERIORE) */}
       <div style={{ marginTop: '6px', marginBottom: '14px' }}>
         <AnimatedBanner latestOutcomeTrigger={outcomeTrigger} />

@@ -48,7 +48,12 @@ html, body {
   overflow-x: hidden;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
-  background-color: var(--bg-deep);
+  background-color: #030810;
+  background-image: url('./assets/starry-night-bg.webp');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--coraline-parchment);
   font-family: var(--font-body);
   user-select: none;
