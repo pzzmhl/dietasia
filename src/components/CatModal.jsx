@@ -4,11 +4,11 @@ import catCheatImg from '../assets/cat-cheat.png';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline)
- * Adattato con la Palette Ufficiale Coraline:
- * - #0d2c49 (Navy Notte)
- * - #ddcab7 (Pergamena per testi e fumetto)
- * - #c7a40e (Oro impermeabile)
- * - #786343 (Marrone vintage)
+ * Gestisce:
+ * - success: Dieta Rispettata (Gatto con occhioni azzurri)
+ * - cheat: Sgarro con Bottone Nero (Gatto sardonico con occhi socchiusi)
+ * - key: Sgarro Programmato con Chiave Nera
+ * - last_key: Notifica speciale di esaurimento dell'ultima chiave
  */
 export default function CatModal({ isOpen, quote, context, onClose }) {
   const [visible, setVisible] = useState(false);
@@ -25,17 +25,46 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
   if (!isOpen) return null;
 
   const isCheat = context === 'cheat';
-  const currentCatImg = isCheat ? catCheatImg : catSuccessImg;
-  const buttonLabel = isCheat 
-    ? "Ricevuto, domani niente scuse" 
-    : "Ho capito, Gatto";
+  const isLastKey = context === 'last_key';
+  const isKey = context === 'key';
+
+  // Scelta immagine: il gatto sardonico ammonitore compare per lo sgarro e per l'ultima chiave
+  const currentCatImg = (isCheat || isLastKey) ? catCheatImg : catSuccessImg;
+
+  // Pulsante personalizzato
+  let buttonLabel = "Ho capito, Gatto";
+  if (isLastKey) {
+    buttonLabel = "Messaggio ricevuto";
+  } else if (isCheat) {
+    buttonLabel = "Ricevuto, domani niente scuse";
+  }
 
   // Palette dinamica contestuale
-  const borderColor = isCheat ? '#ef4444' : '#34d399';
-  const glowColor = isCheat ? 'rgba(239, 68, 68, 0.35)' : 'rgba(52, 211, 153, 0.35)';
-  const titleColor = isCheat ? '#f87171' : '#4ade80';
-  const buttonBg = isCheat ? '#7f1d1d' : '#15803d';
-  const buttonTextColor = isCheat ? '#fee2e2' : '#ffffff';
+  let borderColor = '#34d399';
+  let glowColor = 'rgba(52, 211, 153, 0.35)';
+  let titleColor = '#4ade80';
+  let buttonBg = '#15803d';
+  let buttonTextColor = '#ffffff';
+
+  if (isLastKey) {
+    borderColor = 'var(--coraline-gold)';
+    glowColor = 'rgba(199, 164, 14, 0.45)';
+    titleColor = 'var(--coraline-yellow)';
+    buttonBg = '#786343';
+    buttonTextColor = '#ffffff';
+  } else if (isCheat) {
+    borderColor = '#ef4444';
+    glowColor = 'rgba(239, 68, 68, 0.35)';
+    titleColor = '#f87171';
+    buttonBg = '#7f1d1d';
+    buttonTextColor = '#fee2e2';
+  } else if (isKey) {
+    borderColor = 'var(--coraline-gold)';
+    glowColor = 'rgba(199, 164, 14, 0.35)';
+    titleColor = 'var(--coraline-gold)';
+    buttonBg = 'rgba(120, 99, 67, 0.9)';
+    buttonTextColor = '#ffffff';
+  }
 
   return (
     <div 
@@ -85,10 +114,10 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           marginBottom: '8px',
           fontWeight: 700
         }}>
-          ✦ Il Gatto dell'Altro Mondo ✦
+          {isLastKey ? "✦ Attenzione, Asia ✦" : "✦ Il Gatto dell'Altro Mondo ✦"}
         </div>
 
-        {/* Nuvoletta di Dialogo (Speech Bubble) in colore Pergamena */}
+        {/* Nuvoletta di Dialogo */}
         <div 
           className="speech-bubble"
           style={{
@@ -133,7 +162,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           />
         </div>
 
-        {/* Pulsante di conferma stile Coraline */}
+        {/* Pulsante di conferma */}
         <button
           onClick={onClose}
           style={{

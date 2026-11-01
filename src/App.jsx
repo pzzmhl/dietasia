@@ -2,10 +2,17 @@ import React, { useState, useEffect } from 'react';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
+import SettingsModal from './components/SettingsModal';
 import CatModal from './components/CatModal';
-import seeingStoneImg from './assets/seeing-stone.png';
 import blackButtonImg from './assets/black-button.png';
-import { getTodayDateString, getAllLogs, saveDayLog } from './utils/storage';
+import { 
+  getTodayDateString, 
+  getAllLogs, 
+  saveDayLog, 
+  getKeysPerMonth, 
+  setKeysPerMonth, 
+  getMonthUsedKeys 
+} from './utils/storage';
 import { getRandomCatQuote } from './data/catQuotes';
 
 export default function App() {
@@ -16,23 +23,28 @@ export default function App() {
   const [displayYear, setDisplayYear] = useState(todayObj.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(todayObj.getMonth());
   const [allLogs, setAllLogs] = useState({});
+  const [keysPerMonth, setKeysPerMonthState] = useState(4);
 
-  // Stato per il Pop-up di Selezione Esito Giorno
+  // Modal Impostazioni
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Modal Selezione Esito Giorno
   const [dayModalState, setDayModalState] = useState({
     isOpen: false,
     dateStr: null
   });
 
-  // Stato per il Pop-up del Tutor Gatto Nero
+  // Modal del Tutor Gatto Nero
   const [catModalState, setCatModalState] = useState({
     isOpen: false,
     quote: '',
     context: 'success'
   });
 
-  // Carica i dati salvati all'avvio
+  // Carica i dati salvati e le impostazioni all'avvio
   useEffect(() => {
     setAllLogs(getAllLogs());
+    setKeysPerMonthState(getKeysPerMonth());
   }, []);
 
   // Navigazione mese
@@ -61,7 +73,7 @@ export default function App() {
     setSelectedDate(todayStr);
   };
 
-  // Quando l'utente tocca un giorno del calendario: apre il pop-up compatto
+  // Quando l'utente tocca un giorno del calendario
   const handleDayClick = (dateStr) => {
     setSelectedDate(dateStr);
     setDayModalState({
@@ -70,9 +82,22 @@ export default function App() {
     });
   };
 
+  // Calcola quante chiavi sono state usate e quante ne restano nel mese selezionato
+  const usedKeysForMonth = getMonthUsedKeys(allLogs, displayYear, displayMonth);
+  const remainingKeys = Math.max(0, keysPerMonth - usedKeysForMonth);
+
+  // Salvataggio impostazioni chiavi al mese
+  const handleSaveKeysPerMonth = (newCount) => {
+    setKeysPerMonth(newCount);
+    setKeysPerMonthState(newCount);
+  };
+
   // Selezione esito dal pop-up
   const handleSelectStatusFromModal = (newStatus) => {
     const targetDate = dayModalState.dateStr || selectedDate;
+    const oldLog = allLogs[targetDate] || {};
+    const wasAlreadyKey = oldLog.dietState === 'cheat_key';
+
     const updated = saveDayLog(targetDate, { dietState: newStatus });
     if (updated) {
       setAllLogs((prev) => ({ ...prev, [targetDate]: updated }));
@@ -81,10 +106,23 @@ export default function App() {
     // 1. Chiude il modal di selezione del giorno
     setDayModalState({ isOpen: false, dateStr: null });
 
-    // 2. Se è stato scelto successo o sgarro, compare il Gatto Nero
-    if (newStatus === 'success' || newStatus === 'cheat') {
+    // 2. Logica reattiva del Gatto Nero
+    if (newStatus === 'cheat_key') {
+      // Calcolo se questa è l'ULTIMA chiave disponibile del mese
+      const isNowLastKey = !wasAlreadyKey && (remainingKeys - 1 <= 0);
+
+      const quoteContext = isNowLastKey ? 'last_key' : 'key';
+      const quote = getRandomCatQuote(quoteContext);
+
+      setTimeout(() => {
+        setCatModalState({
+          isOpen: true,
+          quote,
+          context: quoteContext
+        });
+      }, 180);
+    } else if (newStatus === 'success' || newStatus === 'cheat') {
       const quote = getRandomCatQuote(newStatus);
-      // Breve ritardo fluido per far sfumare il primo modal
       setTimeout(() => {
         setCatModalState({
           isOpen: true,
@@ -108,7 +146,7 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* HEADER COMPATTO CON IDENTITÀ CORALINE */}
+      {/* HEADER COMPATTO CON IDENTITÀ CORALINE & PULSANTE IMPOSTAZIONI */}
       <header style={{
         padding: '12px 14px',
         display: 'flex',
@@ -122,6 +160,7 @@ export default function App() {
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(6, 22, 37, 0.6)',
         marginBottom: '14px'
       }}>
+        {/* Titolo e icona */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '18px' }}>🪡</span>
           <span style={{
@@ -135,17 +174,31 @@ export default function App() {
           </span>
         </div>
 
+        {/* Pulsanti Header: Impostazioni (Ingranaggio) & Bottone Nero */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            fontSize: '11px',
-            fontFamily: 'var(--font-gothic)',
-            color: 'var(--coraline-yellow)',
-            fontWeight: 700,
-            letterSpacing: '1px',
-            textTransform: 'uppercase'
-          }}>
-            Beta
-          </span>
+          {/* Pulsante Ingranaggio Impostazioni */}
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            aria-label="Apri Impostazioni Regole"
+            title="Regole dell'Altro Mondo"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(6, 22, 37, 0.85)',
+              border: '1px solid rgba(199, 164, 14, 0.4)',
+              color: 'var(--coraline-yellow)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            ⚙️
+          </button>
+
           <img
             src={blackButtonImg}
             alt="Bottone Coraline"
@@ -159,14 +212,15 @@ export default function App() {
         </div>
       </header>
 
-      {/* 1. BARRA STATISTICHE & PROIEZIONE MENSILE (AGO E FILO) */}
+      {/* 1. BARRA STATISTICHE, MONITOR CHIAVI JOLLY E PROIEZIONE (AGO E FILO) */}
       <MonthStatsBar
         displayYear={displayYear}
         displayMonth={displayMonth}
         allLogs={allLogs}
+        keysPerMonth={keysPerMonth}
       />
 
-      {/* 2. GRIGLIA MENSILE DEL CALENDARIO (TRIGGER SU CLICK PER POP-UP) */}
+      {/* 2. GRIGLIA MENSILE DEL CALENDARIO (CON SUPPORTO CHIAVI JOLLY) */}
       <CalendarGrid
         selectedDate={selectedDate}
         onSelectDate={handleDayClick}
@@ -195,8 +249,17 @@ export default function App() {
         isOpen={dayModalState.isOpen}
         dateStr={dayModalState.dateStr}
         currentStatus={currentDayLog.dietState}
+        remainingKeys={remainingKeys}
         onSelectStatus={handleSelectStatusFromModal}
         onClose={() => setDayModalState({ isOpen: false, dateStr: null })}
+      />
+
+      {/* MODAL IMPOSTAZIONI: REGOLE DELL'ALTRO MONDO */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        keysPerMonth={keysPerMonth}
+        onSaveKeysPerMonth={handleSaveKeysPerMonth}
+        onClose={() => setIsSettingsOpen(false)}
       />
 
       {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}

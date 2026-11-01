@@ -26,12 +26,26 @@ export const CAT_QUOTES = {
     "Un bottone non fa l'intero cappotto nero. Domani ripuliamo le tracce e si torna in riga, intesi?",
     "Le illusioni hanno un sapore dolce solo per i primi tre secondi, Asia. Domani dimostra di che pasta sei fatta davvero.",
     "Il tunnel verso casa è ancora aperto. Lascia perdere i rimorsi e riparti domani a testa alta."
+  ],
+
+  // Quando Asia usa una Chiave Nera Jolly (Sgarro Programmato con ancora chiavi disponibili)
+  key: [
+    "Hai girato la Chiave Nera nella toppa, Asia. Questo sgarro era calcolato: nessun bottone cucito per oggi.",
+    "Una fuga controllata nell'Altro Mondo. La chiave ti protegge, ma usala con parsimonia.",
+    "Oggi hai evitato la trappola usando il tuo lasciapassare. Mossa astuta, fanciulla.",
+    "Il lucchetto ha scattato: sgarro concesso senza conseguenze. Ma non abbassare la guardia.",
+    "Hai sfoderato la Chiave Nera. L'Altra Madre mastica amaro, per oggi niente aghi."
+  ],
+
+  // Quote speciale per l'ESAURIMENTO dell'ultima chiave
+  last_key: [
+    "Hai usato la tua ultima Chiave per questo mese, Asia. La porta verso l'Altro Mondo è sigillata fino al prossimo mese: da qui in poi ogni sgarro cucirà un Bottone Nero!"
   ]
 };
 
 /**
  * Restituisce una citazione casuale in base al contesto
- * @param {'success' | 'cheat'} context
+ * @param {'success' | 'cheat' | 'key' | 'last_key'} context
  */
 export function getRandomCatQuote(context) {
   const pool = CAT_QUOTES[context] || CAT_QUOTES.success;

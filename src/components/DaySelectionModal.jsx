@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.png';
 import blackButtonImg from '../assets/black-button.png';
+import KeyIcon from './KeyIcon';
 
 /**
  * Modal Compatto di Selezione Esito Giornaliero:
- * Si apre al tocco di un giorno del calendario per registrare o modificare lo stato.
+ * - Opzione 1: Dieta Rispettata (Pietra Verde)
+ * - Opzione 2: Non Rispettata (Bottone Nero)
+ * - Opzione 3: Sgarro Programmato con Chiave Nera Jolly (se disponibile)
+ * - Opzione 4: Azzera registrazione
  */
 export default function DaySelectionModal({ 
   isOpen, 
   dateStr, 
   currentStatus = 'neutral', 
+  remainingKeys = 0,
   onSelectStatus, 
   onClose 
 }) {
@@ -32,13 +37,16 @@ export default function DaySelectionModal({
   const formattedDate = dateObj.toLocaleDateString('it-IT', options);
   const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
+  // La chiave è utilizzabile se ce ne sono ancora disponibili OPPURE se questo giorno ha già la chiave
+  const canUseKey = remainingKeys > 0 || currentStatus === 'cheat_key';
+
   return (
     <div
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 9998,
-        backgroundColor: 'rgba(6, 18, 30, 0.82)',
+        backgroundColor: 'rgba(6, 18, 30, 0.85)',
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         display: 'flex',
@@ -53,11 +61,11 @@ export default function DaySelectionModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '340px',
+          maxWidth: '350px',
           background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
-          borderRadius: '20px',
+          borderRadius: '22px',
           border: '2px dashed var(--coraline-gold)',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(199, 164, 14, 0.25)',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(199, 164, 14, 0.25)',
           padding: '20px 18px',
           display: 'flex',
           flexDirection: 'column',
@@ -93,7 +101,7 @@ export default function DaySelectionModal({
         </button>
 
         {/* Intestazione Data Selezionata */}
-        <div style={{ textAlign: 'center', marginBottom: '18px', paddingRight: '20px', paddingLeft: '20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '16px', paddingRight: '20px', paddingLeft: '20px' }}>
           <div style={{
             fontSize: '10px',
             fontFamily: 'var(--font-gothic)',
@@ -115,12 +123,12 @@ export default function DaySelectionModal({
           </h3>
         </div>
 
-        {/* Opzione 1: DIETA RISPETTATA (Verde Smeraldo con Pietra e Spunta) */}
+        {/* OPZIONE 1: DIETA RISPETTATA (Verde Smeraldo con Pietra) */}
         <button
           onClick={() => onSelectStatus('success')}
           style={{
             width: '100%',
-            padding: '13px 14px',
+            padding: '12px 14px',
             marginBottom: '10px',
             backgroundColor: currentStatus === 'success' ? '#15803d' : 'rgba(21, 128, 61, 0.35)',
             border: currentStatus === 'success' ? '2px solid #4ade80' : '1.5px dashed rgba(74, 222, 128, 0.4)',
@@ -139,25 +147,75 @@ export default function DaySelectionModal({
           <img
             src={seeingStoneImg}
             alt="Pietra Verde"
-            style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+            style={{ width: '26px', height: '26px', objectFit: 'contain' }}
           />
           <div style={{ textAlign: 'left', flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-gothic)', fontSize: '13.5px', fontWeight: 800, color: '#86efac' }}>
+            <div style={{ fontFamily: 'var(--font-gothic)', fontSize: '13px', fontWeight: 800, color: '#86efac' }}>
               Dieta Rispettata
             </div>
-            <div style={{ fontSize: '11px', color: '#dcfce7', opacity: 0.85 }}>
+            <div style={{ fontSize: '10.5px', color: '#dcfce7', opacity: 0.85 }}>
               Pietra della vista (successo)
             </div>
           </div>
-          <span style={{ fontSize: '16px', color: '#4ade80', fontWeight: 900 }}>✓</span>
+          <span style={{ fontSize: '15px', color: '#4ade80', fontWeight: 900 }}>✓</span>
         </button>
 
-        {/* Opzione 2: NON RISPETTATA (Bordeaux Scuro con Bottone Nero) */}
+        {/* OPZIONE 2: USA CHIAVE (SGARRO PROGRAMMATO JOLLY) */}
+        <button
+          onClick={() => onSelectStatus('cheat_key')}
+          disabled={!canUseKey}
+          style={{
+            width: '100%',
+            padding: '12px 14px',
+            marginBottom: '10px',
+            backgroundColor: currentStatus === 'cheat_key' 
+              ? 'rgba(120, 99, 67, 0.75)' 
+              : canUseKey 
+              ? 'rgba(120, 99, 67, 0.35)' 
+              : 'rgba(30, 41, 59, 0.3)',
+            border: currentStatus === 'cheat_key' 
+              ? '2px solid var(--coraline-gold)' 
+              : canUseKey 
+              ? '1.5px dashed var(--coraline-gold)' 
+              : '1px dashed #475569',
+            boxShadow: currentStatus === 'cheat_key' ? '0 0 16px rgba(199, 164, 14, 0.5)' : 'none',
+            borderRadius: '12px',
+            color: canUseKey ? '#ffffff' : '#64748b',
+            cursor: canUseKey ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            opacity: canUseKey ? 1 : 0.65,
+            transition: 'all 0.15s ease'
+          }}
+          onMouseDown={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(0.98)')}
+          onMouseUp={(e) => canUseKey && (e.currentTarget.style.transform = 'scale(1)')}
+        >
+          <KeyIcon size={26} isUsed={!canUseKey && currentStatus !== 'cheat_key'} />
+          <div style={{ textAlign: 'left', flex: 1 }}>
+            <div style={{ 
+              fontFamily: 'var(--font-gothic)', 
+              fontSize: '13px', 
+              fontWeight: 800, 
+              color: canUseKey ? 'var(--coraline-yellow)' : '#94a3b8' 
+            }}>
+              Usa Chiave Nera
+            </div>
+            <div style={{ fontSize: '10.5px', color: canUseKey ? 'var(--coraline-parchment)' : '#64748b', opacity: 0.85 }}>
+              {canUseKey 
+                ? `Sgarro programmato (${remainingKeys} rimaste)` 
+                : "Chiavi esaurite per questo mese"}
+            </div>
+          </div>
+          <span style={{ fontSize: '15px', color: canUseKey ? 'var(--coraline-yellow)' : '#64748b', fontWeight: 900 }}>🗝️</span>
+        </button>
+
+        {/* OPZIONE 3: NON RISPETTATA (Bordeaux Scuro con Bottone Nero) */}
         <button
           onClick={() => onSelectStatus('cheat')}
           style={{
             width: '100%',
-            padding: '13px 14px',
+            padding: '12px 14px',
             marginBottom: '12px',
             backgroundColor: currentStatus === 'cheat' ? '#450a0a' : 'rgba(69, 10, 10, 0.45)',
             border: currentStatus === 'cheat' ? '2px solid #ef4444' : '1.5px dashed rgba(239, 68, 68, 0.4)',
@@ -176,22 +234,22 @@ export default function DaySelectionModal({
           <img
             src={blackButtonImg}
             alt="Bottone Nero"
-            style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+            style={{ width: '26px', height: '26px', objectFit: 'contain' }}
           />
           <div style={{ textAlign: 'left', flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-gothic)', fontSize: '13.5px', fontWeight: 800, color: '#fca5a5' }}>
+            <div style={{ fontFamily: 'var(--font-gothic)', fontSize: '13px', fontWeight: 800, color: '#fca5a5' }}>
               Non Rispettata
             </div>
-            <div style={{ fontSize: '11px', color: '#fee2e2', opacity: 0.85 }}>
+            <div style={{ fontSize: '10.5px', color: '#fee2e2', opacity: 0.85 }}>
               Bottone dell'Altra Madre (sgarro)
             </div>
           </div>
           <span style={{ fontSize: '14px', color: '#f87171', fontWeight: 900 }}>●</span>
         </button>
 
-        {/* Opzione 3: AZZERA / CANCELLA STATO (se già presente) */}
+        {/* OPZIONE 4: AZZERA / CANCELLA STATO */}
         {currentStatus !== 'neutral' && (
-          <div style={{ textAlign: 'center', marginTop: '4px' }}>
+          <div style={{ textAlign: 'center', marginTop: '2px' }}>
             <button
               onClick={() => onSelectStatus('neutral')}
               style={{

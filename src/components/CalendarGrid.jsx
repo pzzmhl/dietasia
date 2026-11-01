@@ -1,6 +1,7 @@
 import React from 'react';
 import seeingStoneImg from '../assets/seeing-stone.png';
 import blackButtonImg from '../assets/black-button.png';
+import KeyIcon from './KeyIcon';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -12,8 +13,9 @@ const MONTHS_IT = [
 
 /**
  * Calendario Mensile a Griglia stile Coraline:
- * - Riceve mese/anno sincronizzati dalla barra statistiche di App.
- * - Al tocco su una data apre il modal compatto di selezione.
+ * - Pietra Verde per Dieta Rispettata.
+ * - Bottone Nero per Dieta Non Rispettata (sgarro).
+ * - Chiave Nera per Sgarro Programmato con Jolly.
  */
 export default function CalendarGrid({ 
   selectedDate, 
@@ -174,7 +176,7 @@ export default function CalendarGrid({
           const log = allLogs[dateStr] || {};
           const dietState = log.dietState;
 
-          // Sfondo e bordo in base alla palette Coraline
+          // Sfondo e bordo in base alla palette Coraline e allo stato
           let cellBg = 'rgba(6, 22, 37, 0.65)';
           let cellBorder = '1px dashed rgba(199, 164, 14, 0.25)';
           let cellShadow = 'none';
@@ -185,6 +187,9 @@ export default function CalendarGrid({
           } else if (dietState === 'cheat') {
             cellBg = 'rgba(69, 10, 10, 0.6)';
             cellBorder = '1.5px dashed rgba(239, 68, 68, 0.45)';
+          } else if (dietState === 'cheat_key') {
+            cellBg = 'rgba(120, 99, 67, 0.4)';
+            cellBorder = '1.5px dashed var(--coraline-gold)';
           } else if (isToday) {
             cellBg = 'rgba(120, 99, 67, 0.35)';
             cellBorder = '1.5px solid var(--coraline-gold)';
@@ -195,11 +200,15 @@ export default function CalendarGrid({
               ? '2px solid #34d399' 
               : dietState === 'cheat' 
               ? '2px solid #ef4444' 
+              : dietState === 'cheat_key'
+              ? '2px solid var(--coraline-gold)'
               : '2px solid var(--coraline-yellow)';
             cellShadow = dietState === 'success'
               ? '0 0 14px rgba(52, 211, 153, 0.5)'
               : dietState === 'cheat'
               ? '0 0 14px rgba(239, 68, 68, 0.5)'
+              : dietState === 'cheat_key'
+              ? '0 0 14px rgba(199, 164, 14, 0.55)'
               : '0 0 14px rgba(216, 198, 21, 0.5)';
           }
 
@@ -271,6 +280,18 @@ export default function CalendarGrid({
                       filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85))'
                     }}
                   />
+                </div>
+              ) : dietState === 'cheat_key' ? (
+                /* SIMBOLO GRANDE: CHIAVE NERA JOLLY */
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%',
+                  padding: '1px'
+                }}>
+                  <KeyIcon size={26} />
                 </div>
               ) : (
                 /* GIORNO NON COMPILATO: Mostra il numero in pergamena */

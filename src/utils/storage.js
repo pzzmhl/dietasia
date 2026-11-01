@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'coraline_asia_habit_tracker_v1';
+const KEYS_CONFIG_KEY = 'coraline_asia_keys_per_month_v1';
 
 /**
  * Ottiene la data corrente formattata in YYYY-MM-DD
@@ -12,8 +13,33 @@ export function getTodayDateString() {
 }
 
 /**
+ * Carica il numero di chiavi mensili configurato (default: 4)
+ */
+export function getKeysPerMonth() {
+  try {
+    const val = localStorage.getItem(KEYS_CONFIG_KEY);
+    return val ? Math.max(1, parseInt(val, 10)) : 4;
+  } catch (err) {
+    return 4;
+  }
+}
+
+/**
+ * Salva il numero di chiavi mensili configurato
+ */
+export function setKeysPerMonth(count) {
+  try {
+    const safeCount = Math.max(1, count);
+    localStorage.setItem(KEYS_CONFIG_KEY, String(safeCount));
+    return safeCount;
+  } catch (err) {
+    return 4;
+  }
+}
+
+/**
  * Carica l'intero database locale
- * @returns {Record<string, { dietState: 'neutral' | 'success' | 'cheat', updatedAt: string }>}
+ * @returns {Record<string, { dietState: 'neutral' | 'success' | 'cheat' | 'cheat_key', updatedAt: string }>}
  */
 export function getAllLogs() {
   try {
@@ -32,9 +58,23 @@ export function getAllLogs() {
 export function getDayLog(dateStr) {
   const all = getAllLogs();
   return all[dateStr] || {
-    dietState: 'neutral', // 'neutral' | 'success' | 'cheat'
+    dietState: 'neutral', // 'neutral' | 'success' | 'cheat' | 'cheat_key'
     updatedAt: null
   };
+}
+
+/**
+ * Calcola quante chiavi sono state usate nel mese specificato
+ */
+export function getMonthUsedKeys(allLogs, year, month) {
+  const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  let count = 0;
+  Object.entries(allLogs).forEach(([dateStr, log]) => {
+    if (dateStr.startsWith(prefix) && log.dietState === 'cheat_key') {
+      count++;
+    }
+  });
+  return count;
 }
 
 /**
