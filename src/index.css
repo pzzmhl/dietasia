@@ -3,18 +3,20 @@
      PALETTE UFFICIALE CORALINE
      ========================================== */
   --coraline-navy: #0d2c49;       /* (13, 44, 73) Blu Notte Profondo */
-  --coraline-parchment: #ddcab7;   /* (221, 202, 183) Pergamena / Bambola di pezza */
-  --coraline-brown: #786343;       /* (120, 99, 67) Spago Vintage / Legno antico */
-  --coraline-gold: #c7a40e;        /* (199, 164, 14) Giallo Impermeabile Antico */
-  --coraline-yellow: #d8c615;      /* (216, 198, 21) Giallo Impermeabile Vivo */
+  --coraline-parchment: #ddcab7;   /* (221, 202, 183) Pergamena */
+  --coraline-brown: #786343;       /* (120, 99, 67) Spago Vintage */
+  --coraline-gold: #c7a40e;        /* (199, 164, 14) Oro Impermeabile */
+  --coraline-yellow: #d8c615;      /* (216, 198, 21) Giallo Vivo */
 
-  /* Sfondi, Card e Impunture */
+  /* Bordi Blu Scuro Puliti (Sostituiscono le linee tratteggiate gialle) */
+  --border-dark-blue: #1a456e;
+  --border-dark-blue-light: rgba(26, 69, 110, 0.85);
+  --border-dark-blue-subtle: rgba(26, 69, 110, 0.45);
+
+  /* Sfondi, Card e Superfici */
   --bg-deep: #071727;
-  --bg-card: rgba(13, 44, 73, 0.78);
-  --bg-card-inner: rgba(6, 22, 37, 0.85);
-  --border-stitch: #c7a40e;
-  --border-stitch-subtle: rgba(199, 164, 14, 0.4);
-  --stitch-offwhite: rgba(221, 202, 183, 0.35);
+  --bg-card: rgba(13, 44, 73, 0.85);
+  --bg-card-inner: rgba(6, 22, 37, 0.9);
 
   /* Tipografia */
   --font-gothic: 'Cinzel', Georgia, serif;
@@ -49,38 +51,33 @@ button {
   outline: none;
 }
 
-/* Atmosfera notturna con la palette Coraline (#0d2c49, #071727, sfumature calde #c7a40e) */
+/* Atmosfera notturna con la palette Coraline */
 body {
   background: 
-    radial-gradient(circle at 50% 12%, rgba(216, 198, 21, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 85%, rgba(120, 99, 67, 0.18) 0%, transparent 50%),
-    linear-gradient(180deg, #061524 0%, #0d2c49 55%, #061524 100%);
+    radial-gradient(circle at 50% 12%, rgba(26, 69, 110, 0.25) 0%, transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(120, 99, 67, 0.12) 0%, transparent 50%),
+    linear-gradient(180deg, #05121e 0%, #0d2c49 55%, #05121e 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* Card con impunture sartoriali stile stop-motion */
+/* Card con elegante bordo continuo Blu Scuro */
 .stitched-card {
   background: var(--bg-card);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 2px dashed var(--border-stitch);
-  border-radius: 18px;
+  border: 1.5px solid var(--border-dark-blue-light);
+  border-radius: 20px;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 18px rgba(6, 22, 37, 0.7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), inset 0 0 18px rgba(6, 22, 37, 0.7);
   transition: all 0.2s ease;
 }
 
 .stitched-card::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border: 1px dotted rgba(221, 202, 183, 0.18);
-  border-radius: 22px;
-  pointer-events: none;
+  display: none;
 }
 
-/* Bagliore giallo impermeabile (#d8c615) */
+/* Bagliore giallo impermeabile */
 .glow-yellow {
   box-shadow: 0 0 20px rgba(216, 198, 21, 0.45);
 }
@@ -116,7 +113,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--coraline-gold);
+  background: var(--border-dark-blue);
   border-radius: 4px;
 }
 
@@ -142,11 +139,11 @@ body {
   animation: buttonPulse 3s infinite ease-in-out;
 }
 
-/* Nuvoletta di dialogo */
+/* Nuvoletta di dialogo con bordo Blu Scuro */
 .speech-bubble {
   position: relative;
   background: rgba(13, 44, 73, 0.95);
-  border: 2px dashed var(--coraline-gold);
+  border: 1.5px solid var(--border-dark-blue-light);
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.5);

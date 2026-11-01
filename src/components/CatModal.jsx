@@ -47,8 +47,8 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
   let buttonTextColor = '#ffffff';
 
   if (isLastKey) {
-    borderColor = 'var(--coraline-gold)';
-    glowColor = 'rgba(199, 164, 14, 0.45)';
+    borderColor = '#f59e0b';
+    glowColor = 'rgba(245, 158, 11, 0.4)';
     titleColor = 'var(--coraline-yellow)';
     buttonBg = '#786343';
     buttonTextColor = '#ffffff';
@@ -59,9 +59,9 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
     buttonBg = '#7f1d1d';
     buttonTextColor = '#fee2e2';
   } else if (isKey) {
-    borderColor = 'var(--coraline-gold)';
-    glowColor = 'rgba(199, 164, 14, 0.35)';
-    titleColor = 'var(--coraline-gold)';
+    borderColor = 'var(--border-dark-blue-light)';
+    glowColor = 'rgba(26, 69, 110, 0.4)';
+    titleColor = 'var(--coraline-yellow)';
     buttonBg = 'rgba(120, 99, 67, 0.9)';
     buttonTextColor = '#ffffff';
   }
@@ -92,7 +92,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           maxWidth: '360px',
           background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
           borderRadius: '24px',
-          border: `2px dashed ${borderColor}`,
+          border: `1.5px solid ${borderColor}`,
           boxShadow: `0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px ${glowColor}`,
           padding: '22px 18px',
           display: 'flex',
@@ -124,7 +124,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             width: '100%',
             marginBottom: '10px',
             backgroundColor: 'rgba(6, 22, 37, 0.95)',
-            border: `1.5px dashed ${borderColor}`,
+            border: `1.5px solid ${borderColor}`,
             borderRadius: '16px',
             padding: '14px 16px',
             boxShadow: 'inset 0 0 15px rgba(0,0,0,0.6)'
@@ -175,7 +175,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             letterSpacing: '0.8px',
             padding: '13px 16px',
             borderRadius: '12px',
-            border: `1.5px dashed ${borderColor}`,
+            border: `1.5px solid ${borderColor}`,
             boxShadow: `0 4px 15px ${glowColor}`,
             cursor: 'pointer',
             transition: 'all 0.15s ease'

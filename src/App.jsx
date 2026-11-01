@@ -152,7 +152,7 @@ export default function App() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        border: '2px dashed var(--coraline-gold)',
+        border: '1.5px solid var(--border-dark-blue-light)',
         borderRadius: '16px',
         backgroundColor: 'rgba(13, 44, 73, 0.85)',
         backdropFilter: 'blur(10px)',
@@ -186,7 +186,7 @@ export default function App() {
               height: '32px',
               borderRadius: '8px',
               backgroundColor: 'rgba(6, 22, 37, 0.85)',
-              border: '1px solid rgba(199, 164, 14, 0.4)',
+              border: '1px solid var(--border-dark-blue)',
               color: 'var(--coraline-yellow)',
               cursor: 'pointer',
               display: 'flex',
@@ -239,7 +239,7 @@ export default function App() {
         padding: '16px 0 8px 0',
         fontSize: '11px',
         color: 'var(--coraline-brown)',
-        borderTop: '1px dashed rgba(199, 164, 14, 0.25)'
+        borderTop: '1px solid var(--border-dark-blue-subtle)'
       }}>
         ✦ Tocca un giorno per cucire il tuo destino ✦
       </footer>

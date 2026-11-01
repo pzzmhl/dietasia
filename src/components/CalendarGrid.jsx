@@ -99,7 +99,7 @@ export default function CalendarGrid({
               height: '32px',
               borderRadius: '8px',
               backgroundColor: 'rgba(6, 22, 37, 0.85)',
-              border: '1px solid rgba(199, 164, 14, 0.4)',
+              border: '1px solid var(--border-dark-blue)',
               color: 'var(--coraline-parchment)',
               cursor: 'pointer',
               display: 'flex',
@@ -119,7 +119,7 @@ export default function CalendarGrid({
               height: '32px',
               borderRadius: '8px',
               backgroundColor: 'rgba(6, 22, 37, 0.85)',
-              border: '1px solid rgba(199, 164, 14, 0.4)',
+              border: '1px solid var(--border-dark-blue)',
               color: 'var(--coraline-parchment)',
               cursor: 'pointer',
               display: 'flex',
@@ -178,18 +178,18 @@ export default function CalendarGrid({
 
           // Sfondo e bordo in base alla palette Coraline e allo stato
           let cellBg = 'rgba(6, 22, 37, 0.65)';
-          let cellBorder = '1px dashed rgba(199, 164, 14, 0.25)';
+          let cellBorder = '1px solid var(--border-dark-blue-subtle)';
           let cellShadow = 'none';
 
           if (dietState === 'success') {
             cellBg = 'rgba(21, 128, 61, 0.4)';
-            cellBorder = '1.5px dashed rgba(52, 211, 153, 0.5)';
+            cellBorder = '1.5px solid rgba(52, 211, 153, 0.55)';
           } else if (dietState === 'cheat') {
             cellBg = 'rgba(69, 10, 10, 0.6)';
-            cellBorder = '1.5px dashed rgba(239, 68, 68, 0.45)';
+            cellBorder = '1.5px solid rgba(239, 68, 68, 0.5)';
           } else if (dietState === 'cheat_key') {
             cellBg = 'rgba(120, 99, 67, 0.45)';
-            cellBorder = '1.5px dashed var(--coraline-gold)';
+            cellBorder = '1.5px solid rgba(199, 164, 14, 0.7)';
           } else if (isToday) {
             cellBg = 'rgba(120, 99, 67, 0.35)';
             cellBorder = '1.5px solid var(--coraline-gold)';

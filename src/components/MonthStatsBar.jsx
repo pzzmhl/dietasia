@@ -47,7 +47,7 @@ export default function MonthStatsBar({
         backgroundColor: 'rgba(6, 22, 37, 0.88)',
         padding: '16px 14px',
         borderRadius: '18px',
-        border: '1.5px dashed var(--coraline-gold)',
+        border: '1.5px solid var(--border-dark-blue-light)',
         boxShadow: 'inset 0 0 16px rgba(0, 0, 0, 0.75)',
         marginBottom: '16px',
         display: 'flex',

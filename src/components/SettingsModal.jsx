@@ -58,8 +58,8 @@ export default function SettingsModal({
           maxWidth: '340px',
           background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
           borderRadius: '22px',
-          border: '2px dashed var(--coraline-gold)',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(199, 164, 14, 0.3)',
+          border: '1.5px solid var(--border-dark-blue-light)',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(26, 69, 110, 0.35)',
           padding: '22px 20px',
           display: 'flex',
           flexDirection: 'column',
@@ -122,7 +122,7 @@ export default function SettingsModal({
           backgroundColor: 'rgba(6, 22, 37, 0.75)',
           padding: '16px',
           borderRadius: '16px',
-          border: '1px dashed rgba(199, 164, 14, 0.35)',
+          border: '1px solid var(--border-dark-blue)',
           marginBottom: '20px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
@@ -217,7 +217,7 @@ export default function SettingsModal({
             letterSpacing: '0.8px',
             padding: '13px',
             borderRadius: '12px',
-            border: '1.5px dashed #061625',
+            border: '1.5px solid #061625',
             boxShadow: '0 4px 15px rgba(199, 164, 14, 0.45)',
             cursor: 'pointer',
             transition: 'all 0.15s ease'

@@ -64,8 +64,8 @@ export default function DaySelectionModal({
           maxWidth: '350px',
           background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
           borderRadius: '22px',
-          border: '2px dashed var(--coraline-gold)',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(199, 164, 14, 0.25)',
+          border: '1.5px solid var(--border-dark-blue-light)',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(26, 69, 110, 0.35)',
           padding: '20px 18px',
           display: 'flex',
           flexDirection: 'column',
@@ -131,7 +131,7 @@ export default function DaySelectionModal({
             padding: '12px 14px',
             marginBottom: '10px',
             backgroundColor: currentStatus === 'success' ? '#15803d' : 'rgba(21, 128, 61, 0.35)',
-            border: currentStatus === 'success' ? '2px solid #4ade80' : '1.5px dashed rgba(74, 222, 128, 0.4)',
+            border: currentStatus === 'success' ? '2px solid #4ade80' : '1.5px solid rgba(74, 222, 128, 0.4)',
             boxShadow: currentStatus === 'success' ? '0 0 16px rgba(74, 222, 128, 0.45)' : 'none',
             borderRadius: '12px',
             color: '#ffffff',
@@ -176,8 +176,8 @@ export default function DaySelectionModal({
             border: currentStatus === 'cheat_key' 
               ? '2px solid var(--coraline-gold)' 
               : canUseKey 
-              ? '1.5px dashed var(--coraline-gold)' 
-              : '1px dashed #475569',
+              ? '1.5px solid var(--border-dark-blue)' 
+              : '1px solid #334155',
             boxShadow: currentStatus === 'cheat_key' ? '0 0 16px rgba(199, 164, 14, 0.5)' : 'none',
             borderRadius: '12px',
             color: canUseKey ? '#ffffff' : '#64748b',
@@ -218,7 +218,7 @@ export default function DaySelectionModal({
             padding: '12px 14px',
             marginBottom: '12px',
             backgroundColor: currentStatus === 'cheat' ? '#450a0a' : 'rgba(69, 10, 10, 0.45)',
-            border: currentStatus === 'cheat' ? '2px solid #ef4444' : '1.5px dashed rgba(239, 68, 68, 0.4)',
+            border: currentStatus === 'cheat' ? '2px solid #ef4444' : '1.5px solid rgba(239, 68, 68, 0.4)',
             boxShadow: currentStatus === 'cheat' ? '0 0 16px rgba(220, 38, 38, 0.45)' : 'none',
             borderRadius: '12px',
             color: '#ffffff',
