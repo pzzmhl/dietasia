@@ -135,7 +135,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
                 justifyContent: 'center',
                 transform: isUsed ? 'scale(0.92)' : 'scale(1.08)',
                 transition: 'all 0.25s ease',
-                position: 'relative'
+                position: 'relative',
+                animation: `dashboardKeyFloat 3.2s ease-in-out infinite ${idx * 0.35}s`,
+                willChange: 'transform'
               }}
             >
               {/* Alone bianco spettrale ristretto per le chiavi usate */}
@@ -250,7 +252,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               objectFit: 'contain', 
               marginBottom: '6px',
               filter: 'drop-shadow(0 3px 8px rgba(16, 185, 129, 0.6))',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              animation: 'stoneFloat 3.4s ease-in-out infinite',
+              willChange: 'transform'
             }} 
           />
           <div style={{ 
@@ -303,7 +307,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               objectFit: 'contain', 
               marginBottom: '6px',
               filter: 'drop-shadow(0 3px 8px rgba(220, 38, 38, 0.6))',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              animation: 'starFloat 3.2s ease-in-out infinite 0.4s',
+              willChange: 'transform'
             }} 
           />
           <div style={{ 
@@ -356,7 +362,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               objectFit: 'contain', 
               marginBottom: '6px',
               filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95))',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              animation: 'buttonFloat 3.6s ease-in-out infinite 0.8s',
+              willChange: 'transform'
             }} 
           />
           <div style={{ 
@@ -463,6 +471,43 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           to {
             opacity: 1;
             transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+
+        /* Fluttuazione organica in stile stop-motion per gli oggetti della dashboard */
+        @keyframes dashboardKeyFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -5px, 0) rotate(2deg);
+          }
+        }
+
+        @keyframes stoneFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -6px, 0) rotate(2.2deg);
+          }
+        }
+
+        @keyframes starFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -5px, 0) rotate(-2.5deg);
+          }
+        }
+
+        @keyframes buttonFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -5px, 0) rotate(1.8deg);
           }
         }
       `}</style>
