@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import catSuccessImg from '../assets/cat-standing.png';
-import catCheatImg from '../assets/cat-cheat.png';
+import catSuccessImg from '../assets/cat-success.png';     // Dieta Corretta / Rispettata (Pietra Verde) -> Gatto con occhioni azzurri
+import catFailImg from '../assets/cat-fail.png';           // Dieta Scorretta / Non Seguita (Bottone Nero) -> Gatto scettico
+import catCheatKeyImg from '../assets/cat-cheat-key.png';  // Sgarro con Chiave Jolly -> Gatto con topolino circense in bocca
 import catModalBg from '../assets/cat-modal-bg.jpg';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline):
- * - Rimosso il tasto X di chiusura.
- * - Sfondo notturno stellato ispirato al maglione/cielo vorticoso di Coraline.
- * - Nuvoletta di dialogo abbassata, in stile cucito gotico con animazione fluida.
- * - Immagine del gatto per il successo visibilmente grande e nitida.
+ * - Dieta Corretta (Pietra Verde): Gatto con occhioni azzurri (success)
+ * - Dieta Scorretta / Non Seguita (Bottone Nero): Gatto scettico con occhi socchiusi (cheat)
+ * - Sgarro Programmato (Chiave Nera Jolly): Gatto con topolino in bocca (key / last_key)
  */
 export default function CatModal({ isOpen, quote, context, onClose }) {
   const [visible, setVisible] = useState(false);
@@ -27,18 +27,33 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
   const isCheat = context === 'cheat';
   const isLastKey = context === 'last_key';
   const isKey = context === 'key';
-  const isSuccess = !isCheat && !isLastKey && !isKey;
+  const isCheatKey = isKey || isLastKey;
+  const isSuccess = !isCheat && !isCheatKey;
 
-  // Immagine del gatto
-  const currentCatImg = (isCheat || isLastKey) ? catCheatImg : catSuccessImg;
+  // Immagine del gatto contestuale
+  let currentCatImg = catSuccessImg;
+  if (isCheat) {
+    currentCatImg = catFailImg;
+  } else if (isCheatKey) {
+    currentCatImg = catCheatKeyImg;
+  } else {
+    currentCatImg = catSuccessImg;
+  }
 
-  // Dimensioni differenziate: il gatto del successo è visibilmente più grande
-  const catHeight = (isSuccess || isKey) ? '270px' : '220px';
+  // Dimensioni proporzionate per ciascuna marionetta
+  let catHeight = '260px';
+  if (isCheatKey) {
+    catHeight = '230px';
+  } else if (isCheat) {
+    catHeight = '235px';
+  }
 
   // Pulsante personalizzato
   let buttonLabel = "Ho capito, Gatto";
   if (isLastKey) {
     buttonLabel = "Messaggio ricevuto";
+  } else if (isKey) {
+    buttonLabel = "Sgarro registrato ✦";
   } else if (isCheat) {
     buttonLabel = "Ricevuto, domani niente scuse";
   } else if (isSuccess) {
