@@ -96,7 +96,7 @@ export default function JumpingMouseNotice({
         />
       )}
 
-      {/* BANNER / AVVISO DEL TOPO SALTATORE (CLICCABILE PER APRIRE IL PRIMO GIORNO MANCANTE) */}
+      {/* BANNER / AVVISO DEL TOPO SALTATORE (CON SFONDO A VORTICE UGUALE AL CALENDARIO) */}
       <div
         role="button"
         tabIndex={0}
@@ -104,23 +104,21 @@ export default function JumpingMouseNotice({
           triggerHapticFeedback('selection');
           onSelectDay(firstMissingDate);
         }}
+        className="stitched-card vortex-card"
         style={{
           width: '100%',
           marginBottom: '16px',
-          background: 'linear-gradient(135deg, rgba(13, 44, 73, 0.75) 0%, rgba(6, 22, 37, 0.8) 100%)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          border: '2px solid var(--coraline-yellow)',
+          border: '1.5px solid var(--coraline-yellow)',
           borderRadius: '20px',
           padding: '14px 16px',
-          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.85), 0 0 20px rgba(216, 198, 21, 0.3)',
-          position: 'relative',
+          boxShadow: 'inset 0 1.5px 0 0 rgba(216, 198, 21, 0.35), inset 0 0 18px rgba(6, 22, 37, 0.7), 0 12px 30px rgba(0, 0, 0, 0.85), 0 0 18px rgba(216, 198, 21, 0.22)',
           display: 'flex',
           alignItems: 'center',
           gap: '14px',
           cursor: 'pointer',
           touchAction: 'manipulation',
-          animation: 'mouseNoticeEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+          animation: 'mouseNoticeEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxSizing: 'border-box'
         }}
       >
         {/* Pulsantino Chiusura / Riduci "✕" */}

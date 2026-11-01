@@ -5,17 +5,15 @@ import { openCoralineSpotifyShuffle } from '../services/spotify';
 
 /**
  * La Porticina Segreta di Coraline (Portale Musicale dell'Altro Mondo)
- * - Tocco singolo: Apre Spotify e avvia in modalità shuffle casuale
- *   un brano dalla Colonna Sonora ufficiale di Coraline.
- * - Pressione prolungata (Long-press): Apre il pannello impostazioni e backup.
+ * - Tocco singolo: Apre Spotify e avvia immediatamente in modalità shuffle
+ *   un brano dalla Colonna Sonora ufficiale di Coraline (senza alcuna anteprima testo a schermo).
+ * - Pressione prolungata (Long-press): Attiva il riquadro segreto "Ti amo".
  */
-export default function SecretDoor({ onOpenSettings }) {
+export default function SecretDoor({ onLongPress, onOpenSettings }) {
   const [isRevealed, setIsRevealed] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
-  const [nowPlaying, setNowPlaying] = useState(null);
   const doorRef = useRef(null);
   const longPressTimerRef = useRef(null);
-  const toastTimerRef = useRef(null);
   const unlockTimerRef = useRef(null);
   const isLongPressRef = useRef(false);
 
@@ -40,7 +38,6 @@ export default function SecretDoor({ onOpenSettings }) {
     return () => {
       if (observer) observer.disconnect();
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current);
     };
   }, []);
@@ -49,9 +46,13 @@ export default function SecretDoor({ onOpenSettings }) {
     isLongPressRef.current = false;
     longPressTimerRef.current = setTimeout(() => {
       isLongPressRef.current = true;
-      triggerHapticFeedback('selection');
-      if (onOpenSettings) onOpenSettings();
-    }, 800);
+      triggerHapticFeedback('key');
+      if (onLongPress) {
+        onLongPress();
+      } else if (onOpenSettings) {
+        onOpenSettings();
+      }
+    }, 750);
   };
 
   const handlePointerUpOrLeave = () => {
@@ -76,13 +77,8 @@ export default function SecretDoor({ onOpenSettings }) {
     triggerHapticFeedback('key');
     setIsUnlocking(true);
 
-    // Apre Spotify in shuffle mode con la playlist di Coraline
-    const playedTrack = openCoralineSpotifyShuffle();
-    if (playedTrack) {
-      setNowPlaying(playedTrack.title);
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      toastTimerRef.current = setTimeout(() => setNowPlaying(null), 4500);
-    }
+    // Apre Spotify in shuffle mode con la playlist di Coraline direttamente (senza mostrare anteprime testo)
+    openCoralineSpotifyShuffle();
 
     if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current);
     unlockTimerRef.current = setTimeout(() => {
@@ -112,7 +108,7 @@ export default function SecretDoor({ onOpenSettings }) {
         onPointerUp={handlePointerUpOrLeave}
         onPointerLeave={handlePointerUpOrLeave}
         onPointerCancel={handlePointerUpOrLeave}
-        aria-label="La Porticina Segreta: tocca per riprodurre Coraline su Spotify (tieni premuto per impostazioni)"
+        aria-label="La Porticina Segreta: tocca per riprodurre la colonna sonora di Coraline su Spotify"
         style={{
           background: 'none',
           border: 'none',
@@ -170,32 +166,6 @@ export default function SecretDoor({ onOpenSettings }) {
         />
       </button>
 
-      {/* Toast notifica brano Spotify in riproduzione */}
-      {nowPlaying && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '8px 14px',
-            backgroundColor: 'rgba(6, 22, 37, 0.94)',
-            border: '1.5px solid #1db954',
-            borderRadius: '14px',
-            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.8), 0 0 12px rgba(29, 185, 84, 0.4)',
-            color: '#1db954',
-            fontSize: '11px',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 700,
-            textAlign: 'center',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            animation: 'spotifyToastFadeIn 0.25s ease'
-          }}
-        >
-          <span>🎵 In riproduzione su Spotify:</span>
-          <span style={{ color: 'var(--coraline-parchment)', fontWeight: 600 }}>{nowPlaying}</span>
-        </div>
-      )}
-
       <style>{`
         @keyframes secretDoorGlowPulse {
           0%, 100% {
@@ -203,17 +173,6 @@ export default function SecretDoor({ onOpenSettings }) {
           }
           50% {
             filter: drop-shadow(0 0 22px rgba(74, 222, 128, 0.9)) drop-shadow(0 10px 26px rgba(0, 0, 0, 0.95));
-          }
-        }
-
-        @keyframes spotifyToastFadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
           }
         }
       `}</style>

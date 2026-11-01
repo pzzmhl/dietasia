@@ -7,9 +7,9 @@ import DaySelectionModal from './components/DaySelectionModal';
 import CatModal from './components/CatModal';
 import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
-import SecretSettingsModal from './components/SecretSettingsModal';
 import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
+import SecretLoveModal from './components/SecretLoveModal';
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
@@ -110,8 +110,8 @@ export default function App() {
     setIsDailyGreetingOpen(false);
   }, [todayStr]);
 
-  // Modal Gestione Impostazioni della Porticina Segreta (include Diario & Backup)
-  const [isSecretSettingsOpen, setIsSecretSettingsOpen] = useState(false);
+  // Riquadro Segreto per Asia (Easter egg "Ti amo" attivato con pressione prolungata della Porticina)
+  const [isLoveModalOpen, setIsLoveModalOpen] = useState(false);
 
   // Trigger per aggiornare istantaneamente la GIF nel banner animato
   const [outcomeTrigger, setOutcomeTrigger] = useState(null);
@@ -119,7 +119,7 @@ export default function App() {
   // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
   const activeModalsRef = useRef({
     dailyGreeting: false,
-    settings: false,
+    love: false,
     day: false,
     story: false,
     cat: false
@@ -127,7 +127,7 @@ export default function App() {
 
   activeModalsRef.current = {
     dailyGreeting: isDailyGreetingOpen,
-    settings: isSecretSettingsOpen,
+    love: isLoveModalOpen,
     day: dayModalState.isOpen,
     story: storyModalState.isOpen,
     cat: catModalState.isOpen
@@ -139,11 +139,11 @@ export default function App() {
     const registerBackHandler = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          const { dailyGreeting, settings, day, story, cat } = activeModalsRef.current;
+          const { dailyGreeting, love, day, story, cat } = activeModalsRef.current;
           if (dailyGreeting) {
             handleDismissDailyGreeting();
-          } else if (settings) {
-            setIsSecretSettingsOpen(false);
+          } else if (love) {
+            setIsLoveModalOpen(false);
           } else if (day) {
             setDayModalState({ isOpen: false, dateStr: null });
           } else if (story) {
@@ -456,8 +456,8 @@ export default function App() {
         keysPerMonth={keysPerMonth}
       />
 
-      {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (IMPOSTAZIONI, DIARIO & BACKUP) */}
-      <SecretDoor onOpenSettings={() => setIsSecretSettingsOpen(true)} />
+      {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
+      <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
@@ -538,16 +538,10 @@ export default function App() {
         onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
       />
 
-      {/* OVERLAY IMPOSTAZIONI DELLA PORTICINA SEGRETA & DIARIO */}
-      <SecretSettingsModal
-        isOpen={isSecretSettingsOpen}
-        onClose={() => setIsSecretSettingsOpen(false)}
-        keysPerMonth={keysPerMonth}
-        onChangeKeysPerMonth={(newKeys) => setKeysPerMonth(newKeys)}
-        onRestoreSuccess={(restoredLogs) => {
-          setAllLogs(restoredLogs);
-        }}
-        onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
+      {/* RIQUADRO SPECIALE "TI AMO" PER ASIA (EASTER EGG ATTIVATO DALLA PORTICINA) */}
+      <SecretLoveModal
+        isOpen={isLoveModalOpen}
+        onClose={() => setIsLoveModalOpen(false)}
       />
 
       {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}
