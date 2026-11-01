@@ -42,10 +42,19 @@
   -webkit-touch-callout: none;
 }
 
-html, body {
+html {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
+  overflow-y: visible;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   background-color: #030810;
@@ -58,18 +67,22 @@ html, body {
   font-family: var(--font-body);
   user-select: none;
   -webkit-user-select: none;
-  touch-action: manipulation;
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
-  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y; /* Permette lo scorrimento verticale naturale ovunque con il dito */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+#root {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 button, a, input, [role="button"] {
   font-family: inherit;
   outline: none;
-  touch-action: manipulation;
+  touch-action: pan-y; /* Permette il trascinamento verticale anche quando il tocco inizia su un pulsante */
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;

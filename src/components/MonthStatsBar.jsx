@@ -116,7 +116,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           justifyContent: 'center',
           gap: '16px',
           cursor: 'pointer',
-          touchAction: 'manipulation',
+          touchAction: 'pan-y',
           transition: 'all 0.2s ease'
         }}
       >
@@ -229,7 +229,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 16px rgba(0, 0, 0, 0.5)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'manipulation',
+            touchAction: 'pan-y',
             transition: 'all 0.18s ease'
           }}
         >
@@ -280,7 +280,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 16px rgba(0, 0, 0, 0.5)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'manipulation',
+            touchAction: 'pan-y',
             transition: 'all 0.18s ease'
           }}
         >
@@ -331,7 +331,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 16px rgba(0, 0, 0, 0.5)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'manipulation',
+            touchAction: 'pan-y',
             transition: 'all 0.18s ease'
           }}
         >

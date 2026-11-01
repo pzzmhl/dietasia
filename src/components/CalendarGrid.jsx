@@ -80,7 +80,7 @@ const DayCell = React.memo(function DayCell({
         justifyContent: 'center',
         position: 'relative',
         lineHeight: 1,
-        touchAction: 'manipulation',
+        touchAction: 'pan-y',
         willChange: 'transform',
         transform: 'translateZ(0)'
       }}

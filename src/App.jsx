@@ -378,19 +378,22 @@ export default function App() {
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          touchAction: 'none'
         }}
       />
 
       <div style={{
         minHeight: '100vh',
+        width: '100%',
         maxWidth: '480px',
         margin: '0 auto',
-        padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px env(safe-area-inset-bottom, 24px) 16px',
+        padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px calc(env(safe-area-inset-bottom, 24px) + 60px) 16px',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        zIndex: 1
+        zIndex: 1,
+        touchAction: 'pan-y'
       }}>
         {/* 1. ZONA GIF: BANNER ANIMATO (SPAZIATO DALL'ALTO, NON ANCORATO AL BORDO SUPERIORE) */}
       <div style={{ marginTop: '6px', marginBottom: '14px' }}>
