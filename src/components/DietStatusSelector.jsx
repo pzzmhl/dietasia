@@ -4,41 +4,41 @@ import blackButtonImg from '../assets/black-button.png';
 
 /**
  * Selettore Esito Dieta Giornaliero:
- * - Immagini ufficiali: Pietra Verde (Rispettata) & Bottone Nero (Non Rispettata).
- * - Tasto "Dieta Rispettata" in verde smeraldo.
- * - Tasto "Sgarrato" in rosso bordeaux molto scuro.
+ * - Palette Coraline con contrasto pergamena/navy (#0d2c49, #ddcab7, #c7a40e, #786343).
+ * - Tasto Verde per Pietra della Vista (Rispettata).
+ * - Tasto Bordeaux Scuro per Bottone Nero (Non Rispettata).
  */
 export default function DietStatusSelector({ status, onSelectStatus }) {
   return (
     <div className="stitched-card" style={{ padding: '20px', marginBottom: '20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <h3 style={{ fontFamily: 'var(--font-gothic)', fontSize: '15px', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: 'var(--accent-yellow)' }}>🪡</span> Esito Dieta del Giorno
+        <h3 style={{ fontFamily: 'var(--font-gothic)', fontSize: '15px', color: 'var(--coraline-parchment)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: 'var(--coraline-gold)' }}>🪡</span> Esito Dieta del Giorno
         </h3>
         <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
           {status === 'success' && <span style={{ color: '#4ade80' }}>✨ Pietra Verde</span>}
           {status === 'cheat' && <span style={{ color: '#f87171' }}>🧵 Bottone Cucito</span>}
-          {status === 'neutral' && <span style={{ color: '#94a3b8' }}>In attesa</span>}
+          {status === 'neutral' && <span style={{ color: 'var(--coraline-brown)' }}>In attesa</span>}
         </span>
       </div>
 
-      {/* Visualizzatore Principale dello Stato con Immagini Grandi */}
+      {/* Visualizzatore Principale dello Stato */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
         backgroundColor: status === 'success' 
-          ? 'rgba(16, 52, 35, 0.4)' 
+          ? 'rgba(21, 128, 61, 0.25)' 
           : status === 'cheat' 
-          ? 'rgba(46, 11, 16, 0.5)' 
-          : 'rgba(15, 16, 38, 0.65)',
+          ? 'rgba(69, 10, 10, 0.4)' 
+          : 'rgba(6, 22, 37, 0.75)',
         borderRadius: '16px',
         border: status === 'success' 
-          ? '1.5px solid rgba(52, 211, 153, 0.35)' 
+          ? '1.5px solid rgba(52, 211, 153, 0.4)' 
           : status === 'cheat' 
-          ? '1.5px solid rgba(220, 38, 38, 0.35)' 
-          : '1px solid rgba(224, 159, 62, 0.2)',
+          ? '1.5px solid rgba(220, 38, 38, 0.4)' 
+          : '1px solid rgba(199, 164, 14, 0.25)',
         marginBottom: '18px',
         transition: 'all 0.25s ease'
       }}>
@@ -92,16 +92,16 @@ export default function DietStatusSelector({ status, onSelectStatus }) {
               width: '54px',
               height: '54px',
               borderRadius: '14px',
-              border: '2px dashed #4b5563',
+              border: '2px dashed var(--coraline-brown)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#6b7280',
+              color: 'var(--coraline-brown)',
               fontSize: '22px'
             }}>
               ?
             </div>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+            <span style={{ fontSize: '12px', color: 'var(--coraline-parchment)', opacity: 0.75 }}>
               Nessun esito segnato per questo giorno
             </span>
           </div>
@@ -115,7 +115,7 @@ export default function DietStatusSelector({ status, onSelectStatus }) {
           onClick={() => onSelectStatus('success')}
           style={{
             padding: '13px 8px',
-            backgroundColor: status === 'success' ? '#15803d' : 'rgba(20, 56, 36, 0.75)',
+            backgroundColor: status === 'success' ? '#15803d' : 'rgba(21, 128, 61, 0.45)',
             color: status === 'success' ? '#ffffff' : '#86efac',
             border: status === 'success' ? '2px solid #4ade80' : '1.5px dashed rgba(74, 222, 128, 0.4)',
             boxShadow: status === 'success' ? '0 0 16px rgba(74, 222, 128, 0.45)' : 'none',
@@ -141,12 +141,12 @@ export default function DietStatusSelector({ status, onSelectStatus }) {
           <span>Rispettata</span>
         </button>
 
-        {/* PULSANTE BORDEAUX MOLTO SCURO: NON RISPETTATA (SGARRATO) */}
+        {/* PULSANTE BORDEAUX SCURO: NON RISPETTATA (SGARRATO) */}
         <button
           onClick={() => onSelectStatus('cheat')}
           style={{
             padding: '13px 8px',
-            backgroundColor: status === 'cheat' ? '#450a0a' : 'rgba(46, 11, 16, 0.75)',
+            backgroundColor: status === 'cheat' ? '#450a0a' : 'rgba(69, 10, 10, 0.55)',
             color: status === 'cheat' ? '#fee2e2' : '#fca5a5',
             border: status === 'cheat' ? '2px solid #ef4444' : '1.5px dashed rgba(239, 68, 68, 0.4)',
             boxShadow: status === 'cheat' ? '0 0 16px rgba(220, 38, 38, 0.45)' : 'none',
@@ -181,7 +181,7 @@ export default function DietStatusSelector({ status, onSelectStatus }) {
             style={{
               background: 'none',
               border: 'none',
-              color: '#64748b',
+              color: 'var(--coraline-brown)',
               fontSize: '11px',
               textDecoration: 'underline',
               cursor: 'pointer',

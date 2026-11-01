@@ -1,17 +1,22 @@
 :root {
-  --bg-deep: #0f1026;
-  --bg-purple: #231942;
-  --bg-card: rgba(26, 20, 56, 0.75);
-  --bg-card-hover: rgba(35, 25, 66, 0.9);
-  --accent-yellow: #e09f3e;
-  --accent-yellow-glow: rgba(224, 159, 62, 0.45);
-  --accent-gold: #f4ba40;
-  --text-fog: #e2e8f0;
-  --text-muted: #94a3b8;
-  --stitch-offwhite: rgba(241, 245, 249, 0.5);
-  --stitch-crimson: #841b2d;
-  --stitch-dark: #12131e;
-  --border-stitch: rgba(224, 159, 62, 0.4);
+  /* ==========================================
+     PALETTE UFFICIALE CORALINE
+     ========================================== */
+  --coraline-navy: #0d2c49;       /* (13, 44, 73) Blu Notte Profondo */
+  --coraline-parchment: #ddcab7;   /* (221, 202, 183) Pergamena / Bambola di pezza */
+  --coraline-brown: #786343;       /* (120, 99, 67) Spago Vintage / Legno antico */
+  --coraline-gold: #c7a40e;        /* (199, 164, 14) Giallo Impermeabile Antico */
+  --coraline-yellow: #d8c615;      /* (216, 198, 21) Giallo Impermeabile Vivo */
+
+  /* Sfondi, Card e Impunture */
+  --bg-deep: #071727;
+  --bg-card: rgba(13, 44, 73, 0.78);
+  --bg-card-inner: rgba(6, 22, 37, 0.85);
+  --border-stitch: #c7a40e;
+  --border-stitch-subtle: rgba(199, 164, 14, 0.4);
+  --stitch-offwhite: rgba(221, 202, 183, 0.35);
+
+  /* Tipografia */
   --font-gothic: 'Cinzel', Georgia, serif;
   --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-spooky: 'Creepster', cursive;
@@ -29,7 +34,7 @@ html, body {
   height: 100%;
   overflow-x: hidden;
   background-color: var(--bg-deep);
-  color: var(--text-fog);
+  color: var(--coraline-parchment);
   font-family: var(--font-body);
   user-select: none;
   -webkit-user-select: none;
@@ -44,17 +49,17 @@ button {
   outline: none;
 }
 
-/* Background atmosphere with vignette and subtle spiral nebula vibe */
+/* Atmosfera notturna con la palette Coraline (#0d2c49, #071727, sfumature calde #c7a40e) */
 body {
   background: 
-    radial-gradient(circle at 50% 15%, rgba(68, 44, 110, 0.4) 0%, transparent 60%),
-    radial-gradient(circle at 85% 85%, rgba(132, 27, 45, 0.2) 0%, transparent 50%),
-    linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-purple) 65%, var(--bg-deep) 100%);
+    radial-gradient(circle at 50% 12%, rgba(216, 198, 21, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 85% 85%, rgba(120, 99, 67, 0.18) 0%, transparent 50%),
+    linear-gradient(180deg, #061524 0%, #0d2c49 55%, #061524 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* Stitched container utility */
+/* Card con impunture sartoriali stile stop-motion */
 .stitched-card {
   background: var(--bg-card);
   backdrop-filter: blur(12px);
@@ -62,7 +67,7 @@ body {
   border: 2px dashed var(--border-stitch);
   border-radius: 18px;
   position: relative;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(15, 16, 38, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 18px rgba(6, 22, 37, 0.7);
   transition: all 0.2s ease;
 }
 
@@ -70,22 +75,26 @@ body {
   content: '';
   position: absolute;
   inset: -6px;
-  border: 1px dotted rgba(241, 245, 249, 0.15);
+  border: 1px dotted rgba(221, 202, 183, 0.18);
   border-radius: 22px;
   pointer-events: none;
 }
 
-/* Raincoat Yellow Glow */
+/* Bagliore giallo impermeabile (#d8c615) */
 .glow-yellow {
-  box-shadow: 0 0 20px var(--accent-yellow-glow);
+  box-shadow: 0 0 20px rgba(216, 198, 21, 0.45);
 }
 
 .text-gold {
-  color: var(--accent-gold);
+  color: var(--coraline-gold);
 }
 
 .text-yellow {
-  color: var(--accent-yellow);
+  color: var(--coraline-yellow);
+}
+
+.text-parchment {
+  color: var(--coraline-parchment);
 }
 
 .font-gothic {
@@ -96,22 +105,21 @@ body {
   font-family: var(--font-spooky);
 }
 
-/* Custom scrollbars */
+/* Scrollbar personalizzata Coraline */
 ::-webkit-scrollbar {
   height: 4px;
   width: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 16, 38, 0.4);
+  background: rgba(6, 22, 37, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(224, 159, 62, 0.3);
+  background: var(--coraline-gold);
   border-radius: 4px;
 }
 
-/* Hide scrollbar for clean horizontal carousel */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -120,22 +128,7 @@ body {
   scrollbar-width: none;
 }
 
-/* Pulsing subtle eye animation for eerie charm */
-@keyframes catBlink {
-  0%, 90%, 100% {
-    transform: scaleY(1);
-  }
-  95% {
-    transform: scaleY(0.1);
-  }
-}
-
-.animate-blink {
-  animation: catBlink 6s infinite;
-  transform-origin: center;
-}
-
-/* Button pulse */
+/* Pulsazione del bottone */
 @keyframes buttonPulse {
   0%, 100% {
     transform: scale(1);
@@ -149,14 +142,14 @@ body {
   animation: buttonPulse 3s infinite ease-in-out;
 }
 
-/* Speech bubble tail */
+/* Nuvoletta di dialogo */
 .speech-bubble {
   position: relative;
-  background: rgba(26, 20, 56, 0.95);
-  border: 2px dashed var(--accent-yellow);
+  background: rgba(13, 44, 73, 0.95);
+  border: 2px dashed var(--coraline-gold);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
 
 .speech-bubble::after {
@@ -166,8 +159,7 @@ body {
   left: 45px;
   border-width: 12px 10px 0;
   border-style: solid;
-  border-color: rgba(26, 20, 56, 0.95) transparent;
+  border-color: rgba(13, 44, 73, 0.95) transparent;
   display: block;
   width: 0;
 }
-

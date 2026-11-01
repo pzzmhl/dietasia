@@ -4,9 +4,11 @@ import catCheatImg from '../assets/cat-cheat.png';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline)
- * Mostra l'immagine del Gatto corrispondente:
- * - Gatto con testa reclinata e grandi occhi azzurri per: Dieta Rispettata (success)
- * - Gatto sardonico/scettico con occhi socchiusi per: Dieta Non Rispettata (cheat)
+ * Adattato con la Palette Ufficiale Coraline:
+ * - #0d2c49 (Navy Notte)
+ * - #ddcab7 (Pergamena per testi e fumetto)
+ * - #c7a40e (Oro impermeabile)
+ * - #786343 (Marrone vintage)
  */
 export default function CatModal({ isOpen, quote, context, onClose }) {
   const [visible, setVisible] = useState(false);
@@ -28,9 +30,9 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
     ? "Ricevuto, domani niente scuse" 
     : "Ho capito, Gatto";
 
-  // Palette dinamica in base all'esito
+  // Palette dinamica contestuale
   const borderColor = isCheat ? '#ef4444' : '#34d399';
-  const glowColor = isCheat ? 'rgba(239, 68, 68, 0.3)' : 'rgba(52, 211, 153, 0.3)';
+  const glowColor = isCheat ? 'rgba(239, 68, 68, 0.35)' : 'rgba(52, 211, 153, 0.35)';
   const titleColor = isCheat ? '#f87171' : '#4ade80';
   const buttonBg = isCheat ? '#7f1d1d' : '#15803d';
   const buttonTextColor = isCheat ? '#fee2e2' : '#ffffff';
@@ -42,7 +44,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: 'rgba(5, 6, 15, 0.85)',
+        backgroundColor: 'rgba(6, 18, 30, 0.88)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
@@ -59,7 +61,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         style={{
           width: '100%',
           maxWidth: '360px',
-          background: 'linear-gradient(180deg, #1b1633 0%, #111224 100%)',
+          background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
           borderRadius: '24px',
           border: `2px dashed ${borderColor}`,
           boxShadow: `0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px ${glowColor}`,
@@ -73,7 +75,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Etichetta superiore gotica */}
+        {/* Etichetta superiore */}
         <div style={{
           fontSize: '11px',
           letterSpacing: '2px',
@@ -86,21 +88,21 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           ✦ Il Gatto dell'Altro Mondo ✦
         </div>
 
-        {/* Nuvoletta di Dialogo (Speech Bubble) */}
+        {/* Nuvoletta di Dialogo (Speech Bubble) in colore Pergamena */}
         <div 
           className="speech-bubble"
           style={{
             width: '100%',
             marginBottom: '10px',
-            backgroundColor: 'rgba(15, 16, 38, 0.95)',
+            backgroundColor: 'rgba(6, 22, 37, 0.95)',
             border: `1.5px dashed ${borderColor}`,
             borderRadius: '16px',
             padding: '14px 16px',
-            boxShadow: 'inset 0 0 15px rgba(0,0,0,0.5)'
+            boxShadow: 'inset 0 0 15px rgba(0,0,0,0.6)'
           }}
         >
           <p style={{
-            color: '#f8fafc',
+            color: 'var(--coraline-parchment)',
             fontSize: '14px',
             lineHeight: '1.45',
             fontStyle: 'italic',

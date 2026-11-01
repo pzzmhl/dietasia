@@ -11,10 +11,13 @@ const MONTHS_IT = [
 ];
 
 /**
- * Calendario Mensile a Griglia stile Coraline.
- * - Simboli ufficiali: Pietra Verde (Dieta Rispettata) & Bottone Nero Reale (Sgarro).
- * - Sfondo cella verde per dieta rispettata, bordeaux scuro per sgarro.
- * - Inizio settimana da Lunedì.
+ * Calendario Mensile a Griglia stile Coraline:
+ * Applicata la palette ufficiale:
+ * - #0d2c49 (Navy notte)
+ * - #ddcab7 (Pergamena)
+ * - #786343 (Marrone spago)
+ * - #c7a40e (Oro impermeabile antico)
+ * - #d8c615 (Giallo impermeabile vivo)
  */
 export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} }) {
   const selectedDateObj = new Date(selectedDate + 'T00:00:00');
@@ -29,8 +32,6 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
 
   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
 
-  // In JavaScript: 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato.
-  // Lunedì (1) -> colonna 1, ..., Domenica (0) -> colonna 7
   const rawFirstDay = new Date(displayYear, displayMonth, 1).getDay();
   const firstDayColumn = rawFirstDay === 0 ? 7 : rawFirstDay;
 
@@ -92,7 +93,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
           <h2 style={{
             fontFamily: 'var(--font-gothic)',
             fontSize: '17px',
-            color: '#f8fafc',
+            color: 'var(--coraline-parchment)',
             fontWeight: 800,
             letterSpacing: '0.5px'
           }}>
@@ -104,10 +105,10 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               fontSize: '10px',
               fontFamily: 'var(--font-gothic)',
               padding: '2px 8px',
-              backgroundColor: 'rgba(224, 159, 62, 0.2)',
-              border: '1px solid rgba(224, 159, 62, 0.5)',
+              backgroundColor: 'rgba(216, 198, 21, 0.18)',
+              border: '1px solid var(--coraline-gold)',
               borderRadius: '6px',
-              color: '#e09f3e',
+              color: 'var(--coraline-yellow)',
               cursor: 'pointer',
               fontWeight: 700
             }}
@@ -124,9 +125,9 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(35, 25, 66, 0.85)',
-              border: '1px solid rgba(224, 159, 62, 0.35)',
-              color: '#e2e8f0',
+              backgroundColor: 'rgba(6, 22, 37, 0.85)',
+              border: '1px solid rgba(199, 164, 14, 0.4)',
+              color: 'var(--coraline-parchment)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -144,9 +145,9 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(35, 25, 66, 0.85)',
-              border: '1px solid rgba(224, 159, 62, 0.35)',
-              color: '#e2e8f0',
+              backgroundColor: 'rgba(6, 22, 37, 0.85)',
+              border: '1px solid rgba(199, 164, 14, 0.4)',
+              color: 'var(--coraline-parchment)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -173,7 +174,8 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
             <div 
               key={dayName} 
               style={{ 
-                color: isWeekend ? '#cbd5e1' : '#94a3b8',
+                color: isWeekend ? 'var(--coraline-gold)' : 'var(--coraline-parchment)',
+                opacity: isWeekend ? 0.9 : 0.75,
                 fontSize: '11px',
                 fontFamily: 'var(--font-gothic)',
                 fontWeight: 700,
@@ -201,20 +203,20 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
           const log = allLogs[dateStr] || {};
           const dietState = log.dietState;
 
-          // Sfondo e bordo in base allo stato (Verde per successo, Bordeaux scuro per sgarro)
-          let cellBg = 'rgba(15, 16, 38, 0.6)';
-          let cellBorder = '1px dashed rgba(224, 159, 62, 0.22)';
+          // Sfondo e bordo in base alla palette Coraline
+          let cellBg = 'rgba(6, 22, 37, 0.65)';
+          let cellBorder = '1px dashed rgba(199, 164, 14, 0.25)';
           let cellShadow = 'none';
 
           if (dietState === 'success') {
-            cellBg = 'rgba(18, 54, 38, 0.55)';
-            cellBorder = '1.5px dashed rgba(52, 211, 153, 0.45)';
+            cellBg = 'rgba(21, 128, 61, 0.4)';
+            cellBorder = '1.5px dashed rgba(52, 211, 153, 0.5)';
           } else if (dietState === 'cheat') {
-            cellBg = 'rgba(46, 11, 16, 0.65)';
-            cellBorder = '1.5px dashed rgba(220, 38, 38, 0.4)';
+            cellBg = 'rgba(69, 10, 10, 0.6)';
+            cellBorder = '1.5px dashed rgba(239, 68, 68, 0.45)';
           } else if (isToday) {
-            cellBg = 'rgba(35, 25, 66, 0.7)';
-            cellBorder = '1.5px solid rgba(224, 159, 62, 0.5)';
+            cellBg = 'rgba(120, 99, 67, 0.35)';
+            cellBorder = '1.5px solid var(--coraline-gold)';
           }
 
           if (isSelected) {
@@ -222,12 +224,12 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               ? '2px solid #34d399' 
               : dietState === 'cheat' 
               ? '2px solid #ef4444' 
-              : '2px solid #e09f3e';
+              : '2px solid var(--coraline-yellow)';
             cellShadow = dietState === 'success'
               ? '0 0 14px rgba(52, 211, 153, 0.5)'
               : dietState === 'cheat'
-              ? '0 0 14px rgba(220, 38, 38, 0.5)'
-              : '0 0 12px rgba(224, 159, 62, 0.45)';
+              ? '0 0 14px rgba(239, 68, 68, 0.5)'
+              : '0 0 14px rgba(216, 198, 21, 0.5)';
           }
 
           return (
@@ -245,7 +247,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                 backgroundColor: cellBg,
                 border: cellBorder,
                 boxShadow: cellShadow,
-                color: isSelected ? '#ffffff' : '#e2e8f0',
+                color: isSelected ? 'var(--coraline-yellow)' : 'var(--coraline-parchment)',
                 fontFamily: 'var(--font-gothic)',
                 fontSize: '14px',
                 fontWeight: isSelected ? 800 : 600,
@@ -258,7 +260,7 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               }}
             >
               {dietState === 'success' ? (
-                /* SIMBOLO GRANDE: PIETRA DELLA VISTA VERDE DI CORALINE */
+                /* SIMBOLO GRANDE: PIETRA DELLA VISTA VERDE */
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -274,12 +276,12 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                       width: '84%',
                       height: '84%',
                       objectFit: 'contain',
-                      filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.45))'
+                      filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))'
                     }}
                   />
                 </div>
               ) : dietState === 'cheat' ? (
-                /* SIMBOLO GRANDE: BOTTONE NERO ORIGINALE DI CORALINE */
+                /* SIMBOLO GRANDE: BOTTONE NERO ORIGINALE */
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -295,12 +297,12 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                       width: '84%',
                       height: '84%',
                       objectFit: 'contain',
-                      filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8))'
+                      filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85))'
                     }}
                   />
                 </div>
               ) : (
-                /* GIORNO NON COMPILATO: Mostra il numero standard */
+                /* GIORNO NON COMPILATO: Mostra il numero in pergamena */
                 <span>{day}</span>
               )}
             </button>

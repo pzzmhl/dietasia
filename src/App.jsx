@@ -46,7 +46,6 @@ export default function App() {
       setAllLogs((prev) => ({ ...prev, [selectedDate]: updated }));
     }
 
-    // Trigger del Tutor Gatto Nero solo quando si seleziona uno stato attivo
     if (newStatus === 'success' || newStatus === 'cheat') {
       const quote = getRandomCatQuote(newStatus);
       setModalState({
@@ -57,7 +56,7 @@ export default function App() {
     }
   };
 
-  // Calcolo statistiche rapide
+  // Statistiche rapide
   const totalDaysLogged = Object.values(allLogs).filter(
     (l) => l.dietState && l.dietState !== 'neutral'
   ).length;
@@ -74,29 +73,31 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* HEADER PULITO CON IMPUNTURE GOTICHE E ICONE UFFICIALI */}
+      {/* HEADER: PALETTE UFFICIALE CORALINE (#0d2c49, #c7a40e, #ddcab7, #786343) */}
       <header style={{
         padding: '12px 14px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        border: '1.5px dashed rgba(224, 159, 62, 0.4)',
+        border: '2px dashed var(--coraline-gold)',
         borderRadius: '16px',
-        backgroundColor: 'rgba(26, 20, 56, 0.75)',
+        backgroundColor: 'rgba(13, 44, 73, 0.85)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(6, 22, 37, 0.6)',
         marginBottom: '16px'
       }}>
-        {/* Contatori sintetici: Giorni Rispettati (Pietra Verde) e Totali */}
+        {/* Contatori sintetici */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Badge Giorni Rispettati (Pietra Verde) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            backgroundColor: 'rgba(15, 16, 38, 0.7)',
+            backgroundColor: 'rgba(6, 22, 37, 0.75)',
             padding: '6px 10px',
             borderRadius: '10px',
-            border: '1px solid rgba(52, 211, 153, 0.3)'
+            border: '1px solid rgba(52, 211, 153, 0.35)'
           }}>
             <img src={seeingStoneImg} alt="" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
             <span style={{
@@ -105,37 +106,39 @@ export default function App() {
               fontWeight: 800,
               color: '#4ade80'
             }}>
-              {successfulDays} <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500 }}>rispettati</span>
+              {successfulDays} <span style={{ fontSize: '10px', color: 'var(--coraline-parchment)', opacity: 0.8, fontWeight: 500 }}>rispettati</span>
             </span>
           </div>
 
+          {/* Badge Giorni Totali Tracciati */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            backgroundColor: 'rgba(15, 16, 38, 0.7)',
+            backgroundColor: 'rgba(6, 22, 37, 0.75)',
             padding: '6px 10px',
             borderRadius: '10px',
-            border: '1px solid rgba(224, 159, 62, 0.25)'
+            border: '1px solid rgba(199, 164, 14, 0.3)'
           }}>
             <span style={{ fontSize: '13px' }}>🗝️</span>
             <span style={{
               fontFamily: 'var(--font-gothic)',
               fontSize: '13px',
               fontWeight: 800,
-              color: '#f8fafc'
+              color: 'var(--coraline-parchment)'
             }}>
-              {totalDaysLogged} <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500 }}>totali</span>
+              {totalDaysLogged} <span style={{ fontSize: '10px', color: 'var(--coraline-parchment)', opacity: 0.8, fontWeight: 500 }}>totali</span>
             </span>
           </div>
         </div>
 
-        {/* L'Iconico Bottone Nero di Coraline integrato nell'Header */}
+        {/* Bottone Nero di Coraline autentico con badge Beta */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{
             fontSize: '11px',
             fontFamily: 'var(--font-gothic)',
-            color: 'rgba(224, 159, 62, 0.75)',
+            color: 'var(--coraline-yellow)',
+            fontWeight: 700,
             letterSpacing: '1px',
             textTransform: 'uppercase'
           }}>
@@ -148,20 +151,20 @@ export default function App() {
               width: '36px',
               height: '36px',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8))'
+              filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.85))'
             }}
           />
         </div>
       </header>
 
-      {/* UNICA VISTA CALENDARIO MENSILE A GRIGLIA (SETTIMANA DA LUNEDÌ) */}
+      {/* CALENDARIO MENSILE A GRIGLIA */}
       <CalendarGrid
         selectedDate={selectedDate}
         onSelectDate={setSelectedDate}
         allLogs={allLogs}
       />
 
-      {/* INTESTAZIONE DATA CORRENTE SELEZIONATA */}
+      {/* DATA CORRENTE SELEZIONATA */}
       <div style={{
         marginBottom: '12px',
         padding: '0 4px',
@@ -172,7 +175,7 @@ export default function App() {
         <h2 style={{
           fontSize: '17px',
           fontFamily: 'var(--font-gothic)',
-          color: '#f8fafc',
+          color: 'var(--coraline-parchment)',
           fontWeight: 700,
           letterSpacing: '0.4px'
         }}>
@@ -192,8 +195,8 @@ export default function App() {
         textAlign: 'center',
         padding: '16px 0 8px 0',
         fontSize: '11px',
-        color: '#64748b',
-        borderTop: '1px dashed rgba(255, 255, 255, 0.08)'
+        color: 'var(--coraline-brown)',
+        borderTop: '1px dashed rgba(199, 164, 14, 0.25)'
       }}>
         ✦ 🪡 ✦
       </footer>
