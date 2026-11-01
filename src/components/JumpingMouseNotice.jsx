@@ -13,11 +13,29 @@ export default function JumpingMouseNotice({
   audioSrc = null // Predisposto per ricevere file audio (es. /src/assets/mouse-audio.mp3)
 }) {
   // 1. TUTTI GLI HOOKS DEVONO ESSERE DICHIARATI RIGOROSAMENTE IN CIMA SENZA ALCUN EARLY RETURN
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const dismissedDate = localStorage.getItem('coraline_mouse_notice_dismissed_date');
+      return dismissedDate === todayStr;
+    } catch (e) {
+      return false;
+    }
+  });
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioRef = useRef(null);
 
   const hasUnmarked = Array.isArray(unmarkedDays) && unmarkedDays.length > 0;
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    try {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      localStorage.setItem('coraline_mouse_notice_dismissed_date', todayStr);
+    } catch (e) {}
+  };
 
   const handlePlayAudio = () => {
     try {
@@ -38,8 +56,8 @@ export default function JumpingMouseNotice({
     }
   }, [hasUnmarked, audioSrc, isDismissed]);
 
-  // 2. SOLO DOPO TUTTI GLI HOOKS: EARLY RETURN SE NON CI SONO GIORNI DA NOTIFICARE
-  if (!hasUnmarked) {
+  // 2. SOLO DOPO TUTTI GLI HOOKS: EARLY RETURN SE NON CI SONO GIORNI DA NOTIFICARE O SE È STATO CHIUSO
+  if (!hasUnmarked || isDismissed) {
     return null;
   }
 
@@ -65,66 +83,6 @@ export default function JumpingMouseNotice({
       return dStr || '';
     }
   };
-
-  // Se minimizzato, mostra un'icona compatta flottante del topo che trema nell'angolo
-  if (isDismissed) {
-    return (
-      <button
-        onClick={() => setIsDismissed(false)}
-        aria-label="Mostra giorni non contrassegnati"
-        title={`${missingCount} giorni non contrassegnati`}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '18px',
-          zIndex: 9990,
-          backgroundColor: '#0d2c49',
-          border: '2px solid var(--coraline-yellow)',
-          borderRadius: '50%',
-          width: '58px',
-          height: '58px',
-          padding: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.8), 0 0 16px rgba(216, 198, 21, 0.45)',
-          cursor: 'pointer',
-          animation: 'mouseFloat 2.5s ease-in-out infinite'
-        }}
-      >
-        <img
-          src={jumpingMouseImg}
-          alt="Topo Saltatore"
-          style={{
-            width: '46px',
-            height: '46px',
-            objectFit: 'contain',
-            animation: 'mouseTrumpetBlast 1.6s ease-in-out infinite'
-          }}
-        />
-        <span
-          style={{
-            position: 'absolute',
-            top: '-2px',
-            right: '-2px',
-            backgroundColor: '#ef4444',
-            color: '#fff',
-            fontSize: '11px',
-            fontWeight: 900,
-            width: '20px',
-            height: '20px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '2px solid #061625'
-          }}
-        >
-          {missingCount}
-        </span>
-      </button>
-    );
-  }
 
   return (
     <>
@@ -156,7 +114,7 @@ export default function JumpingMouseNotice({
       >
         {/* Pulsantino Chiusura / Riduci "✕" */}
         <button
-          onClick={() => setIsDismissed(true)}
+          onClick={handleDismiss}
           aria-label="Chiudi avviso"
           style={{
             position: 'absolute',
@@ -351,16 +309,6 @@ export default function JumpingMouseNotice({
           100% {
             transform: scale(1.5);
             opacity: 0;
-          }
-        }
-
-        /* Galleggiamento dell'icona minimizzata */
-        @keyframes mouseFloat {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-6px);
           }
         }
       `}</style>
