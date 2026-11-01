@@ -35,6 +35,13 @@ html, body {
   -webkit-user-select: none;
   touch-action: manipulation;
   -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+button {
+  font-family: inherit;
+  outline: none;
 }
 
 /* Background atmosphere with vignette and subtle spiral nebula vibe */

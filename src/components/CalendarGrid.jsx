@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Formato europeo ISO: settimana da Lunedì a Domenica
+// Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
 const MONTHS_IT = [
@@ -9,33 +9,32 @@ const MONTHS_IT = [
 ];
 
 /**
- * Calendario Mensile a Griglia stile Coraline.
- * - Settimana con inizio rigoroso da Lunedì (formato ISO europeo).
- * - Vista unica a griglia senza selettori o strisce.
- * - Indicazione visiva immediata dello stato (Spunta o Bottone Nero).
+ * Calendario Mensile a Griglia ultra-ottimizzato per schermi Android e iOS.
+ * - Stesso gap sia per intestazione che per celle (allineamento millimetrico delle colonne).
+ * - Uso di gridColumnStart sul giorno 1: elimina i disallineamenti di altezza e offset.
+ * - min-width: 0 per prevenire overflow orizzontale su schermi stretti (es. 360px).
  */
 export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} }) {
   const selectedDateObj = new Date(selectedDate + 'T00:00:00');
   const [displayYear, setDisplayYear] = useState(selectedDateObj.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(selectedDateObj.getMonth());
 
-  // Sincronizza mese/anno se cambia dall'esterno la data selezionata
   useEffect(() => {
     const d = new Date(selectedDate + 'T00:00:00');
     setDisplayYear(d.getFullYear());
     setDisplayMonth(d.getMonth());
   }, [selectedDate]);
 
-  // Numero di giorni nel mese corrente
   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
 
-  // Offset per il primo giorno del mese con settimana iniziante da LUNEDÌ
-  // In JavaScript: getDay() -> 0 = Dom, 1 = Lun, 2 = Mar, ..., 6 = Sab
-  // Converte a: Lun = 0, Mar = 1, ..., Sab = 5, Dom = 6
+  // In JavaScript: 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato.
+  // Converte a colonna CSS Grid (1..7) per Lunedì..Domenica:
+  // Lunedì (1) -> 1
+  // Martedì (2) -> 2
+  // Domenica (0) -> 7
   const rawFirstDay = new Date(displayYear, displayMonth, 1).getDay();
-  const startOffset = (rawFirstDay + 6) % 7;
+  const firstDayColumn = rawFirstDay === 0 ? 7 : rawFirstDay;
 
-  // Formattazione YYYY-MM-DD
   const formatYMD = (year, month, day) => {
     const m = String(month + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
@@ -70,34 +69,46 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
   const now = new Date();
   const todayStr = formatYMD(now.getFullYear(), now.getMonth(), now.getDate());
 
+  // Gap comune uniforme per evitare qualsiasi sfasamento tra header e griglia
+  const GRID_GAP = '4px';
+
   return (
-    <div className="stitched-card" style={{ padding: '18px 14px', marginBottom: '20px' }}>
-      {/* Intestazione Mese & Comandi */}
+    <div 
+      className="stitched-card" 
+      style={{ 
+        padding: '14px 10px', 
+        marginBottom: '16px',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}
+    >
+      {/* Intestazione Mese & Pulsanti Navigazione */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '16px'
+        marginBottom: '14px',
+        padding: '0 4px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <h2 style={{
             fontFamily: 'var(--font-gothic)',
-            fontSize: '18px',
+            fontSize: '17px',
             color: '#f8fafc',
             fontWeight: 800,
-            letterSpacing: '0.8px'
+            letterSpacing: '0.5px'
           }}>
             {MONTHS_IT[displayMonth]} {displayYear}
           </h2>
           <button
             onClick={handleTodayClick}
             style={{
-              fontSize: '11px',
+              fontSize: '10px',
               fontFamily: 'var(--font-gothic)',
-              padding: '3px 9px',
-              backgroundColor: 'rgba(224, 159, 62, 0.18)',
+              padding: '2px 8px',
+              backgroundColor: 'rgba(224, 159, 62, 0.2)',
               border: '1px solid rgba(224, 159, 62, 0.5)',
-              borderRadius: '8px',
+              borderRadius: '6px',
               color: '#e09f3e',
               cursor: 'pointer',
               fontWeight: 700
@@ -112,17 +123,17 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
             onClick={handlePrevMonth}
             aria-label="Mese precedente"
             style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(35, 25, 66, 0.8)',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(35, 25, 66, 0.85)',
               border: '1px solid rgba(224, 159, 62, 0.35)',
               color: '#e2e8f0',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '14px'
+              fontSize: '13px'
             }}
           >
             ◀
@@ -132,17 +143,17 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
             onClick={handleNextMonth}
             aria-label="Mese successivo"
             style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(35, 25, 66, 0.8)',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(35, 25, 66, 0.85)',
               border: '1px solid rgba(224, 159, 62, 0.35)',
               color: '#e2e8f0',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '14px'
+              fontSize: '13px'
             }}
           >
             ▶
@@ -150,36 +161,41 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
         </div>
       </div>
 
-      {/* Intestazione Giorni della Settimana (Inizio da LUNEDÌ) */}
+      {/* Intestazione Giorni della Settimana (LUN -> DOM) con identico gap */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
+        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+        gap: GRID_GAP,
         textAlign: 'center',
-        marginBottom: '10px',
-        fontSize: '12px',
-        color: '#94a3b8',
-        fontFamily: 'var(--font-gothic)',
-        fontWeight: 700,
-        letterSpacing: '0.5px'
+        marginBottom: '8px'
       }}>
         {DAYS_HEADER.map((dayName, idx) => {
-          // Evidenzia sabato e domenica con una sfumatura più tenue
           const isWeekend = idx >= 5;
           return (
-            <div key={dayName} style={{ color: isWeekend ? '#cbd5e1' : '#94a3b8' }}>
+            <div 
+              key={dayName} 
+              style={{ 
+                color: isWeekend ? '#cbd5e1' : '#94a3b8',
+                fontSize: '11px',
+                fontFamily: 'var(--font-gothic)',
+                fontWeight: 700,
+                padding: '2px 0'
+              }}
+            >
               {dayName}
             </div>
           );
         })}
       </div>
 
-      {/* Griglia Giorni del Mese */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
-        {/* Offset celle vuote fino a Lunedì */}
-        {Array.from({ length: startOffset }).map((_, idx) => (
-          <div key={`offset-${idx}`} style={{ minHeight: '44px' }} />
-        ))}
-
+      {/* Griglia Giorni del Mese con identico gap e colonne allineate al millimetro */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', 
+        gap: GRID_GAP,
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
         {daysArray.map((day) => {
           const dateStr = formatYMD(displayYear, displayMonth, day);
           const isSelected = dateStr === selectedDate;
@@ -192,44 +208,56 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
               key={dateStr}
               onClick={() => onSelectDate(dateStr)}
               style={{
-                minHeight: '48px',
-                aspectRatio: '1',
-                borderRadius: '12px',
+                // Il primo giorno del mese si posiziona esattamente nella sua colonna CSS
+                ...(day === 1 ? { gridColumnStart: firstDayColumn } : {}),
+                aspectRatio: '1 / 1',
+                width: '100%',
+                minWidth: 0,
+                padding: '2px',
+                boxSizing: 'border-box',
+                borderRadius: '10px',
                 backgroundColor: isSelected
-                  ? 'rgba(224, 159, 62, 0.25)'
-                  : 'rgba(15, 16, 38, 0.55)',
+                  ? 'rgba(224, 159, 62, 0.28)'
+                  : isToday
+                  ? 'rgba(35, 25, 66, 0.7)'
+                  : 'rgba(15, 16, 38, 0.6)',
                 border: isSelected
                   ? '2px solid #e09f3e'
                   : isToday
-                  ? '1px solid rgba(224, 159, 62, 0.6)'
-                  : '1px dashed rgba(224, 159, 62, 0.2)',
+                  ? '1.5px solid rgba(224, 159, 62, 0.5)'
+                  : '1px dashed rgba(224, 159, 62, 0.22)',
                 boxShadow: isSelected
-                  ? '0 0 14px rgba(224, 159, 62, 0.4)'
+                  ? '0 0 12px rgba(224, 159, 62, 0.45)'
                   : 'none',
                 color: isSelected ? '#ffffff' : '#e2e8f0',
                 fontFamily: 'var(--font-gothic)',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: isSelected ? 800 : 600,
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '2px',
                 position: 'relative',
-                transition: 'all 0.15s ease'
+                lineHeight: 1,
+                gap: '3px'
               }}
             >
               <span>{day}</span>
 
-              {/* Indicatore visivo dello stato */}
-              <div style={{ height: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Indicatore visivo dello stato sotto il numero */}
+              <div style={{ 
+                height: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+              }}>
                 {dietState === 'success' && (
                   <span
                     title="Dieta seguita"
                     style={{
                       color: '#e09f3e',
-                      fontSize: '11px',
+                      fontSize: '10px',
                       fontWeight: 900,
                       lineHeight: 1
                     }}
@@ -239,15 +267,15 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                 )}
                 {dietState === 'cheat' && (
                   <span
-                    title="Bottone nero (sgarrato)"
+                    title="Bottone nero"
                     style={{
                       display: 'inline-block',
-                      width: '7px',
-                      height: '7px',
+                      width: '6px',
+                      height: '6px',
                       borderRadius: '50%',
                       backgroundColor: '#050508',
-                      border: '1.2px solid #cbd5e1',
-                      boxShadow: '0 0 4px rgba(0,0,0,0.9)'
+                      border: '1px solid #cbd5e1',
+                      boxShadow: '0 0 3px rgba(0,0,0,0.8)'
                     }}
                   />
                 )}
