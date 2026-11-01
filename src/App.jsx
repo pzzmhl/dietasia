@@ -6,7 +6,9 @@ import DaySelectionModal from './components/DaySelectionModal';
 import SettingsModal from './components/SettingsModal';
 import CatModal from './components/CatModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
+import NotificationSettingsModal from './components/NotificationSettingsModal';
 import blackButtonImg from './assets/black-button.png';
+import jumpingMouseImg from './assets/jumping-mouse.png';
 import { 
   getTodayDateString, 
   getAllLogs, 
@@ -30,6 +32,9 @@ export default function App() {
 
   // Modal Impostazioni
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Modal Notifiche Quotidiane (Topi Saltatori)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   // Modal Selezione Esito Giorno
   const [dayModalState, setDayModalState] = useState({
@@ -192,28 +197,36 @@ export default function App() {
           </span>
         </div>
 
-        {/* Pulsanti Header: Simula Topo (Tromba), Impostazioni (Ingranaggio) & Bottone Nero */}
+        {/* Pulsanti Header: Gestione Notifiche (Topo Statico), Impostazioni (Ingranaggio) & Bottone Nero */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Tasto rapido Simula Notifica Topo */}
+          {/* Tasto Gestione Promemoria Giornaliero (Topolino Statico) */}
           <button
-            onClick={() => setSimulatedMouseAlert((prev) => !prev)}
-            aria-label="Simula Notifica Topo"
-            title="Simula Notifica Topo Saltatore"
+            onClick={() => setIsNotificationOpen(true)}
+            aria-label="Gestisci Notifiche Quotidiane"
+            title="Promemoria Giornaliero dei Topi Saltatori"
             style={{
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              backgroundColor: simulatedMouseAlert ? 'rgba(216, 198, 21, 0.25)' : 'rgba(6, 22, 37, 0.85)',
-              border: simulatedMouseAlert ? '1.5px solid var(--coraline-yellow)' : '1px solid var(--border-dark-blue)',
+              backgroundColor: 'rgba(6, 22, 37, 0.85)',
+              border: '1.5px solid var(--border-dark-blue)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '15px',
+              padding: '2px',
               transition: 'all 0.15s ease'
             }}
           >
-            🎺
+            <img
+              src={jumpingMouseImg}
+              alt="Promemoria Topo"
+              style={{
+                width: '24px',
+                height: '24px',
+                objectFit: 'contain'
+              }}
+            />
           </button>
 
           {/* Pulsante Ingranaggio Impostazioni */}
@@ -309,6 +322,12 @@ export default function App() {
         keysPerMonth={keysPerMonth}
         onSaveKeysPerMonth={handleSaveKeysPerMonth}
         onClose={() => setIsSettingsOpen(false)}
+      />
+
+      {/* MODAL PROMEMORIA QUOTIDIANO: TOPI SALTATORI */}
+      <NotificationSettingsModal
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
       />
 
       {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}

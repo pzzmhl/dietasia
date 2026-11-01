@@ -179,17 +179,18 @@ export default function JumpingMouseNotice({
           ✕
         </button>
 
-        {/* CONTENITORE DEL TOPO CHE TREMA E SQUILLA LA TROMBA */}
+        {/* CONTENITORE DEL TOPO PIÙ GRANDE CHE TREMA E SQUILLA LA TROMBA */}
         <div
           style={{
             flexShrink: 0,
-            width: '84px',
-            height: '84px',
+            width: '108px',
+            height: '108px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            cursor: audioSrc ? 'pointer' : 'default'
+            cursor: audioSrc ? 'pointer' : 'default',
+            margin: '-4px 0 -4px -6px'
           }}
           onClick={handlePlayAudio}
           title={audioSrc ? 'Tocca per ascoltare la tromba!' : undefined}
@@ -207,74 +208,42 @@ export default function JumpingMouseNotice({
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95))'
+              filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95))'
             }}
           />
         </div>
 
-        {/* TESTO E PULSANTE DI AZIONE */}
-        <div style={{ flex: 1, minWidth: 0, paddingRight: '12px' }}>
-          <div
+        {/* SOLO TITOLO E SOTTOTITOLO (SENZA EMOJI TROMBA E SENZA PULSANTE) */}
+        <div style={{ flex: 1, minWidth: 0, paddingRight: '14px' }}>
+          <h4
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginBottom: '3px'
+              margin: '0 0 4px 0',
+              color: 'var(--coraline-yellow)',
+              fontSize: '14px',
+              fontWeight: 800,
+              letterSpacing: '0.6px',
+              textTransform: 'uppercase',
+              fontFamily: 'var(--font-gothic)'
             }}
           >
-            <span style={{ fontSize: '14px' }}>🎺</span>
-            <h4
-              style={{
-                margin: 0,
-                color: 'var(--coraline-yellow)',
-                fontSize: '13px',
-                fontWeight: 800,
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase'
-              }}
-            >
-              Allarme Topi Saltatori!
-            </h4>
-          </div>
+            Allarme Topi Saltatori!
+          </h4>
 
           <p
             style={{
-              margin: '0 0 8px 0',
+              margin: 0,
               fontSize: '12px',
               color: 'var(--coraline-parchment)',
-              lineHeight: 1.35
+              lineHeight: 1.4,
+              opacity: 0.92
             }}
           >
             {missingCount === 1 ? (
-              <>C'è <strong>1 giorno</strong> non contrassegnato da completare nel tuo diario!</>
+              <>C'è <strong>1 giorno</strong> non contrassegnato che deve essere completato.</>
             ) : (
-              <>Ci sono <strong>{missingCount} giorni</strong> non contrassegnati che devono essere completati!</>
+              <>Ci sono <strong>{missingCount} giorni</strong> non contrassegnati che devono essere completati.</>
             )}
           </p>
-
-          <button
-            onClick={() => onSelectDay(firstMissingDate)}
-            style={{
-              backgroundColor: 'var(--coraline-yellow)',
-              color: '#061625',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '7px 13px',
-              fontSize: '11px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 3px 8px rgba(0, 0, 0, 0.45)',
-              transition: 'transform 0.15s ease'
-            }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.96)')}
-            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-          >
-            <span>Segna subito ({formatDateLabel(firstMissingDate)})</span>
-            <span style={{ fontSize: '13px' }}>➔</span>
-          </button>
         </div>
       </div>
 
