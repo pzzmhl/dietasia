@@ -4,11 +4,11 @@ import blackButtonImg from '../assets/black-button.png';
 import KeyIcon from './KeyIcon';
 
 /**
- * Dashboard Statistiche & Proiezione Mensile Ingrandita Stile Coraline:
- * - Posizionata sotto il calendario.
- * - Chiavi Nere Jolly in formato extra-large (visibili e definite).
- * - Indicatori e numeri grandi per una leggibilità immediata.
- * - Barra ad Ago e Filo maggiorata.
+ * Dashboard Statistiche & Proiezione Mensile Stile Coraline:
+ * - Minimalista e ultra-visiva: solo i simboli autentici e i numeri.
+ * - Le 4 Chiavi Nere grandi e centrate (le usate diventano opacizzate/meno visibili).
+ * - Pietra Verde e Bottone Nero senza diciture superflue, affiancati dal rispettivo conteggio.
+ * - Barra ad Ago e Filo con micro-copy.
  */
 export default function MonthStatsBar({ 
   displayYear, 
@@ -61,181 +61,153 @@ export default function MonthStatsBar({
     <div 
       className="stitched-card"
       style={{
-        padding: '18px 16px',
+        padding: '16px 14px',
         marginTop: '4px',
         marginBottom: '20px',
         width: '100%',
         boxSizing: 'border-box'
       }}
     >
-      {/* SEZIONE 1: VETRINA CHIAVI NERE JOLLY INGRANDITE */}
+      {/* SEZIONE 1: LE 4 CHIAVI NERE GRANDI (SENZA SCRITTE NÉ DICITURE) */}
       <div style={{
         backgroundColor: 'rgba(6, 22, 37, 0.88)',
         padding: '12px 14px',
         borderRadius: '16px',
         border: '1.5px dashed var(--coraline-gold)',
         boxShadow: 'inset 0 0 14px rgba(0, 0, 0, 0.7)',
-        marginBottom: '16px'
+        marginBottom: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '18px'
       }}>
-        {/* Titolo e contatore testuale */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '10px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '18px' }}>🗝️</span>
-            <span style={{
-              fontFamily: 'var(--font-gothic)',
-              fontSize: '13px',
-              fontWeight: 800,
-              color: 'var(--coraline-parchment)',
-              letterSpacing: '0.8px',
-              textTransform: 'uppercase'
-            }}>
-              Chiavi Nere Jolly
-            </span>
-          </div>
-
-          <div style={{
-            fontFamily: 'var(--font-gothic)',
-            fontSize: '14px',
-            fontWeight: 900,
-            color: remainingKeys > 0 ? 'var(--coraline-yellow)' : '#f87171',
-            backgroundColor: 'rgba(13, 44, 73, 0.8)',
-            padding: '4px 10px',
-            borderRadius: '8px',
-            border: '1px solid rgba(199, 164, 14, 0.4)'
-          }}>
-            {remainingKeys} / {keysPerMonth} disponibili
-          </div>
-        </div>
-
-        {/* File delle Chiavi in FORMATO GRANDE */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '14px',
-          padding: '8px 4px 4px 4px',
-          flexWrap: 'wrap'
-        }}>
-          {Array.from({ length: keysPerMonth }).map((_, idx) => {
-            const isUsed = idx >= remainingKeys;
-            return (
-              <div 
-                key={idx}
-                title={isUsed ? "Chiave utilizzata per sgarro" : "Chiave pronta all'uso"}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  transform: isUsed ? 'scale(0.88)' : 'scale(1.05)',
-                  transition: 'all 0.25s ease'
-                }}
-              >
-                {/* Chiave Nera di Coraline in formato grande (42px) */}
-                <KeyIcon size={42} isUsed={isUsed} />
-
-                <span style={{
-                  fontSize: '9px',
-                  fontFamily: 'var(--font-gothic)',
-                  fontWeight: 700,
-                  color: isUsed ? 'var(--coraline-brown)' : 'var(--coraline-gold)',
-                  letterSpacing: '0.5px'
-                }}>
-                  {isUsed ? "USATA" : `#${idx + 1}`}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        {Array.from({ length: keysPerMonth }).map((_, idx) => {
+          const isUsed = idx >= remainingKeys;
+          return (
+            <div 
+              key={idx}
+              title={isUsed ? "Chiave utilizzata" : "Chiave disponibile"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: isUsed ? 'scale(0.85)' : 'scale(1.08)',
+                transition: 'all 0.25s ease'
+              }}
+            >
+              {/* Chiave Nera di Coraline grande: accesa e nitida vs opacizzata/meno visibile */}
+              <KeyIcon size={46} isUsed={isUsed} />
+            </div>
+          );
+        })}
       </div>
 
-      {/* SEZIONE 2: LE 3 GRANDI METRICHE DELLA DASHBOARD */}
+      {/* SEZIONE 2: LE 3 METRICHE (SOLO ICONA E NUMERO, SENZA PAROLE) */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr',
         gap: '8px',
         alignItems: 'center',
-        marginBottom: '16px'
+        marginBottom: '14px'
       }}>
-        {/* Metrica 1: Giorni Rispettati */}
+        {/* Metrica 1: Anello/Pietra Verde + Numero */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: 'rgba(6, 22, 37, 0.8)',
-          padding: '10px 6px',
-          borderRadius: '12px',
+          padding: '12px 6px',
+          borderRadius: '14px',
           border: '1px solid rgba(52, 211, 153, 0.4)',
-          textAlign: 'center'
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
         }}>
           <img 
             src={seeingStoneImg} 
             alt="Pietra Verde" 
-            style={{ width: '22px', height: '22px', objectFit: 'contain', marginBottom: '4px' }} 
+            style={{ 
+              width: '28px', 
+              height: '28px', 
+              objectFit: 'contain', 
+              marginBottom: '6px',
+              filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))'
+            }} 
           />
-          <div style={{ fontSize: '10px', color: '#86efac', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>
-            Rispettati
-          </div>
-          <div style={{ fontSize: '19px', fontWeight: 900, color: '#4ade80', fontFamily: 'var(--font-gothic)', marginTop: '2px' }}>
+          <div style={{ 
+            fontSize: '22px', 
+            fontWeight: 900, 
+            color: '#4ade80', 
+            fontFamily: 'var(--font-gothic)', 
+            lineHeight: 1 
+          }}>
             {successCount}
           </div>
         </div>
 
-        {/* Metrica 2: Giorni con Bottone Nero */}
+        {/* Metrica 2: Bottone Nero + Numero */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: 'rgba(6, 22, 37, 0.8)',
-          padding: '10px 6px',
-          borderRadius: '12px',
+          padding: '12px 6px',
+          borderRadius: '14px',
           border: '1px solid rgba(220, 38, 38, 0.4)',
-          textAlign: 'center'
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
         }}>
           <img 
             src={blackButtonImg} 
             alt="Bottone Nero" 
-            style={{ width: '22px', height: '22px', objectFit: 'contain', marginBottom: '4px' }} 
+            style={{ 
+              width: '28px', 
+              height: '28px', 
+              objectFit: 'contain', 
+              marginBottom: '6px',
+              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9))'
+            }} 
           />
-          <div style={{ fontSize: '10px', color: '#fca5a5', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>
-            Bottoni
-          </div>
-          <div style={{ fontSize: '19px', fontWeight: 900, color: '#f87171', fontFamily: 'var(--font-gothic)', marginTop: '2px' }}>
+          <div style={{ 
+            fontSize: '22px', 
+            fontWeight: 900, 
+            color: '#f87171', 
+            fontFamily: 'var(--font-gothic)', 
+            lineHeight: 1 
+          }}>
             {cheatCount}
           </div>
         </div>
 
-        {/* Metrica 3: Percentuale Tenuta Filo */}
+        {/* Metrica 3: Ago da Cucito + Percentuale Tenuta */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: 'rgba(6, 22, 37, 0.8)',
-          padding: '10px 6px',
-          borderRadius: '12px',
+          padding: '12px 6px',
+          borderRadius: '14px',
           border: '1px solid rgba(199, 164, 14, 0.45)',
-          textAlign: 'center'
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
         }}>
-          <span style={{ fontSize: '18px', marginBottom: '4px' }}>🪡</span>
-          <div style={{ fontSize: '10px', color: 'var(--coraline-gold)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>
-            Tenuta Filo
-          </div>
-          <div style={{ fontSize: '19px', fontWeight: 900, color: 'var(--coraline-yellow)', fontFamily: 'var(--font-gothic)', marginTop: '2px' }}>
+          <span style={{ fontSize: '24px', lineHeight: 1, marginBottom: '6px' }}>🪡</span>
+          <div style={{ 
+            fontSize: '22px', 
+            fontWeight: 900, 
+            color: 'var(--coraline-yellow)', 
+            fontFamily: 'var(--font-gothic)', 
+            lineHeight: 1 
+          }}>
             {totalLogged > 0 ? `${successPercentage}%` : '--'}
           </div>
         </div>
       </div>
 
-      {/* SEZIONE 3: BARRA AD AGO E FILO MAGGIORATA */}
-      <div style={{ position: 'relative', padding: '8px 4px 10px 4px' }}>
+      {/* SEZIONE 3: BARRA AD AGO E FILO */}
+      <div style={{ position: 'relative', padding: '6px 4px 8px 4px' }}>
         <div style={{
           width: '100%',
           height: '11px',
@@ -255,7 +227,7 @@ export default function MonthStatsBar({
             transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
           }} />
 
-          {/* Cursore Ago Ricurvo Ingrandito */}
+          {/* Cursore Ago Ricurvo */}
           <div style={{
             position: 'absolute',
             top: '50%',
@@ -286,7 +258,7 @@ export default function MonthStatsBar({
         </div>
       </div>
 
-      {/* SEZIONE 4: MICRO-COPY DI PROIEZIONE CHIARO E LEGGIBILE */}
+      {/* SEZIONE 4: MICRO-COPY DI PROIEZIONE */}
       <div style={{
         marginTop: '6px',
         textAlign: 'center',
