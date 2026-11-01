@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BlackButtonIcon from './BlackButtonIcon';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -218,6 +219,10 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                 borderRadius: '10px',
                 backgroundColor: isSelected
                   ? 'rgba(224, 159, 62, 0.28)'
+                  : dietState === 'success'
+                  ? 'rgba(224, 159, 62, 0.12)'
+                  : dietState === 'cheat'
+                  ? 'rgba(40, 15, 25, 0.5)'
                   : isToday
                   ? 'rgba(35, 25, 66, 0.7)'
                   : 'rgba(15, 16, 38, 0.6)',
@@ -231,55 +236,58 @@ export default function CalendarGrid({ selectedDate, onSelectDate, allLogs = {} 
                   : 'none',
                 color: isSelected ? '#ffffff' : '#e2e8f0',
                 fontFamily: 'var(--font-gothic)',
-                fontSize: '13px',
+                fontSize: '14px',
                 fontWeight: isSelected ? 800 : 600,
                 cursor: 'pointer',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
-                lineHeight: 1,
-                gap: '3px'
+                lineHeight: 1
               }}
             >
-              <span>{day}</span>
-
-              {/* Indicatore visivo dello stato sotto il numero */}
-              <div style={{ 
-                height: '8px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
-              }}>
-                {dietState === 'success' && (
-                  <span
-                    title="Dieta seguita"
-                    style={{
-                      color: '#e09f3e',
-                      fontSize: '10px',
-                      fontWeight: 900,
-                      lineHeight: 1
-                    }}
-                  >
-                    ✓
-                  </span>
-                )}
-                {dietState === 'cheat' && (
-                  <span
-                    title="Bottone nero"
-                    style={{
-                      display: 'inline-block',
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      backgroundColor: '#050508',
-                      border: '1px solid #cbd5e1',
-                      boxShadow: '0 0 3px rgba(0,0,0,0.8)'
-                    }}
-                  />
-                )}
-              </div>
+              {dietState === 'success' ? (
+                /* SIMBOLO GRANDE DIETA SEGUITA: Sostituisce completamente il numero del giorno */
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M 4 12 L 9.5 17.5 L 20 6"
+                      stroke="#e09f3e"
+                      strokeWidth="3.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M 4 12 L 9.5 17.5 L 20 6"
+                      stroke="#f8fafc"
+                      strokeWidth="1.2"
+                      strokeDasharray="2 1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              ) : dietState === 'cheat' ? (
+                /* SIMBOLO GRANDE BOTTONE NERO: Sostituisce completamente il numero del giorno */
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%'
+                }}>
+                  <BlackButtonIcon size={26} />
+                </div>
+              ) : (
+                /* GIORNO NON COMPILATO: Mostra il numero standard */
+                <span>{day}</span>
+              )}
             </button>
           );
         })}
