@@ -64,6 +64,18 @@ export async function scheduleDailyReminder(timeStr = '20:00') {
   const targetMinute = parseInt(minutesStr, 10) || 0;
 
   try {
+    // Registra il canale notifiche ad alta priorità su Android se supportato
+    try {
+      await LocalNotifications.createChannel({
+        id: 'coraline_reminders',
+        name: 'Promemoria Diario Coraline',
+        description: 'Notifica giornaliera dei topi saltatori alle 20:00',
+        importance: 5,
+        visibility: 1,
+        vibration: true
+      });
+    } catch (e) {}
+
     // Cancella eventuali notifiche precedenti
     await LocalNotifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] });
 
@@ -83,6 +95,7 @@ export async function scheduleDailyReminder(timeStr = '20:00') {
           title: 'I Topi Saltatori ti chiamano!',
           body: 'Asia, è ora di contrassegnare il tuo diario prima che l’Altra Madre se ne accorga!',
           id: NOTIFICATION_ID,
+          channelId: 'coraline_reminders',
           schedule: {
             at: scheduledDate,
             repeats: true,

@@ -17,32 +17,17 @@ export function getTodayDateString() {
 }
 
 /**
- * Carica il numero di chiavi mensili configurato (default: 4) con cache in RAM
+ * Numero di chiavi mensili fisso a 4 di default (non modificabile)
  */
 export function getKeysPerMonth() {
-  if (keysConfigCache !== null) return keysConfigCache;
-  try {
-    const val = localStorage.getItem(KEYS_CONFIG_KEY);
-    keysConfigCache = val ? Math.max(1, parseInt(val, 10)) : 4;
-    return keysConfigCache;
-  } catch (err) {
-    keysConfigCache = 4;
-    return 4;
-  }
+  return 4;
 }
 
 /**
- * Salva il numero di chiavi mensili configurato
+ * Mantenuto per compatibilità, fissa a 4
  */
-export function setKeysPerMonth(count) {
-  try {
-    const safeCount = Math.max(1, count);
-    keysConfigCache = safeCount;
-    localStorage.setItem(KEYS_CONFIG_KEY, String(safeCount));
-    return safeCount;
-  } catch (err) {
-    return 4;
-  }
+export function setKeysPerMonth() {
+  return 4;
 }
 
 /**
