@@ -111,7 +111,7 @@ export default function DaySelectionModal({
           gap: '12px',
           marginBottom: '6px'
         }}>
-          {/* 1. IN ALTO A SINISTRA: DIETA RISPETTATA (PIETRA VERDE) */}
+          {/* 1. IN ALTO A SINISTRA: DIETA RISPETTATA (PIETRA VERDE CON AURA VERDE) */}
           <button
             type="button"
             onClick={() => onSelectStatus(currentStatus === 'success' ? 'neutral' : 'success')}
@@ -128,10 +128,10 @@ export default function DaySelectionModal({
                 : 'rgba(6, 22, 37, 0.8)',
               border: currentStatus === 'success' 
                 ? '2px solid #4ade80' 
-                : '1.5px solid var(--border-dark-blue)',
+                : '1.5px solid rgba(74, 222, 128, 0.35)',
               boxShadow: currentStatus === 'success' 
-                ? '0 0 16px rgba(74, 222, 128, 0.4), inset 0 0 12px rgba(21, 128, 61, 0.3)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.4)',
+                ? '0 0 18px rgba(74, 222, 128, 0.5), inset 0 0 14px rgba(21, 128, 61, 0.4)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(74, 222, 128, 0.12)',
               cursor: 'pointer',
               position: 'relative',
               touchAction: 'manipulation',
@@ -145,7 +145,7 @@ export default function DaySelectionModal({
                 width: '54px',
                 height: '54px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 3px 8px rgba(16, 185, 129, 0.55))'
+                filter: 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.85)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6))'
               }}
             />
             {currentStatus === 'success' && (
@@ -160,7 +160,7 @@ export default function DaySelectionModal({
             )}
           </button>
 
-          {/* 2. IN ALTO A DESTRA: DIETA NON RISPETTATA (BOTTONE NERO) */}
+          {/* 2. IN ALTO A DESTRA: DIETA NON RISPETTATA (BOTTONE NERO CON AURA ROSSA) */}
           <button
             type="button"
             onClick={() => onSelectStatus(currentStatus === 'cheat' ? 'neutral' : 'cheat')}
@@ -177,10 +177,10 @@ export default function DaySelectionModal({
                 : 'rgba(6, 22, 37, 0.8)',
               border: currentStatus === 'cheat' 
                 ? '2px solid #ef4444' 
-                : '1.5px solid var(--border-dark-blue)',
+                : '1.5px solid rgba(239, 68, 68, 0.35)',
               boxShadow: currentStatus === 'cheat' 
-                ? '0 0 16px rgba(239, 68, 68, 0.4), inset 0 0 12px rgba(69, 10, 10, 0.3)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.4)',
+                ? '0 0 18px rgba(239, 68, 68, 0.5), inset 0 0 14px rgba(69, 10, 10, 0.4)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(239, 68, 68, 0.12)',
               cursor: 'pointer',
               position: 'relative',
               touchAction: 'manipulation',
@@ -194,7 +194,7 @@ export default function DaySelectionModal({
                 width: '52px',
                 height: '52px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95))'
+                filter: 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.85)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7))'
               }}
             />
             {currentStatus === 'cheat' && (
@@ -209,7 +209,7 @@ export default function DaySelectionModal({
             )}
           </button>
 
-          {/* 3. IN BASSO A SINISTRA: SGARRO CON CHIAVE */}
+          {/* 3. IN BASSO A SINISTRA: SGARRO CON CHIAVE (CHIAVE JOLLY CON AURA GIALLA) */}
           <button
             type="button"
             onClick={() => onSelectStatus(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key')}
@@ -230,11 +230,13 @@ export default function DaySelectionModal({
               border: currentStatus === 'cheat_key' 
                 ? '2px solid var(--coraline-yellow)' 
                 : canUseKey 
-                ? '1.5px solid var(--border-dark-blue)' 
+                ? '1.5px solid rgba(216, 198, 21, 0.35)' 
                 : '1px solid #1e293b',
               boxShadow: currentStatus === 'cheat_key' 
-                ? '0 0 16px rgba(216, 198, 21, 0.4), inset 0 0 12px rgba(120, 99, 67, 0.3)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.4)',
+                ? '0 0 18px rgba(216, 198, 21, 0.5), inset 0 0 14px rgba(120, 99, 67, 0.4)' 
+                : canUseKey 
+                ? '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(216, 198, 21, 0.12)' 
+                : 'none',
               cursor: canUseKey ? 'pointer' : 'not-allowed',
               opacity: canUseKey ? 1 : 0.35,
               position: 'relative',
@@ -249,7 +251,7 @@ export default function DaySelectionModal({
                 width: '48px',
                 height: '48px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85))'
+                filter: 'drop-shadow(0 0 12px rgba(216, 198, 21, 0.85)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6))'
               }}
             />
             {currentStatus === 'cheat_key' && (
