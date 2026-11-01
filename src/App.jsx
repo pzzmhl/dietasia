@@ -361,32 +361,38 @@ export default function App() {
     : { dietState: 'neutral' };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      maxWidth: '480px',
-      margin: '0 auto',
-      padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px env(safe-area-inset-bottom, 24px) 16px',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative'
-    }}>
+    <>
       {/* SFONDO NOTTURNO CON STELLE DI CORALINE (FULL-SCREEN HARDWARE-ACCELERATED) */}
       <div
         aria-hidden="true"
         style={{
           position: 'fixed',
-          inset: 0,
-          zIndex: -1,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 0,
           backgroundImage: `url(${starryNightBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
-          pointerEvents: 'none',
-          transform: 'translateZ(0)'
+          pointerEvents: 'none'
         }}
       />
 
-      {/* 1. ZONA GIF: BANNER ANIMATO (SPAZIATO DALL'ALTO, NON ANCORATO AL BORDO SUPERIORE) */}
+      <div style={{
+        minHeight: '100vh',
+        maxWidth: '480px',
+        margin: '0 auto',
+        padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px env(safe-area-inset-bottom, 24px) 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        {/* 1. ZONA GIF: BANNER ANIMATO (SPAZIATO DALL'ALTO, NON ANCORATO AL BORDO SUPERIORE) */}
       <div style={{ marginTop: '6px', marginBottom: '14px' }}>
         <AnimatedBanner latestOutcomeTrigger={outcomeTrigger} />
       </div>
@@ -524,6 +530,7 @@ export default function App() {
           setAllLogs(restoredLogs);
         }}
       />
-    </div>
+      </div>
+    </>
   );
 }
