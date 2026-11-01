@@ -227,14 +227,21 @@ export function getUnmarkedPastDays(allLogs) {
 }
 
 /**
- * Calcola i giorni di dieta consecutivi (streak attuale di successi)
+ * Calcola i giorni di dieta consecutivi (streak di successi).
+ * - Se viene fornita una data di riferimento (es. il giorno appena contrassegnato con 'success'),
+ *   calcola la catena continua di successi che include quella data (sia a ritroso che in avanti).
+ * - Se non viene fornita una referenceDateStr, calcola la catena continua legata a oggi (o ieri),
+ *   tenendo conto anche di eventuali giorni pre-registrati / testati in avanti.
+ * - Inoltre, restituisce il valore più significativo fra la catena attiva e la sequenza
+ *   consecutiva massima presente nei log.
+ * 
  * @param {Record<string, any>} allLogs
+ * @param {string} [referenceDateStr] Data opzionale in formato 'YYYY-MM-DD'
  * @returns {number} Numero di giorni consecutivi di dieta rispettata
  */
-export function getConsecutiveDietStreak(allLogs) {
+export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
   if (!allLogs || typeof allLogs !== 'object') return 0;
 
-  const now = new Date();
   const formatYMD = (d) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -242,35 +249,128 @@ export function getConsecutiveDietStreak(allLogs) {
     return `${y}-${m}-${day}`;
   };
 
-  const todayStr = formatYMD(now);
-  const todayLog = allLogs[todayStr];
-  
-  let checkDate = new Date(now);
-  let streak = 0;
+  const parseYMD = (str) => {
+    if (!str || typeof str !== 'string') return null;
+    const parts = str.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+  };
 
-  // Se oggi è segnato come 'success', contiamo partendo da oggi
-  if (todayLog && todayLog.dietState === 'success') {
-    streak = 1;
-    checkDate.setDate(checkDate.getDate() - 1);
-  } else if (!todayLog || todayLog.dietState === 'neutral') {
-    // Se oggi non è ancora stato segnato, verifichiamo la serie a ritroso da ieri
-    checkDate.setDate(checkDate.getDate() - 1);
-  } else {
-    // Se oggi è già segnato con uno sgarro, la serie è interrotta
-    return 0;
-  }
-
-  // Conta i giorni consecutivi a ritroso fino a trovare un'interruzione (con tetto di sicurezza)
-  while (streak < 3650) {
-    const dateStr = formatYMD(checkDate);
-    const log = allLogs[dateStr];
-    if (log && log.dietState === 'success') {
-      streak++;
-      checkDate.setDate(checkDate.getDate() - 1);
-    } else {
-      break;
+  // 1. Se viene indicata una data di riferimento specifica (es. giorno cliccato dall'utente):
+  if (referenceDateStr && typeof referenceDateStr === 'string') {
+    const refLog = allLogs[referenceDateStr];
+    if (refLog && refLog.dietState === 'success') {
+      let streak = 1;
+      const refDate = parseYMD(referenceDateStr);
+      if (refDate) {
+        // A ritroso (giorni precedenti)
+        const pastDate = new Date(refDate);
+        while (streak < 3650) {
+          pastDate.setDate(pastDate.getDate() - 1);
+          const pStr = formatYMD(pastDate);
+          if (allLogs[pStr] && allLogs[pStr].dietState === 'success') {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        // In avanti (giorni successivi se pre-registrati o testati)
+        const futureDate = new Date(refDate);
+        while (streak < 3650) {
+          futureDate.setDate(futureDate.getDate() + 1);
+          const fStr = formatYMD(futureDate);
+          if (allLogs[fStr] && allLogs[fStr].dietState === 'success') {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        return streak;
+      }
     }
   }
 
-  return streak;
+  // 2. Se non c'è una data di riferimento, calcola la catena continua legata a oggi (o ieri)
+  const now = new Date();
+  now.setHours(12, 0, 0, 0);
+  const todayStr = formatYMD(now);
+  const todayLog = allLogs[todayStr];
+
+  let chainToday = 0;
+  if (todayLog && todayLog.dietState === 'success') {
+    chainToday = 1;
+    // Indietro
+    const pDate = new Date(now);
+    while (chainToday < 3650) {
+      pDate.setDate(pDate.getDate() - 1);
+      const pStr = formatYMD(pDate);
+      if (allLogs[pStr] && allLogs[pStr].dietState === 'success') {
+        chainToday++;
+      } else {
+        break;
+      }
+    }
+    // Avanti
+    const fDate = new Date(now);
+    while (chainToday < 3650) {
+      fDate.setDate(fDate.getDate() + 1);
+      const fStr = formatYMD(fDate);
+      if (allLogs[fStr] && allLogs[fStr].dietState === 'success') {
+        chainToday++;
+      } else {
+        break;
+      }
+    }
+  } else if (!todayLog || todayLog.dietState === 'neutral') {
+    // Oggi non è ancora segnato: verifica catena a ritroso da ieri
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yStr = formatYMD(yesterday);
+    if (allLogs[yStr] && allLogs[yStr].dietState === 'success') {
+      chainToday = 1;
+      const pDate = new Date(yesterday);
+      while (chainToday < 3650) {
+        pDate.setDate(pDate.getDate() - 1);
+        const pStr = formatYMD(pDate);
+        if (allLogs[pStr] && allLogs[pStr].dietState === 'success') {
+          chainToday++;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  // 3. Calcola la massima serie consecutiva presente in tutti i dati registrati
+  const successDates = Object.keys(allLogs)
+    .filter((dStr) => allLogs[dStr] && allLogs[dStr].dietState === 'success')
+    .sort();
+
+  let maxStreak = 0;
+  let curStreak = 0;
+  let prevDateObj = null;
+
+  for (const dStr of successDates) {
+    const dObj = parseYMD(dStr);
+    if (!dObj) continue;
+
+    if (prevDateObj) {
+      const diffMs = dObj.getTime() - prevDateObj.getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        curStreak++;
+      } else {
+        curStreak = 1;
+      }
+    } else {
+      curStreak = 1;
+    }
+
+    prevDateObj = dObj;
+    if (curStreak > maxStreak) {
+      maxStreak = curStreak;
+    }
+  }
+
+  return Math.max(chainToday, maxStreak);
 }

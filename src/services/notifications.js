@@ -32,6 +32,24 @@ export async function requestNotificationPermission() {
 }
 
 /**
+ * Inizializza il canale notifiche ad alta priorità su Android (API 26+)
+ */
+export async function initNotificationChannels() {
+  try {
+    await LocalNotifications.createChannel({
+      id: 'coraline_reminders',
+      name: 'Promemoria Diario Coraline',
+      description: 'Notifiche e allarmi dell’Altro Mondo',
+      importance: 5,
+      visibility: 1,
+      vibration: true
+    });
+  } catch (e) {
+    // Non-Android o canale già presente
+  }
+}
+
+/**
  * Pianifica il promemoria giornaliero alle ore 20:00 (o timeStr indicato).
  * Se la giornata di oggi è già stata registrata con successo o sgarro,
  * la notifica odierna viene evitata e programmata direttamente per il giorno successivo.
@@ -43,18 +61,7 @@ export async function scheduleDailyReminder(timeStr = '20:00', isTodayLogged = f
 
   try {
     await requestNotificationPermission();
-
-    // Registra il canale notifiche ad alta priorità su Android
-    try {
-      await LocalNotifications.createChannel({
-        id: 'coraline_reminders',
-        name: 'Promemoria Diario Coraline',
-        description: 'Notifiche e allarmi dell’Altro Mondo',
-        importance: 5,
-        visibility: 1,
-        vibration: true
-      });
-    } catch (e) {}
+    await initNotificationChannels();
 
     // Cancella notifiche precedenti per evitare doppioni
     await LocalNotifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] });
@@ -101,6 +108,7 @@ export async function scheduleDailyReminder(timeStr = '20:00', isTodayLogged = f
  */
 export async function sendWybieStreakNotification(streak) {
   await requestNotificationPermission();
+  await initNotificationChannels();
 
   const title = '✦ Wybie è fiero di te, Asia! ✦';
   const body = `Ehi Asia, ${streak} giorni di fila senza sgarrare! Persino la nonna sarebbe impressionata, stai battendo l'Altro Mondo!`;
@@ -113,7 +121,7 @@ export async function sendWybieStreakNotification(streak) {
           body,
           id: 1000 + Number(streak),
           channelId: 'coraline_reminders',
-          schedule: { at: new Date(Date.now() + 500) },
+          schedule: { at: new Date(Date.now() + 250) },
           smallIcon: 'ic_launcher'
         }
       ]
@@ -133,6 +141,7 @@ export async function sendWybieStreakNotification(streak) {
  */
 export async function sendOtherMotherKeysDepletedNotification() {
   await requestNotificationPermission();
+  await initNotificationChannels();
 
   const title = "✦ L'Altra Madre ha ingoiato l'ultima chiave! ✦";
   const body = "Hai esaurito tutti i tuoi sgarri del mese, Asia! L'Altra Madre ha preso l'ultima Chiave Nera... niente più errori o vorrà cucirti i bottoni!";
@@ -145,7 +154,7 @@ export async function sendOtherMotherKeysDepletedNotification() {
           body,
           id: 2001,
           channelId: 'coraline_reminders',
-          schedule: { at: new Date(Date.now() + 500) },
+          schedule: { at: new Date(Date.now() + 250) },
           smallIcon: 'ic_launcher'
         }
       ]

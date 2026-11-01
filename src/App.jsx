@@ -13,7 +13,8 @@ import {
   requestNotificationPermission, 
   scheduleDailyReminder,
   sendWybieStreakNotification,
-  sendOtherMotherKeysDepletedNotification 
+  sendOtherMotherKeysDepletedNotification,
+  initNotificationChannels
 } from './services/notifications';
 import { triggerHapticFeedback } from './services/haptics';
 
@@ -247,6 +248,11 @@ export default function App() {
     return !!(todayLog && todayLog.dietState && todayLog.dietState !== 'neutral');
   }, [allLogs, todayStr]);
 
+  // Inizializza i canali di notifica per Android e pianifica il promemoria
+  useEffect(() => {
+    initNotificationChannels();
+  }, []);
+
   // Pianifica o aggiorna la notifica quotidiana delle 20:00:
   // Se oggi è già segnato, la notifica per oggi viene evitata e programmata per domani!
   useEffect(() => {
@@ -307,8 +313,8 @@ export default function App() {
         }, 120);
       }
     } else if (newStatus === 'success') {
-      // Calcola il nuovo streak di dieta consecutiva
-      const newStreak = getConsecutiveDietStreak(updatedLogs);
+      // Calcola il nuovo streak di dieta consecutiva ancorato alla data selezionata
+      const newStreak = getConsecutiveDietStreak(updatedLogs, targetDate);
       const lastCelebrated = Number(localStorage.getItem('coraline_last_celebrated_streak') || 0);
 
       // NOTIFICA 1: Wybie celebra traguardi di costanza (es. 3, 5, 7, 10, 14, 21, 30 giorni o nuovo record >= 3)
@@ -361,6 +367,11 @@ export default function App() {
           context: 'cheat'
         });
       }, 120);
+    } else if (newStatus === 'neutral') {
+      // Se si azzera una data, resettiamo il tracker di celebrazione per permettere nuovi test
+      try {
+        localStorage.setItem('coraline_last_celebrated_streak', '0');
+      } catch (e) {}
     }
   }, [dayModalState.dateStr, selectedDate, allLogs, remainingKeys]);
 
