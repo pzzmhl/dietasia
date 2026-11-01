@@ -60,31 +60,31 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
     buttonLabel = "Continua così ✦";
   }
 
-  // Palette dinamica contestuale
-  let borderColor = '#34d399';
-  let glowColor = 'rgba(52, 211, 153, 0.4)';
-  let buttonBg = '#15803d';
-  let buttonTextColor = '#ffffff';
-  let bubbleStitchColor = '#34d399';
+  // Palette dinamica contestuale con note soffuse e vellutate
+  let borderColor = 'rgba(74, 222, 128, 0.45)';
+  let glowColor = 'rgba(0, 0, 0, 0.5)';
+  let buttonBg = 'rgba(18, 48, 35, 0.85)';
+  let buttonTextColor = 'var(--coraline-parchment)';
+  let bubbleStitchColor = 'rgba(74, 222, 128, 0.6)';
 
   if (isLastKey) {
-    borderColor = '#f59e0b';
-    glowColor = 'rgba(245, 158, 11, 0.45)';
-    buttonBg = '#786343';
-    buttonTextColor = '#ffffff';
-    bubbleStitchColor = 'var(--coraline-yellow)';
+    borderColor = 'rgba(216, 198, 21, 0.45)';
+    glowColor = 'rgba(0, 0, 0, 0.5)';
+    buttonBg = 'rgba(48, 38, 22, 0.85)';
+    buttonTextColor = 'var(--coraline-parchment)';
+    bubbleStitchColor = 'rgba(216, 198, 21, 0.6)';
   } else if (isCheat) {
-    borderColor = '#ef4444';
-    glowColor = 'rgba(239, 68, 68, 0.4)';
-    buttonBg = '#7f1d1d';
-    buttonTextColor = '#fee2e2';
-    bubbleStitchColor = '#f87171';
+    borderColor = 'rgba(239, 68, 68, 0.45)';
+    glowColor = 'rgba(0, 0, 0, 0.5)';
+    buttonBg = 'rgba(48, 18, 22, 0.85)';
+    buttonTextColor = 'var(--coraline-parchment)';
+    bubbleStitchColor = 'rgba(239, 68, 68, 0.6)';
   } else if (isKey) {
-    borderColor = 'var(--coraline-yellow)';
-    glowColor = 'rgba(216, 198, 21, 0.4)';
-    buttonBg = 'rgba(120, 99, 67, 0.9)';
-    buttonTextColor = '#ffffff';
-    bubbleStitchColor = 'var(--coraline-yellow)';
+    borderColor = 'rgba(216, 198, 21, 0.45)';
+    glowColor = 'rgba(0, 0, 0, 0.5)';
+    buttonBg = 'rgba(48, 38, 22, 0.85)';
+    buttonTextColor = 'var(--coraline-parchment)';
+    bubbleStitchColor = 'rgba(216, 198, 21, 0.6)';
   }
 
   return (
@@ -225,7 +225,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           />
         </div>
 
-        {/* PULSANTE DI CONFERMA / CHIUSURA */}
+        {/* PULSANTE DI CONFERMA / CHIUSURA CON TONI SOFFUSI */}
         <button
           onClick={onClose}
           style={{
@@ -234,12 +234,12 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             color: buttonTextColor,
             fontFamily: 'var(--font-coraline)',
             fontWeight: 'normal',
-            fontSize: '12.5px',
+            fontSize: '12px',
             letterSpacing: '0.8px',
             padding: '11px 16px',
             borderRadius: '14px',
             border: `1.5px solid ${borderColor}`,
-            boxShadow: `0 6px 18px ${glowColor}`,
+            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.25)',
             cursor: 'pointer',
             touchAction: 'manipulation'
           }}

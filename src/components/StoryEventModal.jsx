@@ -35,8 +35,8 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
     borderColor: '#ef4444',
     glowColor: 'rgba(239, 68, 68, 0.5)',
     stitchColor: '#f87171',
-    buttonBg: '#991b1b',
-    buttonBorder: '#ef4444',
+    buttonBg: 'rgba(50, 18, 22, 0.85)',
+    buttonBorder: 'rgba(239, 68, 68, 0.5)',
     titleColor: '#fca5a5'
   } : {
     title: "Wybie è fiero di te!",
@@ -48,8 +48,8 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
     borderColor: 'var(--coraline-yellow)',
     glowColor: 'rgba(216, 198, 21, 0.45)',
     stitchColor: 'var(--coraline-yellow)',
-    buttonBg: '#786343',
-    buttonBorder: 'var(--coraline-yellow)',
+    buttonBg: 'rgba(48, 38, 22, 0.85)',
+    buttonBorder: 'rgba(216, 198, 21, 0.5)',
     titleColor: 'var(--coraline-yellow)'
   };
 
