@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
+import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Modal Compatto e Iconico per la Registrazione Esito Giornaliero:
@@ -67,10 +68,12 @@ export default function DaySelectionModal({
         style={{
           width: '100%',
           maxWidth: '290px',
-          background: 'linear-gradient(180deg, #0d2c49 0%, #061625 100%)',
+          background: 'linear-gradient(180deg, rgba(13, 44, 73, 0.94) 0%, rgba(6, 22, 37, 0.96) 100%)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           borderRadius: '24px',
           border: '1.5px solid var(--border-dark-blue-light)',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(26, 69, 110, 0.4)',
+          boxShadow: 'inset 0 1.5px 0 rgba(216, 198, 21, 0.35), 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(26, 69, 110, 0.4)',
           padding: '20px 16px 16px 16px',
           display: 'flex',
           flexDirection: 'column',
@@ -114,7 +117,10 @@ export default function DaySelectionModal({
           {/* 1. IN ALTO A SINISTRA: DIETA RISPETTATA (PIETRA VERDE CON AURA VERDE) */}
           <button
             type="button"
-            onClick={() => onSelectStatus(currentStatus === 'success' ? 'neutral' : 'success')}
+            onClick={() => {
+              triggerHapticFeedback('success');
+              onSelectStatus(currentStatus === 'success' ? 'neutral' : 'success');
+            }}
             aria-label="Dieta Rispettata"
             title="Dieta Rispettata"
             style={{
@@ -130,8 +136,8 @@ export default function DaySelectionModal({
                 ? '2px solid #4ade80' 
                 : '1.5px solid rgba(74, 222, 128, 0.35)',
               boxShadow: currentStatus === 'success' 
-                ? '0 0 18px rgba(74, 222, 128, 0.5), inset 0 0 14px rgba(21, 128, 61, 0.4)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(74, 222, 128, 0.12)',
+                ? 'inset 0 1px 0 rgba(74, 222, 128, 0.5), 0 0 18px rgba(74, 222, 128, 0.5), inset 0 0 14px rgba(21, 128, 61, 0.4)' 
+                : 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(74, 222, 128, 0.12)',
               cursor: 'pointer',
               position: 'relative',
               touchAction: 'manipulation',
@@ -141,6 +147,7 @@ export default function DaySelectionModal({
             <img
               src={seeingStoneImg}
               alt="Dieta Rispettata"
+              className="stop-motion-icon"
               style={{
                 width: '54px',
                 height: '54px',
@@ -163,7 +170,10 @@ export default function DaySelectionModal({
           {/* 2. IN ALTO A DESTRA: DIETA NON RISPETTATA (BOTTONE NERO CON AURA ROSSA) */}
           <button
             type="button"
-            onClick={() => onSelectStatus(currentStatus === 'cheat' ? 'neutral' : 'cheat')}
+            onClick={() => {
+              triggerHapticFeedback('cheat');
+              onSelectStatus(currentStatus === 'cheat' ? 'neutral' : 'cheat');
+            }}
             aria-label="Dieta Non Rispettata"
             title="Dieta Non Rispettata"
             style={{
@@ -179,8 +189,8 @@ export default function DaySelectionModal({
                 ? '2px solid #ef4444' 
                 : '1.5px solid rgba(239, 68, 68, 0.35)',
               boxShadow: currentStatus === 'cheat' 
-                ? '0 0 18px rgba(239, 68, 68, 0.5), inset 0 0 14px rgba(69, 10, 10, 0.4)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(239, 68, 68, 0.12)',
+                ? 'inset 0 1px 0 rgba(239, 68, 68, 0.5), 0 0 18px rgba(239, 68, 68, 0.5), inset 0 0 14px rgba(69, 10, 10, 0.4)' 
+                : 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(239, 68, 68, 0.12)',
               cursor: 'pointer',
               position: 'relative',
               touchAction: 'manipulation',
@@ -190,6 +200,7 @@ export default function DaySelectionModal({
             <img
               src={blackButtonImg}
               alt="Dieta Non Rispettata"
+              className="stop-motion-icon"
               style={{
                 width: '52px',
                 height: '52px',
@@ -212,7 +223,10 @@ export default function DaySelectionModal({
           {/* 3. IN BASSO A SINISTRA: SGARRO CON CHIAVE (CHIAVE JOLLY CON AURA GIALLA) */}
           <button
             type="button"
-            onClick={() => onSelectStatus(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key')}
+            onClick={() => {
+              triggerHapticFeedback('key');
+              onSelectStatus(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key');
+            }}
             disabled={!canUseKey}
             aria-label="Sgarro con Chiave"
             title="Sgarro con Chiave"
@@ -233,9 +247,9 @@ export default function DaySelectionModal({
                 ? '1.5px solid rgba(216, 198, 21, 0.35)' 
                 : '1px solid #1e293b',
               boxShadow: currentStatus === 'cheat_key' 
-                ? '0 0 18px rgba(216, 198, 21, 0.5), inset 0 0 14px rgba(120, 99, 67, 0.4)' 
+                ? 'inset 0 1px 0 rgba(216, 198, 21, 0.5), 0 0 18px rgba(216, 198, 21, 0.5), inset 0 0 14px rgba(120, 99, 67, 0.4)' 
                 : canUseKey 
-                ? '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(216, 198, 21, 0.12)' 
+                ? 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(216, 198, 21, 0.12)' 
                 : 'none',
               cursor: canUseKey ? 'pointer' : 'not-allowed',
               opacity: canUseKey ? 1 : 0.35,
@@ -247,6 +261,7 @@ export default function DaySelectionModal({
             <img
               src={keyImg}
               alt="Sgarro con Chiave"
+              className="stop-motion-icon"
               style={{
                 width: '48px',
                 height: '48px',
@@ -269,7 +284,10 @@ export default function DaySelectionModal({
           {/* 4. IN BASSO A DESTRA: X ANONIMA PER CHIUDERE */}
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              triggerHapticFeedback('selection');
+              onClose();
+            }}
             aria-label="Chiudi finestra"
             title="Chiudi"
             style={{
@@ -280,7 +298,7 @@ export default function DaySelectionModal({
               borderRadius: '18px',
               backgroundColor: 'rgba(6, 22, 37, 0.55)',
               border: '1.5px solid rgba(221, 202, 183, 0.18)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
+              boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 4px 12px rgba(0, 0, 0, 0.35)',
               cursor: 'pointer',
               touchAction: 'manipulation',
               transition: 'all 0.15s ease'
@@ -303,7 +321,10 @@ export default function DaySelectionModal({
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
             <button
               type="button"
-              onClick={() => onSelectStatus('neutral')}
+              onClick={() => {
+                triggerHapticFeedback('selection');
+                onSelectStatus('neutral');
+              }}
               style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid var(--border-dark-blue)',

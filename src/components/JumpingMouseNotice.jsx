@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import jumpingMouseImg from '../assets/jumping-mouse.webp';
+import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Avviso Topo Saltatore del Circo di Bobinsky:

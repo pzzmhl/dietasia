@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
+import { triggerHapticFeedback } from '../services/haptics';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -27,7 +28,7 @@ const DayCell = React.memo(function DayCell({
   // Stili e colori calcolati localmente con trasparenza armoniosa sullo sfondo stellato
   let cellBg = 'rgba(6, 22, 37, 0.45)';
   let cellBorder = '1px solid var(--border-dark-blue-subtle)';
-  let cellShadow = 'none';
+  let cellShadow = 'inset 0 1px 0 0 rgba(221, 202, 183, 0.12)';
 
   if (dietState === 'success') {
     cellBg = 'rgba(21, 128, 61, 0.32)';
@@ -56,9 +57,17 @@ const DayCell = React.memo(function DayCell({
       : '0 0 14px rgba(216, 198, 21, 0.55)';
   }
 
+  // Micro-inclinazione artigianale stop-motion per gli oggetti reali
+  const organicRotation = ((day * 7) % 5 - 2) * 1.2;
+
+  const handleClick = () => {
+    triggerHapticFeedback('selection');
+    onSelectDate(dateStr);
+  };
+
   return (
     <button
-      onClick={() => onSelectDate(dateStr)}
+      onClick={handleClick}
       style={{
         ...(isFirstDay ? { gridColumnStart: firstDayColumn } : {}),
         aspectRatio: '1 / 1',
@@ -82,7 +91,8 @@ const DayCell = React.memo(function DayCell({
         lineHeight: 1,
         touchAction: 'pan-y',
         willChange: 'transform',
-        transform: 'translateZ(0)'
+        transform: isSelected ? 'scale(1.06) translateZ(0)' : 'translateZ(0)',
+        transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease'
       }}
     >
       {dietState === 'success' ? (
@@ -91,12 +101,14 @@ const DayCell = React.memo(function DayCell({
           alt="Dieta Rispettata"
           loading="eager"
           decoding="async"
+          className="stop-motion-icon"
           style={{
             width: '84%',
             height: '84%',
             objectFit: 'contain',
             filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            transform: `rotate(${organicRotation}deg)`
           }}
         />
       ) : dietState === 'cheat' ? (
@@ -105,12 +117,14 @@ const DayCell = React.memo(function DayCell({
           alt="Sgarrato"
           loading="eager"
           decoding="async"
+          className="stop-motion-icon"
           style={{
             width: '84%',
             height: '84%',
             objectFit: 'contain',
             filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85))',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            transform: `rotate(${organicRotation}deg)`
           }}
         />
       ) : dietState === 'cheat_key' ? (
@@ -119,12 +133,14 @@ const DayCell = React.memo(function DayCell({
           alt="Chiave Jolly Usata"
           loading="eager"
           decoding="async"
+          className="stop-motion-icon"
           style={{
             width: '86%',
             height: '86%',
             objectFit: 'contain',
             filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 12px rgba(225, 240, 255, 0.8)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9))',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            transform: `rotate(${organicRotation}deg)`
           }}
         />
       ) : (
@@ -135,7 +151,7 @@ const DayCell = React.memo(function DayCell({
 });
 
 /**
- * Calendario Mensile a Griglia stile Coraline (Hardware Accelerated & 120 FPS)
+ * Calendario Mensile a Griglia stile Coraline (Hardware Accelerated, Gesture Swipe & 120 FPS)
  */
 export default function CalendarGrid({ 
   selectedDate, 
@@ -146,6 +162,8 @@ export default function CalendarGrid({
   onPrevMonth,
   onNextMonth
 }) {
+  const touchStartRef = useRef(null);
+
   const { firstDayColumn, daysArray, todayStr } = useMemo(() => {
     const count = new Date(displayYear, displayMonth + 1, 0).getDate();
     const rawFirst = new Date(displayYear, displayMonth, 1).getDay();
@@ -164,11 +182,43 @@ export default function CalendarGrid({
     };
   }, [displayYear, displayMonth]);
 
+  // Gestione Swipe Orizzontale Naturale per Sfogliare i Mesi (Thumb Reach)
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartRef.current || !e.changedTouches || e.changedTouches.length === 0) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+    touchStartRef.current = null;
+
+    // Riconosce swipe orizzontale intenzionale senza bloccare lo scroll verticale
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25 && deltaTime < 650) {
+      if (deltaX < 0) {
+        triggerHapticFeedback('swipe');
+        onNextMonth();
+      } else {
+        triggerHapticFeedback('swipe');
+        onPrevMonth();
+      }
+    }
+  };
+
   const GRID_GAP = '4px';
 
   return (
     <div 
       className="stitched-card" 
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{ 
         padding: '14px 10px', 
         marginBottom: '16px',
@@ -186,7 +236,10 @@ export default function CalendarGrid({
       }}>
         {/* Freccia Sinistra (Mese Precedente) */}
         <button
-          onClick={onPrevMonth}
+          onClick={() => {
+            triggerHapticFeedback('swipe');
+            onPrevMonth();
+          }}
           aria-label="Mese precedente"
           style={{
             width: '32px',
@@ -194,6 +247,7 @@ export default function CalendarGrid({
             borderRadius: '8px',
             backgroundColor: 'rgba(6, 22, 37, 0.55)',
             border: '1.5px solid var(--border-dark-blue)',
+            boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 2px 6px rgba(0, 0, 0, 0.35)',
             color: 'var(--coraline-parchment)',
             cursor: 'pointer',
             display: 'flex',
@@ -206,7 +260,7 @@ export default function CalendarGrid({
           ◀
         </button>
 
-        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Identico alla Dashboard) */}
+        {/* Nome del Mese Centrato in Font Ufficiale Coraline */}
         <h2 style={{
           fontFamily: 'var(--font-coraline)',
           fontSize: '16px',
@@ -221,7 +275,10 @@ export default function CalendarGrid({
 
         {/* Freccia Destra (Mese Successivo) */}
         <button
-          onClick={onNextMonth}
+          onClick={() => {
+            triggerHapticFeedback('swipe');
+            onNextMonth();
+          }}
           aria-label="Mese successivo"
           style={{
             width: '32px',
@@ -229,6 +286,7 @@ export default function CalendarGrid({
             borderRadius: '8px',
             backgroundColor: 'rgba(6, 22, 37, 0.55)',
             border: '1.5px solid var(--border-dark-blue)',
+            boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 2px 6px rgba(0, 0, 0, 0.35)',
             color: 'var(--coraline-parchment)',
             cursor: 'pointer',
             display: 'flex',
@@ -270,14 +328,18 @@ export default function CalendarGrid({
         })}
       </div>
 
-      {/* Griglia Giorni del Mese con Celled Memozzate */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', 
-        gap: GRID_GAP,
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
+      {/* Griglia Giorni del Mese con Celle Memoizzate e transizione fluida */}
+      <div 
+        key={`${displayYear}-${displayMonth}`}
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', 
+          gap: GRID_GAP,
+          width: '100%',
+          boxSizing: 'border-box',
+          animation: 'monthFadeSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
         {daysArray.map((day) => {
           const m = String(displayMonth + 1).padStart(2, '0');
           const d = String(day).padStart(2, '0');

@@ -4,6 +4,7 @@ import blackButtonImg from '../assets/black-button.webp';
 import streakStarImg from '../assets/streak-star.webp';
 import KeyIcon from './KeyIcon';
 import { getConsecutiveDietStreak } from '../utils/storage';
+import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Dashboard Statistiche Mensile Stile Coraline (Versione Gigante, Streak & Diciture Interattive al Tap):
@@ -41,6 +42,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
   }, [allLogs, displayYear, displayMonth, keysPerMonth]);
 
   const toggleTooltip = (type) => {
+    triggerHapticFeedback('selection');
     setActiveTooltip((prev) => (prev === type ? null : type));
   };
 
@@ -110,8 +112,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             ? '1.5px solid var(--coraline-yellow)' 
             : '1.5px solid var(--border-dark-blue-light)',
           boxShadow: activeTooltip === 'keys'
-            ? 'inset 0 0 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(216, 198, 21, 0.4)'
-            : 'inset 0 0 16px rgba(0, 0, 0, 0.5)',
+            ? 'inset 0 1.5px 0 rgba(216, 198, 21, 0.45), inset 0 0 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(216, 198, 21, 0.4)'
+            : 'inset 0 1.5px 0 rgba(221, 202, 183, 0.2), inset 0 0 16px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.35)',
           marginBottom: '12px',
           display: 'flex',
           alignItems: 'center',
@@ -229,8 +231,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               ? '1.5px solid #34d399' 
               : '1.5px solid var(--border-dark-blue-light)',
             boxShadow: activeTooltip === 'success' 
-              ? '0 0 14px rgba(52, 211, 153, 0.45)' 
-              : '0 6px 16px rgba(0, 0, 0, 0.4)',
+              ? 'inset 0 1px 0 rgba(74, 222, 128, 0.4), 0 0 14px rgba(52, 211, 153, 0.45)' 
+              : 'inset 0 1px 0 rgba(221, 202, 183, 0.18), 0 6px 16px rgba(0, 0, 0, 0.4)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -282,8 +284,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               ? '1.5px solid var(--coraline-yellow)' 
               : '1.5px solid var(--border-dark-blue-light)',
             boxShadow: activeTooltip === 'streak' 
-              ? '0 0 14px rgba(216, 198, 21, 0.45)' 
-              : '0 6px 16px rgba(0, 0, 0, 0.4)',
+              ? 'inset 0 1px 0 rgba(216, 198, 21, 0.4), 0 0 14px rgba(216, 198, 21, 0.45)' 
+              : 'inset 0 1px 0 rgba(221, 202, 183, 0.18), 0 6px 16px rgba(0, 0, 0, 0.4)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -335,8 +337,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               ? '1.5px solid #ef4444' 
               : '1.5px solid var(--border-dark-blue-light)',
             boxShadow: activeTooltip === 'cheat' 
-              ? '0 0 14px rgba(239, 68, 68, 0.45)' 
-              : '0 6px 16px rgba(0, 0, 0, 0.4)',
+              ? 'inset 0 1px 0 rgba(239, 68, 68, 0.4), 0 0 14px rgba(239, 68, 68, 0.45)' 
+              : 'inset 0 1px 0 rgba(221, 202, 183, 0.18), 0 6px 16px rgba(0, 0, 0, 0.4)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -368,6 +370,78 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           </div>
         </div>
       </div>
+
+      {/* SEZIONE 3: BARRA DI PROGRESSO DINAMICA PER GLI OBIETTIVI DI WYBIE (PROPOSTA 4) */}
+      {(() => {
+        const target = 7;
+        const isMilestone = streakCount >= target;
+        const filledSlots = isMilestone ? 7 : (streakCount % target);
+
+        return (
+          <div
+            onClick={() => toggleTooltip('streak')}
+            role="button"
+            tabIndex={0}
+            style={{
+              marginTop: '12px',
+              padding: '10px 14px',
+              backgroundColor: 'rgba(6, 22, 37, 0.52)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              borderRadius: '14px',
+              border: isMilestone ? '1.5px solid var(--coraline-gold)' : '1.5px solid var(--border-dark-blue-light)',
+              boxShadow: isMilestone 
+                ? 'inset 0 1px 0 rgba(216, 198, 21, 0.4), 0 0 14px rgba(216, 198, 21, 0.3)' 
+                : 'inset 0 1px 0 rgba(221, 202, 183, 0.18), 0 4px 12px rgba(0, 0, 0, 0.35)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+              cursor: 'pointer',
+              touchAction: 'pan-y'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '11px',
+              fontFamily: 'var(--font-body)',
+              color: 'var(--coraline-parchment)'
+            }}>
+              <span style={{ fontWeight: 700, letterSpacing: '0.4px' }}>
+                ✦ {isMilestone ? 'Traguardo Wybie Raggiunto!' : 'Cammino verso l\'Elogio di Wybie'}
+              </span>
+              <span style={{ color: 'var(--coraline-yellow)', fontWeight: 800 }}>
+                {streakCount}/7 giorni
+              </span>
+            </div>
+
+            {/* Traccia a 7 slot di avanzamento stile Coraline */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: '5px',
+              marginTop: '2px'
+            }}>
+              {Array.from({ length: 7 }).map((_, idx) => {
+                const isSlotFilled = idx < filledSlots;
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      height: '6px',
+                      borderRadius: '3px',
+                      backgroundColor: isSlotFilled ? 'var(--coraline-yellow)' : 'rgba(26, 69, 110, 0.45)',
+                      boxShadow: isSlotFilled ? '0 0 8px rgba(216, 198, 21, 0.7)' : 'none',
+                      transition: 'all 0.25s ease'
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       <style>{`
         @keyframes ghostlyAuraPulse {

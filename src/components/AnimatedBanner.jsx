@@ -6,6 +6,7 @@ import {
   mapStatusToCategory,
   preloadGif
 } from '../services/coralineGifs';
+import { triggerHapticFeedback } from '../services/haptics';
 
 // Durata stimata per 10 ripetizioni complete di una GIF di Coraline (~2.4s x 10 = 24s)
 const TEN_REPETITIONS_MS = 24000;
@@ -118,6 +119,7 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
   // Tocco sul banner quando è fermo per riavviare le 10 ripetizioni
   const handleBannerClick = () => {
     if (isFrozen) {
+      triggerHapticFeedback('selection');
       setIsFrozen(false);
       setFadeKey((prev) => prev + 1);
     }
@@ -141,7 +143,7 @@ export default function AnimatedBanner({ latestOutcomeTrigger = null }) {
         borderRadius: '18px',
         overflow: 'hidden',
         border: '1.5px solid var(--border-dark-blue-light)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(6, 22, 37, 0.5)',
+        boxShadow: 'inset 0 1.5px 0 rgba(216, 198, 21, 0.28), inset 0 0 15px rgba(6, 22, 37, 0.5), 0 10px 28px rgba(0, 0, 0, 0.65)',
         backgroundColor: 'rgba(6, 22, 37, 0.65)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',

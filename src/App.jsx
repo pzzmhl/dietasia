@@ -14,6 +14,7 @@ import {
   sendWybieStreakNotification,
   sendOtherMotherKeysDepletedNotification 
 } from './services/notifications';
+import { triggerHapticFeedback } from './services/haptics';
 
 // Immagini critiche per il rendering immediato e il preloading
 import catStandingImg from './assets/cat-standing.webp';
@@ -454,7 +455,10 @@ export default function App() {
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
-        onClick={() => setCatModalState((prev) => ({ ...prev, isOpen: true }))}
+        onClick={() => {
+          triggerHapticFeedback('selection');
+          setCatModalState((prev) => ({ ...prev, isOpen: true }));
+        }}
         aria-label="Ascolta il Gatto Nero"
         title="Tocca per riascoltare l'ultima frase del Gatto"
         style={{
