@@ -130,7 +130,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         tabIndex={0}
         aria-label="Chiavi Jolly Mensili"
         style={{
-          backgroundColor: 'rgba(6, 22, 37, 0.58)',
+          backgroundColor: 'rgba(6, 22, 37, 0.32)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           padding: keysPerMonth <= 4 ? '14px 12px' : '10px 8px',
@@ -218,7 +218,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(6, 22, 37, 0.52)',
+            backgroundColor: 'rgba(6, 22, 37, 0.28)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             padding: '14px 6px',
@@ -273,7 +273,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(6, 22, 37, 0.52)',
+            backgroundColor: 'rgba(6, 22, 37, 0.28)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             padding: '14px 6px',
@@ -328,7 +328,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(6, 22, 37, 0.52)',
+            backgroundColor: 'rgba(6, 22, 37, 0.28)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             padding: '14px 6px',

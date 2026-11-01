@@ -22,10 +22,10 @@
   --border-dark-blue-light: rgba(26, 69, 110, 0.85);
   --border-dark-blue-subtle: rgba(26, 69, 110, 0.45);
 
-  /* Sfondi, Card e Superfici Leggermente Trasparenti (Glassmorphism Dark) */
+  /* Sfondi, Card e Superfici Leggermente Trasparenti (Glassmorphism Dark Sfumatissimo) */
   --bg-deep: #071727;
-  --bg-card: rgba(10, 32, 54, 0.62);
-  --bg-card-inner: rgba(5, 18, 30, 0.58);
+  --bg-card: rgba(8, 22, 38, 0.44);
+  --bg-card-inner: rgba(5, 18, 30, 0.36);
 
   /* Tipografia */
   --font-coraline: 'CoralinesCat', 'Cinzel', cursive, serif;
@@ -145,7 +145,11 @@ body {
   background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
-  opacity: 0.15;
+  opacity: 0.06;
+  filter: blur(1.8px);
+  -webkit-filter: blur(1.8px);
+  mask-image: radial-gradient(circle at center, black 35%, rgba(0, 0, 0, 0.25) 90%);
+  -webkit-mask-image: radial-gradient(circle at center, black 35%, rgba(0, 0, 0, 0.25) 90%);
   pointer-events: none;
   border-radius: inherit;
   z-index: 0;
