@@ -196,23 +196,6 @@ export default function CalendarGrid({
           }}>
             {MONTHS_IT[displayMonth]} {displayYear}
           </h2>
-          <button
-            onClick={onTodayClick}
-            style={{
-              fontSize: '10px',
-              fontFamily: 'var(--font-gothic)',
-              padding: '2px 8px',
-              backgroundColor: 'rgba(216, 198, 21, 0.18)',
-              border: '1px solid var(--coraline-gold)',
-              borderRadius: '6px',
-              color: 'var(--coraline-yellow)',
-              cursor: 'pointer',
-              fontWeight: 700,
-              touchAction: 'manipulation'
-            }}
-          >
-            Oggi
-          </button>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
