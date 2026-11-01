@@ -24,7 +24,8 @@ export default function SecretSettingsModal({
   onClose, 
   keysPerMonth = 4,
   onChangeKeysPerMonth = () => {},
-  onRestoreSuccess = () => {} 
+  onRestoreSuccess = () => {},
+  onOpenDailyGreeting = () => {}
 }) {
   const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'backup' | 'preferences'
   
@@ -901,7 +902,47 @@ export default function SecretSettingsModal({
               </label>
             </div>
 
-            {/* 3. RIAVVIA NOTIFICHE & CELEBRAZIONI WYBIE */}
+            {/* 3. ANTEPRIMA SCHERMATA DEL BUONGIORNO */}
+            <div style={{
+              backgroundColor: 'rgba(4, 16, 28, 0.7)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              border: '1px solid var(--border-dark-blue-light)'
+            }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#4ade80', marginBottom: '4px' }}>
+                ✦ Schermata del Buongiorno (Primo Accesso)
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--coraline-brown)', marginBottom: '10px' }}>
+                Mostra la schermata minimale del Gatto con frase del giorno che appare al primo avvio quotidiano
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHapticFeedback('selection');
+                  onClose();
+                  setTimeout(() => {
+                    if (onOpenDailyGreeting) onOpenDailyGreeting();
+                  }, 200);
+                }}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(21, 128, 61, 0.25)',
+                  border: '1.5px solid #4ade80',
+                  borderRadius: '12px',
+                  color: '#4ade80',
+                  padding: '9px 12px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  touchAction: 'manipulation'
+                }}
+              >
+                Visualizza Anteprima Schermata
+              </button>
+            </div>
+
+            {/* 4. RIAVVIA NOTIFICHE & CELEBRAZIONI WYBIE */}
             <div style={{
               backgroundColor: 'rgba(4, 16, 28, 0.7)',
               borderRadius: '16px',

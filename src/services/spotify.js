@@ -82,3 +82,4 @@ export function openCoralineSpotifyShuffle() {
 
   return selectedTrack;
 }
+

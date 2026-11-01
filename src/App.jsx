@@ -8,6 +8,7 @@ import CatModal from './components/CatModal';
 import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
 import SecretSettingsModal from './components/SecretSettingsModal';
+import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import { 
   requestNotificationPermission, 
@@ -91,6 +92,23 @@ export default function App() {
     }
   });
 
+  // Schermata Minimale Quotidiana del Gatto (Primo Accesso del Giorno)
+  const [isDailyGreetingOpen, setIsDailyGreetingOpen] = useState(() => {
+    try {
+      const lastGreetingDate = localStorage.getItem('coraline_last_daily_greeting_date');
+      return lastGreetingDate !== todayStr;
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const handleDismissDailyGreeting = useCallback(() => {
+    try {
+      localStorage.setItem('coraline_last_daily_greeting_date', todayStr);
+    } catch (e) {}
+    setIsDailyGreetingOpen(false);
+  }, [todayStr]);
+
   // Modal Gestione Impostazioni della Porticina Segreta (include Diario & Backup)
   const [isSecretSettingsOpen, setIsSecretSettingsOpen] = useState(false);
 
@@ -99,6 +117,7 @@ export default function App() {
 
   // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
   const activeModalsRef = useRef({
+    dailyGreeting: false,
     settings: false,
     day: false,
     story: false,
@@ -106,6 +125,7 @@ export default function App() {
   });
 
   activeModalsRef.current = {
+    dailyGreeting: isDailyGreetingOpen,
     settings: isSecretSettingsOpen,
     day: dayModalState.isOpen,
     story: storyModalState.isOpen,
@@ -118,8 +138,10 @@ export default function App() {
     const registerBackHandler = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          const { settings, day, story, cat } = activeModalsRef.current;
-          if (settings) {
+          const { dailyGreeting, settings, day, story, cat } = activeModalsRef.current;
+          if (dailyGreeting) {
+            handleDismissDailyGreeting();
+          } else if (settings) {
             setIsSecretSettingsOpen(false);
           } else if (day) {
             setDayModalState({ isOpen: false, dateStr: null });
@@ -553,6 +575,14 @@ export default function App() {
         onRestoreSuccess={(restoredLogs) => {
           setAllLogs(restoredLogs);
         }}
+        onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
+      />
+
+      {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}
+      <DailyCatGreetingModal
+        isOpen={isDailyGreetingOpen}
+        onClose={handleDismissDailyGreeting}
+        dateStr={todayStr}
       />
       </div>
     </>
