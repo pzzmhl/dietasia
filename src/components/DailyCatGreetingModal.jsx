@@ -69,7 +69,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           position: 'absolute',
           inset: 0,
           backgroundImage: `
-            radial-gradient(circle at center, rgba(4, 16, 28, 0.5) 0%, rgba(2, 8, 15, 0.94) 80%),
+            radial-gradient(circle at center, rgba(4, 16, 28, 0.45) 0%, rgba(2, 8, 15, 0.94) 80%),
             url(${vortexBg})
           `,
           backgroundPosition: 'center center',
@@ -81,37 +81,14 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
         }}
       />
 
-      {/* HEADER SUPERIORE: SALUTO CON IL FONT UFFICIALE DI CORALINE (SENZA X) */}
-      <div
-        style={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 2,
-          paddingTop: '6px'
-        }}
-      >
-        <div
-          style={{
-            fontFamily: 'var(--font-coraline)',
-            fontSize: '24px',
-            color: 'var(--coraline-yellow)',
-            letterSpacing: '1.2px',
-            textAlign: 'center',
-            textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(216, 198, 21, 0.5)'
-          }}
-        >
-          ✦ {greeting} ✦
-        </div>
-      </div>
+      {/* Spazio flessibile in alto per bilanciare il centraggio perfetto */}
+      <div style={{ flex: '0 0 10px', width: '100%' }} />
 
-      {/* CONTENUTO CENTRALE: IL GATTO GIGANTE FLUTTUANTE + LA FRASE */}
+      {/* BLOCCO UNICO CENTRALE (TUTTO ORIENTATO AL CENTRO) */}
       <div
         style={{
           width: '100%',
-          maxWidth: '340px',
+          maxWidth: '360px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -121,25 +98,56 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           margin: 'auto 0'
         }}
       >
-        {/* Il Gatto Nero GIGANTE che prende quasi lo schermo */}
+        {/* 1. Saluto in piccolo con il font di Coraline orientato al centro */}
+        <div
+          style={{
+            fontFamily: 'var(--font-coraline)',
+            fontSize: '15px',
+            color: 'var(--coraline-yellow)',
+            letterSpacing: '1px',
+            textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(216, 198, 21, 0.5)',
+            marginBottom: '10px'
+          }}
+        >
+          ✦ {greeting} ✦
+        </div>
+
+        {/* 2. La frase che dice il gatto (in grande, pulita e centrale) */}
+        <h1
+          style={{
+            fontSize: '20px',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            lineHeight: 1.45,
+            color: '#fdfbf7',
+            letterSpacing: '-0.3px',
+            margin: '0 0 16px 0',
+            padding: '0 6px',
+            textShadow: '0 2px 14px rgba(0, 0, 0, 0.95), 0 0 16px rgba(13, 44, 73, 0.7)'
+          }}
+        >
+          "{quote}"
+        </h1>
+
+        {/* 3. Il Gatto sotto, ancora più grande di prima, che prende quasi lo schermo */}
         <div
           style={{
             position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '18px'
+            marginTop: '4px'
           }}
         >
           {/* Alone di mistero dietro al gatto gigante */}
           <div
             style={{
               position: 'absolute',
-              width: '220px',
-              height: '220px',
+              width: '260px',
+              height: '260px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, rgba(13, 44, 73, 0.18) 50%, transparent 70%)',
-              filter: 'blur(20px)',
+              background: 'radial-gradient(circle, rgba(74, 222, 128, 0.28) 0%, rgba(13, 44, 73, 0.2) 50%, transparent 70%)',
+              filter: 'blur(24px)',
               pointerEvents: 'none'
             }}
           />
@@ -150,32 +158,16 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
             loading="eager"
             decoding="async"
             style={{
-              height: '250px',
-              maxHeight: '36vh',
+              height: '310px',
+              maxHeight: '44vh',
               width: 'auto',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 16px rgba(74, 222, 128, 0.4))',
+              filter: 'drop-shadow(0 12px 28px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 18px rgba(74, 222, 128, 0.45))',
               animation: 'dailyCatFloat 3.8s ease-in-out infinite',
               pointerEvents: 'none',
               willChange: 'transform'
             }}
           />
-        </div>
-
-        {/* Frase del Gatto sotto al gatto */}
-        <div
-          style={{
-            fontSize: '17px',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            lineHeight: 1.45,
-            color: '#fdfbf7',
-            letterSpacing: '-0.2px',
-            padding: '0 8px',
-            textShadow: '0 2px 14px rgba(0, 0, 0, 0.95), 0 0 16px rgba(13, 44, 73, 0.7)'
-          }}
-        >
-          "{quote}"
         </div>
       </div>
 
