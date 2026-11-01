@@ -5,7 +5,12 @@ on:
     branches:
       - main
       - master
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -55,3 +60,17 @@ jobs:
           path: Coraline-Tracker-Beta.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: 📦 Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: Coraline-Tracker-Beta.apk
+          name: Coraline Tracker (Beta) ${{ github.ref_name }}
+          body: |
+            ### 🪡 Coraline Tracker (Beta) per Asia
+            - File APK pronto per installazione su Android: scarica il file **Coraline-Tracker-Beta.apk** qui sotto.
+            - Estetica originale Coraline (Pietra verde, Bottone nero, Chiave Jolly).
+            - Motore GIF animate categorizzate in rotazione deck.
+            - Allarme Topo Saltatore del Circo di Bobinsky per i giorni non contrassegnati.
+            - Gestione orario notifiche quotidiane sul telefono.
