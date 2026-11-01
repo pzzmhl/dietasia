@@ -1,0 +1,165 @@
+:root {
+  --bg-deep: #0f1026;
+  --bg-purple: #231942;
+  --bg-card: rgba(26, 20, 56, 0.75);
+  --bg-card-hover: rgba(35, 25, 66, 0.9);
+  --accent-yellow: #e09f3e;
+  --accent-yellow-glow: rgba(224, 159, 62, 0.45);
+  --accent-gold: #f4ba40;
+  --text-fog: #e2e8f0;
+  --text-muted: #94a3b8;
+  --stitch-offwhite: rgba(241, 245, 249, 0.5);
+  --stitch-crimson: #841b2d;
+  --stitch-dark: #12131e;
+  --border-stitch: rgba(224, 159, 62, 0.4);
+  --font-gothic: 'Cinzel', Georgia, serif;
+  --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-spooky: 'Creepster', cursive;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  background-color: var(--bg-deep);
+  color: var(--text-fog);
+  font-family: var(--font-body);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+/* Background atmosphere with vignette and subtle spiral nebula vibe */
+body {
+  background: 
+    radial-gradient(circle at 50% 15%, rgba(68, 44, 110, 0.4) 0%, transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(132, 27, 45, 0.2) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-purple) 65%, var(--bg-deep) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Stitched container utility */
+.stitched-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px dashed var(--border-stitch);
+  border-radius: 18px;
+  position: relative;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(15, 16, 38, 0.6);
+  transition: all 0.2s ease;
+}
+
+.stitched-card::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px dotted rgba(241, 245, 249, 0.15);
+  border-radius: 22px;
+  pointer-events: none;
+}
+
+/* Raincoat Yellow Glow */
+.glow-yellow {
+  box-shadow: 0 0 20px var(--accent-yellow-glow);
+}
+
+.text-gold {
+  color: var(--accent-gold);
+}
+
+.text-yellow {
+  color: var(--accent-yellow);
+}
+
+.font-gothic {
+  font-family: var(--font-gothic);
+}
+
+.font-spooky {
+  font-family: var(--font-spooky);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 16, 38, 0.4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(224, 159, 62, 0.3);
+  border-radius: 4px;
+}
+
+/* Hide scrollbar for clean horizontal carousel */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Pulsing subtle eye animation for eerie charm */
+@keyframes catBlink {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+.animate-blink {
+  animation: catBlink 6s infinite;
+  transform-origin: center;
+}
+
+/* Button pulse */
+@keyframes buttonPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: buttonPulse 3s infinite ease-in-out;
+}
+
+/* Speech bubble tail */
+.speech-bubble {
+  position: relative;
+  background: rgba(26, 20, 56, 0.95);
+  border: 2px dashed var(--accent-yellow);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 45px;
+  border-width: 12px 10px 0;
+  border-style: solid;
+  border-color: rgba(26, 20, 56, 0.95) transparent;
+  display: block;
+  width: 0;
+}
