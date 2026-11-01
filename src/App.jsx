@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { App as CapApp } from '@capacitor/app';
 import AnimatedBanner from './components/AnimatedBanner';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
 import CatModal from './components/CatModal';
 import StoryEventModal from './components/StoryEventModal';
+import BackupModal from './components/BackupModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import { 
   requestNotificationPermission, 
@@ -79,8 +81,59 @@ export default function App() {
     }
   });
 
+  // Modal Gestione Backup & Ripristino
+  const [isBackupOpen, setIsBackupOpen] = useState(false);
+
   // Trigger per aggiornare istantaneamente la GIF nel banner animato
   const [outcomeTrigger, setOutcomeTrigger] = useState(null);
+
+  // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
+  const activeModalsRef = useRef({
+    backup: false,
+    day: false,
+    story: false,
+    cat: false
+  });
+
+  activeModalsRef.current = {
+    backup: isBackupOpen,
+    day: dayModalState.isOpen,
+    story: storyModalState.isOpen,
+    cat: catModalState.isOpen
+  };
+
+  // Gestione nativa del tasto indietro Android (Hardware & Gesture navigation)
+  useEffect(() => {
+    let backListener = null;
+    const registerBackHandler = async () => {
+      try {
+        backListener = await CapApp.addListener('backButton', () => {
+          const { backup, day, story, cat } = activeModalsRef.current;
+          if (backup) {
+            setIsBackupOpen(false);
+          } else if (day) {
+            setDayModalState({ isOpen: false, dateStr: null });
+          } else if (story) {
+            setStoryModalState((prev) => ({ ...prev, isOpen: false }));
+          } else if (cat) {
+            setCatModalState((prev) => ({ ...prev, isOpen: false }));
+          } else {
+            // Se nessun pop-up è aperto, minimizza/esce dall'app in modo pulito
+            CapApp.exitApp();
+          }
+        });
+      } catch (err) {
+        // Ambiente web standard
+      }
+    };
+    registerBackHandler();
+
+    return () => {
+      if (backListener && backListener.remove) {
+        backListener.remove();
+      }
+    };
+  }, []);
 
   // Carica i dati salvati e precarica le immagini critiche in memoria RAM all'avvio
   useEffect(() => {
@@ -333,6 +386,30 @@ export default function App() {
         keysPerMonth={keysPerMonth}
       />
 
+      {/* 5. GESTIONE DIARIO & BACKUP: SCRITTA ELEGANTE E DISCRETA A FONDO PAGINA */}
+      <div style={{ textAlign: 'center', marginTop: '14px', marginBottom: '88px' }}>
+        <button
+          type="button"
+          onClick={() => setIsBackupOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'rgba(221, 202, 183, 0.65)',
+            fontFamily: 'var(--font-coraline)',
+            fontSize: '11px',
+            letterSpacing: '0.9px',
+            cursor: 'pointer',
+            padding: '6px 14px',
+            borderRadius: '20px',
+            borderBottom: '1px dotted rgba(216, 198, 21, 0.35)',
+            transition: 'all 0.2s ease',
+            touchAction: 'manipulation'
+          }}
+        >
+          ✦ Diario & Backup di Sicurezza ✦
+        </button>
+      </div>
+
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
         onClick={() => setCatModalState((prev) => ({ ...prev, isOpen: true }))}
@@ -407,6 +484,15 @@ export default function App() {
         type={storyModalState.type}
         streak={storyModalState.streak}
         onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* OVERLAY GESTIONE BACKUP & RIPRISTINO SICUREZZA */}
+      <BackupModal
+        isOpen={isBackupOpen}
+        onClose={() => setIsBackupOpen(false)}
+        onRestoreSuccess={(restoredLogs) => {
+          setAllLogs(restoredLogs);
+        }}
       />
     </div>
   );

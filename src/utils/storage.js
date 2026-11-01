@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'coraline_asia_habit_tracker_v1';
+const BACKUP_SNAPSHOT_KEY = 'coraline_asia_habit_tracker_backup_snapshot';
 
 // Cache in memoria RAM per azzerare I/O sincrono bloccante
 let logsMemoryCache = null;
@@ -15,20 +16,43 @@ export function getTodayDateString() {
 }
 
 /**
- * Carica l'intero database locale con cache in RAM (zero parsing ridondante)
+ * Carica l'intero database locale con cache in RAM e auto-ripristino da snapshot
  * @returns {Record<string, { dietState: 'neutral' | 'success' | 'cheat' | 'cheat_key', updatedAt: string }>}
  */
 export function getAllLogs() {
   if (logsMemoryCache !== null) return logsMemoryCache;
+
+  // 1. Tentativo di lettura da chiave primaria
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    logsMemoryCache = raw ? JSON.parse(raw) : {};
-    return logsMemoryCache;
+    if (raw) {
+      logsMemoryCache = JSON.parse(raw);
+      return logsMemoryCache;
+    }
   } catch (err) {
-    console.error("Errore caricamento dati locali:", err);
-    logsMemoryCache = {};
-    return logsMemoryCache;
+    console.error("Errore lettura chiave primaria storage:", err);
   }
+
+  // 2. Auto-ripristino trasparente dallo Snapshot di emergenza (Dual-Write Recovery)
+  try {
+    const snapshotRaw = localStorage.getItem(BACKUP_SNAPSHOT_KEY);
+    if (snapshotRaw) {
+      const recovered = JSON.parse(snapshotRaw);
+      if (recovered && typeof recovered === 'object') {
+        console.warn("✦ Auto-ripristino eseguito con successo dallo snapshot di emergenza! ✦");
+        logsMemoryCache = recovered;
+        try {
+          localStorage.setItem(STORAGE_KEY, snapshotRaw);
+        } catch (e) {}
+        return logsMemoryCache;
+      }
+    }
+  } catch (snapErr) {
+    console.error("Errore lettura snapshot:", snapErr);
+  }
+
+  logsMemoryCache = {};
+  return logsMemoryCache;
 }
 
 /**
@@ -47,7 +71,7 @@ export function getMonthUsedKeys(allLogs, year, month) {
 }
 
 /**
- * Salva o aggiorna lo stato per una specifica data in modo atomico e istantaneo
+ * Salva o aggiorna lo stato per una specifica data in modo atomico su storage primario e snapshot
  * @param {string} dateStr 'YYYY-MM-DD'
  * @param {object} updates
  */
@@ -66,11 +90,13 @@ export function saveDayLog(dateStr, updates) {
 
     logsMemoryCache = all;
 
-    // Sincronizzazione atomica senza bloccare il thread UI
+    // Sincronizzazione atomica ridondante (doppio snapshot)
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+      const serialized = JSON.stringify(all);
+      localStorage.setItem(STORAGE_KEY, serialized);
+      localStorage.setItem(BACKUP_SNAPSHOT_KEY, serialized);
     } catch (writeErr) {
-      console.error("Errore scrittura localStorage:", writeErr);
+      console.error("Errore scrittura localStorage/snapshot:", writeErr);
     }
 
     return all[dateStr];
@@ -78,6 +104,82 @@ export function saveDayLog(dateStr, updates) {
     console.error("Errore salvataggio dati locali:", err);
     return null;
   }
+}
+
+/**
+ * Genera il payload completo di backup esportabile
+ * @returns {string} Stringa JSON formattata
+ */
+export function exportBackupData() {
+  const logs = getAllLogs();
+  const payload = {
+    app: 'coraline-diet-tracker-asia',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    totalDaysLogged: Object.keys(logs).length,
+    streak: getConsecutiveDietStreak(logs),
+    logs
+  };
+  return JSON.stringify(payload, null, 2);
+}
+
+/**
+ * Importa e valida un file o testo di backup, ripristinando storage e snapshot
+ * @param {string} jsonString
+ * @returns {{ success: boolean, count: number, logs: object }}
+ */
+export function importBackupData(jsonString) {
+  if (!jsonString || typeof jsonString !== 'string') {
+    throw new Error("Il file o il testo fornito è vuoto.");
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonString.trim());
+  } catch (e) {
+    throw new Error("Formato non valido: assicurati di usare un file .json o il codice di backup corretto.");
+  }
+
+  // Estrai il dizionario logs (supporta sia il formato esportato con metadati, sia l'oggetto grezzo)
+  const candidateLogs = (parsed && typeof parsed.logs === 'object' && parsed.logs !== null)
+    ? parsed.logs
+    : parsed;
+
+  if (!candidateLogs || typeof candidateLogs !== 'object' || Array.isArray(candidateLogs)) {
+    throw new Error("La struttura del backup non contiene registrazioni valide.");
+  }
+
+  // Validazione rigorosa e sanitizzazione di ogni data
+  const sanitized = {};
+  const validStates = ['neutral', 'success', 'cheat', 'cheat_key'];
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  Object.entries(candidateLogs).forEach(([dateStr, entry]) => {
+    if (dateRegex.test(dateStr) && entry && typeof entry === 'object') {
+      const state = validStates.includes(entry.dietState) ? entry.dietState : 'neutral';
+      sanitized[dateStr] = {
+        dietState: state,
+        updatedAt: entry.updatedAt || new Date().toISOString()
+      };
+    }
+  });
+
+  const importedCount = Object.keys(sanitized).length;
+  if (importedCount === 0) {
+    throw new Error("Nessuna data valida trovata nel file di backup.");
+  }
+
+  // Scrittura atomica sia sulla chiave primaria sia sullo snapshot
+  const serialized = JSON.stringify(sanitized);
+  localStorage.setItem(STORAGE_KEY, serialized);
+  localStorage.setItem(BACKUP_SNAPSHOT_KEY, serialized);
+  logsMemoryCache = sanitized;
+
+  return {
+    success: true,
+    count: importedCount,
+    logs: sanitized
+  };
 }
 
 /**
