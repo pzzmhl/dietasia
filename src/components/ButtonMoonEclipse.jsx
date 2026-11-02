@@ -843,12 +843,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   }
                 }}
                 style={{
-                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.45)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  border: '1px solid rgba(47, 77, 108, 0.45)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -862,16 +862,6 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfumatura aura Coraline cinematica */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
@@ -945,12 +935,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   }
                 }}
                 style={{
-                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.45)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  border: '1px solid rgba(47, 77, 108, 0.45)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -964,16 +954,6 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfumatura aura Coraline cinematica */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
@@ -1047,12 +1027,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   }
                 }}
                 style={{
-                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.45)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  border: '1px solid rgba(47, 77, 108, 0.45)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -1066,16 +1046,6 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfumatura aura Coraline cinematica */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
@@ -1149,12 +1119,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   }
                 }}
                 style={{
-                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.45)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  border: '1px solid rgba(47, 77, 108, 0.45)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -1168,16 +1138,6 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfumatura aura Coraline cinematica */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
