@@ -9,6 +9,7 @@ import vortexBg from '../assets/coraline-vortex-bg.webp';
 import starryBg from '../assets/coraline-starry-bg.webp';
 import { getConsecutiveDietStreak, getMonthWorkoutCount } from '../utils/storage';
 import { triggerHapticFeedback } from '../services/haptics';
+import { getUIElementExplanation } from '../data/catQuotes';
 
 const MONTHS_IT = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -88,7 +89,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     }
   };
 
-  // Al tocco sulla card, evidenzia la card e fa parlare la nuvoletta del Gatto
+  // Al tocco sulla card, evidenzia la card e fa parlare la nuvoletta del Gatto con la Categoria 8
   const toggleTooltip = (type) => {
     triggerHapticFeedback('selection');
 
@@ -102,8 +103,18 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       setActiveTooltip(null);
     }, 4500);
 
-    if (onCatSpeak && tooltipDetails[type]) {
-      onCatSpeak(tooltipDetails[type].text);
+    const tagMap = {
+      rate: '[PIETRA FORATA]',
+      success: '[PALLINA CON LA STELLA]',
+      cheat: '[IL BOTTONE]',
+      keys: '[LE CHIAVI]',
+      workout: '[PALLINA DEGLI ALLENAMENTI]',
+      streak: '[LA LIBELLULA]'
+    };
+
+    if (onCatSpeak && tagMap[type]) {
+      const phrase = getUIElementExplanation(tagMap[type]);
+      onCatSpeak(phrase);
     }
   };
 

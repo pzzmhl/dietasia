@@ -57,7 +57,7 @@ import {
   saveCustomAvatar
 } from './utils/storage';
 import { triggerDebouncedCloudSync } from './services/supabase';
-import { getRandomCatQuote } from './data/catQuotes';
+import { getRandomCatQuote, getSmartSituationalCatQuote } from './data/catQuotes';
 
 export default function App() {
   const todayStr = getTodayDateString();
@@ -743,8 +743,48 @@ export default function App() {
         <button
           onClick={() => {
             triggerHapticFeedback('selection');
-            const randomQuote = getRandomCatQuote('neutral');
-            handleCatSpeak(randomQuote);
+            const todayStatus = (typeof allLogs[todayStr] === 'object' ? allLogs[todayStr]?.dietState : allLogs[todayStr]) || null;
+            
+            const yesterdayDate = new Date(todayObj);
+            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+            const yStr = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
+            const yesterdayStatus = (typeof allLogs[yStr] === 'object' ? allLogs[yStr]?.dietState : allLogs[yStr]) || null;
+
+            const consecutiveDiet = getConsecutiveDietStreak(allLogs, todayStr);
+
+            let consecutiveCheat = 0;
+            let checkD = new Date(todayObj);
+            for (let i = 0; i < 30; i++) {
+              const cStr = `${checkD.getFullYear()}-${String(checkD.getMonth() + 1).padStart(2, '0')}-${String(checkD.getDate()).padStart(2, '0')}`;
+              const state = (typeof allLogs[cStr] === 'object' ? allLogs[cStr]?.dietState : allLogs[cStr]) || null;
+              if (state === 'cheat') {
+                consecutiveCheat++;
+                checkD.setDate(checkD.getDate() - 1);
+              } else {
+                break;
+              }
+            }
+
+            const hasAbsence = getUnmarkedPastDays(allLogs, todayStr).length > 0;
+
+            let openCount = 1;
+            try {
+              const prev = Number(sessionStorage.getItem('cat_clicks_today') || 0) + 1;
+              sessionStorage.setItem('cat_clicks_today', String(prev));
+              openCount = prev;
+            } catch (e) {}
+
+            const quote = getSmartSituationalCatQuote({
+              todayStatus,
+              yesterdayStatus,
+              consecutiveSuccess: consecutiveDiet,
+              consecutiveCheat,
+              hasAbsence,
+              openCountToday: openCount,
+              now: new Date()
+            });
+
+            handleCatSpeak(quote);
           }}
           aria-label="Ascolta il Gatto Nero"
           title="Tocca per ascoltare il Gatto"

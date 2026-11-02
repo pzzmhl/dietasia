@@ -4,6 +4,7 @@ import { getConsecutiveDietStreak } from '../utils/storage.js';
 import { calculateHistoricalComparison } from '../utils/historicalStats.js';
 import { smoothScrollToElement } from '../utils/scrollAnimation.js';
 import { triggerHapticFeedback } from '../services/haptics';
+import { getUIElementExplanation } from '../data/catQuotes';
 
 // Immagine profilo Boring Blue Boy da Coraline
 import profileAvatarImg from '../assets/profile-avatar.webp';
@@ -906,7 +907,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(`Aderenza dieta: ${stats.currentAdherence}% questo mese, rispetto alla tua media del ${stats.historicalAdherence}%.`);
+                    onCatSpeak(getUIElementExplanation('[PIETRA FORATA]'));
                   }
                 }}
                 style={{
@@ -998,7 +999,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(`Giorni rispettati: ${stats.currentSuccessCount} giorni di dieta seguita questo mese (la tua media mensile è di ${stats.avgMonthlySuccess}).`);
+                    onCatSpeak(getUIElementExplanation('[PALLINA CON LA STELLA]'));
                   }
                 }}
                 style={{
@@ -1090,7 +1091,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(`Bottoni neri: ${stats.currentCheatCount} sgarri registrati questo mese (la tua media abituale è di ${stats.avgMonthlyCheats}).`);
+                    onCatSpeak(getUIElementExplanation('[IL BOTTONE]'));
                   }
                 }}
                 style={{
@@ -1182,7 +1183,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(`Allenamenti Bobinsky: ${stats.currentWorkoutCount} sessioni completate questo mese (la tua media è di ${stats.avgMonthlyWorkouts}).`);
+                    onCatSpeak(getUIElementExplanation('[PALLINA DEGLI ALLENAMENTI]'));
                   }
                 }}
                 style={{
