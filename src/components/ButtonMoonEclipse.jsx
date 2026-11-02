@@ -13,6 +13,8 @@ import streakStarImg from '../assets/streak-star.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 // Sfondo cielo stellato magico di Coraline
 import starryBg from '../assets/coraline-starry-bg.webp';
+// Texture con sfondo delle stelline di Coraline
+import catCloudPattern from '../assets/cat-cloud-pattern.webp';
 
 // Oggetti grafici reali di Coraline per gli esiti dei 7 giorni e le statistiche
 import seeingStoneImg from '../assets/seeing-stone.webp'; // Pietra verde (dieta seguita)
@@ -780,7 +782,21 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           boxSizing: 'border-box'
         }}
       >
-            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E MOLTO SCURITO) */}
+            {/* SFONDO DELLE STELLINE DI CORALINE (ABBASTANZA VISIBILE) */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${catCloudPattern})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.35,
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }} />
+
+            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -788,11 +804,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
-              opacity: 0.08,
-              filter: 'blur(2.5px)',
-              WebkitFilter: 'blur(2.5px)',
-              maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
-              WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
+              opacity: 0.15,
               pointerEvents: 'none',
               borderRadius: 'inherit',
               zIndex: 0
@@ -871,6 +883,20 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
+                {/* Sfondo delle stelline visibile all'interno del box */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${catCloudPattern})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.28,
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
@@ -963,6 +989,20 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
+                {/* Sfondo delle stelline visibile all'interno del box */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${catCloudPattern})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.28,
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
@@ -1055,6 +1095,20 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
+                {/* Sfondo delle stelline visibile all'interno del box */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${catCloudPattern})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.28,
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
@@ -1147,6 +1201,20 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
+                {/* Sfondo delle stelline visibile all'interno del box */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${catCloudPattern})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.28,
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
                 {/* Spirale sfocata e scura identica ai box della Dashboard */}
                 <div style={{
                   position: 'absolute',
