@@ -24,6 +24,7 @@ import {
 import { triggerHapticFeedback } from './services/haptics';
 import { smoothScrollToElement } from './utils/scrollAnimation';
 import { initBackgroundMusic } from './services/backgroundMusic';
+import { playRandomCatSound } from './services/catAudio';
 
 // Immagini critiche per il rendering immediato e il preloading
 import catStandingImg from './assets/cat-standing.webp';
@@ -146,6 +147,7 @@ export default function App() {
 
   const handleCatSpeak = useCallback((text) => {
     triggerHapticFeedback('key');
+    playRandomCatSound();
     if (catSpeechTimerRef.current) {
       clearTimeout(catSpeechTimerRef.current);
     }
