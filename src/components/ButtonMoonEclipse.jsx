@@ -728,10 +728,10 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                       alt="Chiave Nera (Jolly)"
                       title="Sgarro Autorizzato: Chiave Nera"
                       style={{
-                        width: '18px',
-                        height: '18px',
+                        width: '19px',
+                        height: '19px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 0 4px rgba(255, 213, 79, 0.6))'
+                        filter: 'drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 5px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 9px rgba(255, 255, 255, 0.75))'
                       }}
                     />
                   )}
