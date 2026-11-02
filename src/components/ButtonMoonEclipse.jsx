@@ -231,7 +231,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
         padding: '0 4px',
         marginBottom: '22px'
       }}>
-        {/* PICCOLO BOX CON PALLA DEL CIRCO E NUMERO DI STREAK A SINISTRA (PALETTE FILM CORALINE) */}
+        {/* PICCOLO BOX CON PALLA DEL CIRCO E NUMERO DI STREAK A SINISTRA (STILE BOX DASHBOARD) */}
         <button
           type="button"
           onClick={handleScrollToDashboard}
@@ -241,15 +241,19 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             height: '46px',
             padding: '0 14px 0 10px',
             borderRadius: '14px',
-            background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.94) 0%, rgba(12, 16, 19, 0.97) 65%, rgba(48, 49, 49, 0.98) 100%)',
-            border: '1.5px solid rgba(47, 77, 108, 0.65)',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(208, 207, 205, 0.22), 0 0 14px rgba(47, 77, 108, 0.35)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: '1px solid rgba(55, 74, 79, 0.42)',
+            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             userSelect: 'none',
             cursor: 'pointer',
             outline: 'none',
+            position: 'relative',
+            overflow: 'hidden',
             transition: 'transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease',
             WebkitTapHighlightColor: 'transparent'
           }}
@@ -266,6 +270,24 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             e.currentTarget.style.filter = 'none';
           }}
         >
+          {/* Spirale sfocata molto leggera identica ai box della Dashboard */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${vortexBg})`,
+            backgroundPosition: 'center center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.045,
+            filter: 'blur(2px)',
+            WebkitFilter: 'blur(2px)',
+            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+            zIndex: 0
+          }} />
+
           <img
             src={streakStarImg}
             alt="Palla del Circo"
@@ -275,7 +297,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               objectFit: 'contain',
               filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 8px rgba(47, 77, 108, 0.6))',
               pointerEvents: 'none',
-              animation: 'starFloat 3.2s ease-in-out infinite'
+              animation: 'starFloat 3.2s ease-in-out infinite',
+              position: 'relative',
+              zIndex: 1
             }}
           />
           <span
@@ -287,6 +311,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               lineHeight: 1,
               position: 'relative',
               top: '-1px',
+              zIndex: 1,
               textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(47, 77, 108, 0.65)'
             }}
           >
