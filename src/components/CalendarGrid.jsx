@@ -643,18 +643,20 @@ const CalendarGrid = React.memo(function CalendarGrid({
         ))}
       </div>
 
-      {/* SLIDER / SEGMENTED CONTROL IN PALETTE CORALINE: DIETA / ALL. */}
+      {/* SLIDER / SEGMENTED CONTROL NEUTRO IN TONO BIANCO: DIETA / ALL. */}
       <div
+        role="tablist"
+        aria-label="Modalità calendario"
         style={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: '136px',
-          margin: '10px auto 2px auto',
+          maxWidth: '144px',
+          margin: '12px auto 2px auto',
           padding: '2px',
-          backgroundColor: 'rgba(6, 20, 34, 0.94)',
+          backgroundColor: 'rgba(10, 14, 24, 0.85)',
           borderRadius: '12px',
-          border: '1px solid rgba(120, 99, 67, 0.35)',
-          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4)',
+          border: '1px solid rgba(226, 232, 240, 0.18)',
+          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35)',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: '3px',
@@ -663,6 +665,8 @@ const CalendarGrid = React.memo(function CalendarGrid({
       >
         <button
           type="button"
+          role="tab"
+          aria-selected={calendarMode === 'diet'}
           onClick={() => {
             if (calendarMode !== 'diet') {
               triggerHapticFeedback('selection');
@@ -670,28 +674,26 @@ const CalendarGrid = React.memo(function CalendarGrid({
             }
           }}
           style={{
-            padding: '4px 6px',
-            borderRadius: '9px',
+            padding: '5px 8px',
+            borderRadius: '10px',
             border: calendarMode === 'diet'
-              ? '1px solid #D8C615'
+              ? '1px solid rgba(226, 232, 240, 0.9)'
               : '1px solid transparent',
             background: calendarMode === 'diet'
-              ? 'radial-gradient(ellipse at center, rgba(216, 198, 21, 0.25) 0%, rgba(13, 44, 73, 0.8) 100%)'
+              ? 'rgba(226, 232, 240, 0.88)'
               : 'transparent',
             boxShadow: calendarMode === 'diet'
-              ? '0 0 8px rgba(216, 198, 21, 0.45), inset 0 0 5px rgba(216, 198, 21, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5)'
+              ? '0 0 8px rgba(226, 232, 240, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4)'
               : 'none',
-            color: calendarMode === 'diet' ? '#D8C615' : '#DDCAB7',
-            opacity: calendarMode === 'diet' ? 1 : 0.55,
-            textShadow: calendarMode === 'diet' ? '0 0 6px rgba(216, 198, 21, 0.5)' : 'none',
+            color: calendarMode === 'diet' ? '#0a0f1d' : 'rgba(226, 232, 240, 0.55)',
+            fontWeight: calendarMode === 'diet' ? 700 : 500,
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
-            fontWeight: 700,
             letterSpacing: '0.4px',
             cursor: 'pointer',
             textAlign: 'center',
             lineHeight: 1.2,
-            transition: 'all 0.2s ease',
+            transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
             touchAction: 'manipulation'
           }}
         >
@@ -700,6 +702,8 @@ const CalendarGrid = React.memo(function CalendarGrid({
 
         <button
           type="button"
+          role="tab"
+          aria-selected={calendarMode === 'workout'}
           onClick={() => {
             if (calendarMode !== 'workout') {
               triggerHapticFeedback('selection');
@@ -707,28 +711,26 @@ const CalendarGrid = React.memo(function CalendarGrid({
             }
           }}
           style={{
-            padding: '4px 6px',
-            borderRadius: '9px',
+            padding: '5px 8px',
+            borderRadius: '10px',
             border: calendarMode === 'workout'
-              ? '1px solid rgba(141, 109, 82, 0.65)'
+              ? '1px solid rgba(226, 232, 240, 0.9)'
               : '1px solid transparent',
             background: calendarMode === 'workout'
-              ? 'radial-gradient(ellipse at center, rgba(141, 109, 82, 0.25) 0%, rgba(13, 44, 73, 0.75) 100%)'
+              ? 'rgba(226, 232, 240, 0.88)'
               : 'transparent',
             boxShadow: calendarMode === 'workout'
-              ? '0 0 8px rgba(141, 109, 82, 0.38), inset 0 0 5px rgba(141, 109, 82, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5)'
+              ? '0 0 8px rgba(226, 232, 240, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4)'
               : 'none',
-            color: calendarMode === 'workout' ? 'rgb(215, 185, 155)' : '#DDCAB7',
-            opacity: calendarMode === 'workout' ? 1 : 0.55,
-            textShadow: calendarMode === 'workout' ? '0 0 5px rgba(141, 109, 82, 0.4)' : 'none',
+            color: calendarMode === 'workout' ? '#0a0f1d' : 'rgba(226, 232, 240, 0.55)',
+            fontWeight: calendarMode === 'workout' ? 700 : 500,
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
-            fontWeight: 700,
             letterSpacing: '0.4px',
             cursor: 'pointer',
             textAlign: 'center',
             lineHeight: 1.2,
-            transition: 'all 0.2s ease',
+            transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
             touchAction: 'manipulation'
           }}
         >
