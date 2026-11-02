@@ -611,12 +611,12 @@ export default function App() {
         </ScrollReveal>
 
         {/* 3. TERZA LINEA DI DEMARCAZIONE IN STILE CORALINE: INSETTO-ARMADIO ARANCIO */}
-        <ScrollReveal delay={40}>
+        <ScrollReveal delay={40} style={{ position: 'relative', zIndex: 30 }}>
           <CoralineDivider variant="wardrobe" />
         </ScrollReveal>
 
         {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
-        <ScrollReveal delay={60}>
+        <ScrollReveal delay={60} style={{ position: 'relative', zIndex: 10 }}>
           <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
         </ScrollReveal>
 

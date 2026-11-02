@@ -169,7 +169,7 @@ const CoralineDivider = React.memo(function CoralineDivider({
           userSelect: 'none',
           boxSizing: 'border-box',
           position: 'relative',
-          zIndex: isWardrobeGuarding ? 70 : 10,
+          zIndex: isWardrobeGuarding ? 9999 : 1,
           ...style
         }}
       >
@@ -215,13 +215,14 @@ const CoralineDivider = React.memo(function CoralineDivider({
             outline: 'none',
             pointerEvents: 'auto',
             transition: 'transform 0.65s cubic-bezier(0.34, 1.35, 0.64, 1), filter 0.4s ease, opacity 0.4s ease',
+            /* L'insetto va SOPRA la porta (in cima allo stipite) e non sotto */
             transform: isWardrobeGuarding 
-              ? 'translate3d(0, 118px, 0) scale(2.7)' 
+              ? 'translate3d(0, 44px, 0) scale(2.2)' 
               : isHand && isHandShaking 
               ? 'scale(1.1)' 
               : 'scale(1)',
             opacity: isBeetleEscaping ? 0 : 1,
-            zIndex: isWardrobeGuarding ? 90 : 1
+            zIndex: isWardrobeGuarding ? 9999 : 1
           }}
         >
           <img

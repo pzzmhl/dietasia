@@ -212,31 +212,27 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
           alignItems: 'center',
           position: 'relative',
           transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          transform: isUnlocking 
-            ? 'scale(1.12) rotate(4deg)' 
-            : isRevealed 
-            ? 'translate3d(0, 0, 0)' 
-            : 'translate3d(0, 38px, 0)',
-          opacity: isRevealed ? 1 : 0.65,
+          transform: isUnlocking ? 'scale(1.08) rotate(3deg)' : 'none',
+          opacity: 1,
           touchAction: 'manipulation'
         }}
       >
-        {/* Alone di mistero e foschia verde smeraldo dietro la porta */}
+        {/* Alone di mistero e foschia verde smeraldo dietro la porta (Pulsazione della luce) */}
         <div
           style={{
             position: 'absolute',
             bottom: '10px',
-            width: '120px',
-            height: '120px',
+            width: '125px',
+            height: '125px',
             borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(74, 222, 128, 0.45) 0%, rgba(13, 73, 50, 0.22) 50%, transparent 70%)',
-            filter: 'blur(14px)',
+            filter: 'blur(15px)',
             pointerEvents: 'none',
-            animation: 'secretDoorAuraPulse 3s ease-in-out infinite'
+            animation: 'secretDoorAuraPulse 3.2s ease-in-out infinite'
           }}
         />
 
-        {/* L'Immagine della Porticina Segreta di Coraline */}
+        {/* L'Immagine della Porticina Segreta: NON FLUTTUA, È SOLIDA E FERMA, PULSA SOLO LA LUCE VERDE */}
         <img
           src={secretDoorImg}
           alt="Porticina Segreta di Coraline"
@@ -248,8 +244,9 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
             objectFit: 'contain',
             borderRadius: '4px',
             pointerEvents: 'none',
-            animation: 'secretDoorGlowPulse 3s ease-in-out infinite',
-            willChange: 'transform, filter'
+            transform: 'none',
+            animation: 'secretDoorGlowPulse 3.2s ease-in-out infinite',
+            willChange: 'filter'
           }}
         />
       </button>
@@ -329,25 +326,25 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
       </div>
 
       <style>{`
+        /* PULSAZIONE PURA DELLA LUCE: LA PORTA NON SI MUOVE E NON FLUTTUA */
         @keyframes secretDoorGlowPulse {
           0%, 100% {
-            transform: scale(1) translateY(0);
-            filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.65)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
+            filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.55)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
           }
           50% {
-            transform: scale(1.055) translateY(-6px);
-            filter: drop-shadow(0 0 24px rgba(74, 222, 128, 0.95)) drop-shadow(0 14px 26px rgba(0, 0, 0, 0.95));
+            filter: drop-shadow(0 0 28px rgba(74, 222, 128, 0.98)) drop-shadow(0 0 16px rgba(139, 229, 116, 0.75)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
           }
         }
 
+        /* PULSAZIONE DEL BAGLIORE / ALONE SMERALDO RETROSTANTE */
         @keyframes secretDoorAuraPulse {
           0%, 100% {
-            transform: scale(1);
-            opacity: 0.55;
+            transform: scale(0.92);
+            opacity: 0.45;
           }
           50% {
-            transform: scale(1.18);
-            opacity: 0.92;
+            transform: scale(1.24);
+            opacity: 0.95;
           }
         }
 
