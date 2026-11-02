@@ -53,6 +53,8 @@ export default function ScrollReveal({
     };
   }, [threshold, rootMargin]);
 
+  if (!children) return null;
+
   return (
     <div
       ref={ref}

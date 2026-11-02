@@ -69,10 +69,11 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
 
     setJustAnsweredStatus(status);
     setReactionStatus(status);
+    setIsDismissedAfterClick(true);
   };
 
-  // Se l'utente ha risposto e l'animazione della foto a schermo intero è conclusa, scompare la card
-  if (isDismissedAfterClick && !reactionStatus) {
+  // Se l'allenamento odierno è già inserito e non stiamo mostrando la reazione a schermo intero, il pop-up/card scompare!
+  if ((todayStatus || isDismissedAfterClick) && !reactionStatus) {
     return null;
   }
 
@@ -90,7 +91,7 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
         }}
       />
 
-      {!isDismissedAfterClick && (
+      {!todayStatus && !isDismissedAfterClick && (
         <div
           role="region"
           aria-label="Avviso Allenamento Bobinsky"
