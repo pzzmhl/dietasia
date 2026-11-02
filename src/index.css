@@ -71,7 +71,6 @@ body {
   touch-action: pan-y; /* Permette lo scorrimento verticale naturale ovunque con il dito */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  transform: translateZ(0); /* Attivazione pipeline GPU per scrolling a 60/120fps */
 }
 
 #root {
@@ -85,7 +84,7 @@ body {
 button, a, input, [role="button"] {
   font-family: inherit;
   outline: none;
-  touch-action: manipulation; /* Risposta al tocco a 0ms - azzera il ritardo di 300ms su Android WebView */
+  touch-action: pan-y; /* Permette il trascinamento verticale naturale anche quando il tocco inizia su un pulsante */
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
