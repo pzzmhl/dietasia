@@ -226,13 +226,13 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
               )}
             </div>
 
-            {/* SOLO TASTO OK */}
+            {/* SOLO TASTO OK (ROSSO COME IL VESTITO DEL TOPO) */}
             <button
               type="button"
               onClick={handleDismissToday}
               title="Chiudi avviso"
               style={{
-                background: '#0f172a',
+                background: '#c52222',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '12px',
@@ -242,6 +242,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
                 fontFamily: 'var(--font-gothic)',
                 cursor: 'pointer',
                 letterSpacing: '0.4px',
+                boxShadow: '0 2px 6px rgba(197, 34, 34, 0.45)',
                 touchAction: 'manipulation'
               }}
             >
