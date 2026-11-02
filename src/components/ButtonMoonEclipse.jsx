@@ -500,26 +500,26 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           animation: 'moonFloatingBreathe 3.6s ease-in-out infinite',
           willChange: 'transform'
         }}>
-          {/* 1. Ampia foschia eterea lunare ultra-sfumata (bianco al centro con dissolvenza smeraldo diffusa) */}
+          {/* 1. Ampia foschia eterea lunare ultra-sfumata (bianco prevalente con accenno verde morbidissimo) */}
           <div style={{
             position: 'absolute',
-            inset: '-32px',
+            inset: '-38px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(210, 255, 220, 0.28) 32%, rgba(139, 229, 116, 0.20) 58%, rgba(74, 222, 128, 0.06) 75%, transparent 88%)',
-            filter: 'blur(22px)',
-            WebkitFilter: 'blur(22px)',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.40) 0%, rgba(240, 255, 245, 0.22) 36%, rgba(139, 229, 116, 0.08) 65%, transparent 85%)',
+            filter: 'blur(30px)',
+            WebkitFilter: 'blur(30px)',
             animation: 'moonHaloPulse 3.6s ease-in-out infinite',
             pointerEvents: 'none'
           }} />
 
-          {/* 2. Alone di luce soffusa a contatto con la luna (sfocatura morbida di raccordo) */}
+          {/* 2. Alone di luce soffusa a contatto con la luna (sfumatura delicata, zero stacco) */}
           <div style={{
             position: 'absolute',
-            inset: '-16px',
+            inset: '-18px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.48) 0%, rgba(220, 255, 225, 0.30) 40%, rgba(139, 229, 116, 0.18) 70%, transparent 88%)',
-            filter: 'blur(12px)',
-            WebkitFilter: 'blur(12px)',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(242, 255, 246, 0.22) 42%, rgba(139, 229, 116, 0.07) 70%, transparent 88%)',
+            filter: 'blur(16px)',
+            WebkitFilter: 'blur(16px)',
             pointerEvents: 'none'
           }} />
 
@@ -542,11 +542,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   opacity: isActive ? 1 : 0,
                   transform: isActive ? 'scale(1)' : 'scale(0.985)',
                   transition: 'opacity 650ms cubic-bezier(0.4, 0, 0.2, 1), transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  maskImage: 'radial-gradient(circle at center, black 65%, rgba(0, 0, 0, 0.85) 80%, rgba(0, 0, 0, 0.4) 92%, transparent 100%)',
-                  WebkitMaskImage: 'radial-gradient(circle at center, black 65%, rgba(0, 0, 0, 0.85) 80%, rgba(0, 0, 0, 0.4) 92%, transparent 100%)',
+                  maskImage: 'radial-gradient(circle at center, black 58%, rgba(0, 0, 0, 0.8) 75%, rgba(0, 0, 0, 0.25) 90%, transparent 100%)',
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 58%, rgba(0, 0, 0, 0.8) 75%, rgba(0, 0, 0, 0.25) 90%, transparent 100%)',
                   filter: isGlowActive && isActive
-                    ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 30px rgba(139, 229, 116, 0.75)) brightness(0.88) contrast(1.05)'
-                    : 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 22px rgba(139, 229, 116, 0.40)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.75)) brightness(0.86) contrast(1.08)',
+                    ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 28px rgba(139, 229, 116, 0.35)) brightness(0.88) contrast(1.05)'
+                    : 'drop-shadow(0 0 14px rgba(255, 255, 255, 0.38)) drop-shadow(0 0 22px rgba(139, 229, 116, 0.14)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.75)) brightness(0.86) contrast(1.08)',
                   willChange: 'opacity, transform',
                   pointerEvents: 'none'
                 }}
