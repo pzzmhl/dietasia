@@ -620,6 +620,34 @@ export default function App() {
           <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
         </ScrollReveal>
 
+        {/* 6. LUNGA DISCESA NELLA NOTTE STELLATA VERSO LA DEDICA NASCOSTA */}
+        <div
+          style={{
+            marginTop: '850px',
+            marginBottom: '30px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            userSelect: 'none',
+            position: 'relative',
+            zIndex: 1
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'var(--font-coraline)',
+              fontSize: '11px',
+              letterSpacing: '0.8px',
+              color: 'rgba(221, 202, 183, 0.42)',
+              textShadow: '0 0 8px rgba(0, 0, 0, 0.9)',
+              fontWeight: 400
+            }}
+          >
+            fatto con amore dal tuo Michele
+          </span>
+        </div>
+
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
         onClick={() => {

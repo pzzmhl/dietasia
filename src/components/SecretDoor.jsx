@@ -1,28 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import secretDoorImg from '../assets/secret-door.webp';
-import madeWithLoveImg from '../assets/made-with-love-michele.webp';
 import { triggerHapticFeedback } from '../services/haptics';
 import { openCoralineSpotifyShuffle } from '../services/spotify';
 
 /**
  * La Porticina Segreta di Coraline (Portale Musicale dell'Altro Mondo)
  * - Tocco singolo: Apre Spotify e avvia immediatamente in modalità shuffle
- *   un brano dalla Colonna Sonora ufficiale di Coraline (senza alcuna anteprima testo a schermo).
- * - Pressione prolungata (Long-press): Attiva il riquadro segreto "Ti amo".
+ *   un brano dalla Colonna Sonora ufficiale di Coraline.
+ * - Pressione prolungata (Long-press): Attiva il riquadro segreto speciale per Asia.
  */
 export default function SecretDoor({ onLongPress, onOpenSettings }) {
   const [isRevealed, setIsRevealed] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
-  const [isEasterEggRevealed, setIsEasterEggRevealed] = useState(false);
-  const [isPressuring, setIsPressuring] = useState(false);
 
   const doorRef = useRef(null);
   const longPressTimerRef = useRef(null);
   const unlockTimerRef = useRef(null);
   const isLongPressRef = useRef(false);
-  const zoneTimerRef = useRef(null);
 
-  // Rileva quando l'utente arriva in fondo alla pagina e pulisce i timer allo smontaggio
+  // Rileva quando l'utente arriva in prossimità della porta e pulisce i timer allo smontaggio
   useEffect(() => {
     const el = doorRef.current;
     let observer = null;
@@ -44,95 +40,8 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
       if (observer) observer.disconnect();
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
       if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current);
-      if (zoneTimerRef.current) clearTimeout(zoneTimerRef.current);
     };
   }, []);
-
-  // Rileva pressione o tiro prolungato (2.0s esatti) a fine pagina
-  useEffect(() => {
-    let pressureTimeout = null;
-    let isHolding = false;
-    let startY = 0;
-
-    const checkIsStrictlyAtBottom = () => {
-      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-      const windowHeight = window.innerHeight;
-      const docHeight = Math.max(
-        document.body.scrollHeight,
-        document.documentElement.scrollHeight
-      );
-      // Solo quando si è esattamente arrivati alla fine della pagina
-      return scrollY + windowHeight >= docHeight - 50;
-    };
-
-    const onTouchStart = (e) => {
-      if (isEasterEggRevealed) return;
-      if (!e.touches || e.touches.length !== 1) return;
-      if (checkIsStrictlyAtBottom()) {
-        isHolding = true;
-        startY = e.touches[0].clientY;
-        setIsPressuring(true);
-
-        pressureTimeout = setTimeout(() => {
-          triggerHapticFeedback('key');
-          setIsEasterEggRevealed(true);
-          setIsPressuring(false);
-          isHolding = false;
-          setTimeout(() => {
-            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-          }, 180);
-        }, 2000); // 2 secondi pieni
-      }
-    };
-
-    const onTouchMove = (e) => {
-      if (!isHolding) return;
-      const currentY = e.touches[0].clientY;
-      // Se si rilascia il tiro o si risale, annulla
-      if (startY - currentY < -80 || currentY - startY > 60) {
-        if (pressureTimeout) clearTimeout(pressureTimeout);
-        setIsPressuring(false);
-        isHolding = false;
-      }
-    };
-
-    const onTouchEnd = () => {
-      if (pressureTimeout) clearTimeout(pressureTimeout);
-      setIsPressuring(false);
-      isHolding = false;
-    };
-
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('touchcancel', onTouchEnd, { passive: true });
-
-    return () => {
-      if (pressureTimeout) clearTimeout(pressureTimeout);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('touchcancel', onTouchEnd);
-    };
-  }, [isEasterEggRevealed]);
-
-  const handleZonePointerDown = () => {
-    if (isEasterEggRevealed) return;
-    setIsPressuring(true);
-    zoneTimerRef.current = setTimeout(() => {
-      triggerHapticFeedback('key');
-      setIsEasterEggRevealed(true);
-      setIsPressuring(false);
-      setTimeout(() => {
-        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-      }, 180);
-    }, 2000); // 2 secondi pieni
-  };
-
-  const handleZonePointerUp = () => {
-    if (zoneTimerRef.current) clearTimeout(zoneTimerRef.current);
-    setIsPressuring(false);
-  };
 
   const handlePointerDown = () => {
     isLongPressRef.current = false;
@@ -251,80 +160,6 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
         />
       </button>
 
-      {/* ZONA DI PRESSIONE & CONTENITORE EASTER EGG SOTTO LA PORTA */}
-      <div
-        onPointerDown={handleZonePointerDown}
-        onPointerUp={handleZonePointerUp}
-        onPointerLeave={handleZonePointerUp}
-        onPointerCancel={handleZonePointerUp}
-        style={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          paddingTop: '8px',
-          userSelect: 'none',
-          touchAction: 'pan-y'
-        }}
-      >
-        {/* Glow di tensione durante la pressione continua in fondo */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '6px',
-            width: isPressuring ? '180px' : '60px',
-            height: isPressuring ? '50px' : '20px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(239, 68, 68, 0.55) 0%, rgba(216, 198, 21, 0.25) 55%, transparent 75%)',
-            filter: 'blur(16px)',
-            opacity: isPressuring ? 1 : 0,
-            transition: 'all 0.4s ease',
-            pointerEvents: 'none'
-          }}
-        />
-
-        {/* SPAZIO EXTRA BLU NOTTE PROFONDO RIVELATO: "fatto con Amore dal tuo Michele" */}
-        <div
-          style={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: isEasterEggRevealed ? '#0a0b1a' : 'transparent',
-            borderRadius: '24px',
-            paddingTop: isEasterEggRevealed ? '36px' : '0px',
-            paddingBottom: isEasterEggRevealed ? '44px' : '0px',
-            maxHeight: isEasterEggRevealed ? '260px' : '0px',
-            opacity: isEasterEggRevealed ? 1 : 0,
-            transform: isEasterEggRevealed ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 24px, 0) scale(0.9)',
-            transition: 'all 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
-            overflow: 'hidden',
-            pointerEvents: isEasterEggRevealed ? 'auto' : 'none',
-            boxSizing: 'border-box'
-          }}
-        >
-          <img
-            src={madeWithLoveImg}
-            alt="fatto con Amore dal tuo Michele"
-            loading="eager"
-            decoding="async"
-            onClick={() => triggerHapticFeedback('success')}
-            style={{
-              width: '175px',
-              maxWidth: '56vw',
-              height: 'auto',
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 3px 14px rgba(220, 38, 38, 0.75)) drop-shadow(0 0 12px rgba(239, 68, 68, 0.45))',
-              animation: isEasterEggRevealed ? 'madeWithLoveFloat 3.8s ease-in-out infinite' : 'none',
-              cursor: 'pointer'
-            }}
-          />
-        </div>
-      </div>
-
       <style>{`
         /* PULSAZIONE PURA DELLA LUCE: LA PORTA NON SI MUOVE E NON FLUTTUA */
         @keyframes secretDoorGlowPulse {
@@ -345,17 +180,6 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
           50% {
             transform: scale(1.24);
             opacity: 0.95;
-          }
-        }
-
-        @keyframes madeWithLoveFloat {
-          0%, 100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-            filter: drop-shadow(0 4px 18px rgba(220, 38, 38, 0.8)) drop-shadow(0 0 16px rgba(239, 68, 68, 0.5));
-          }
-          50% {
-            transform: translate3d(0, -6px, 0) rotate(-1.4deg);
-            filter: drop-shadow(0 8px 24px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 24px rgba(239, 68, 68, 0.65));
           }
         }
       `}</style>
