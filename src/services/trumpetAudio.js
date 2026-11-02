@@ -43,3 +43,4 @@ export function playTrumpetFanfare(volume = 0.85) {
     console.debug('[TrumpetAudio] Errore riproduzione trombetta:', err);
   }
 }
+

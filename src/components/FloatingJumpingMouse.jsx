@@ -107,7 +107,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
         pointerEvents: 'none'
       }}
     >
-      {/* NUVOLETTA IDENTICA A QUELLA DEL GATTO: NUVOLA CARTOON A LOBI CON TRATTEGGI */}
+      {/* NUVOLETTA IDENTICA A QUELLA DEL GATTO: FUMETTO BIANCO PULITO CON TRAMA STELLATA DISSOLTA E PUNTA FUMETTO */}
       {isCloudOpen && (
         <div
           onClick={handleOpenDayModal}
@@ -116,96 +116,60 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
             bottom: '108px',
             left: '2px',
             width: 'max-content',
-            maxWidth: '240px',
-            minWidth: '185px',
-            minHeight: '92px',
-            filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.65)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4))',
+            maxWidth: '220px',
+            padding: '10px 14px',
+            borderRadius: '16px',
+            backgroundColor: '#ffffff',
+            border: '1.5px solid #0f172a',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35)',
+            color: '#0f172a',
+            fontFamily: 'var(--font-body)',
             cursor: 'pointer',
             pointerEvents: 'auto',
             animation: 'mouseCloudPop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            userSelect: 'none'
+            userSelect: 'none',
+            boxSizing: 'border-box'
           }}
         >
-          {/* SFONDO VETTORIALE DELLA VERA NUVOLA A LOBI ARROTONDATI CON TRATTEGGI */}
-          <svg
-            viewBox="0 0 260 140"
-            preserveAspectRatio="none"
+          {/* Texture Coraline tantissimo dissolta nel riempimento (opacità 10%) */}
+          <div
             style={{
               position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              overflow: 'visible',
+              inset: '1.5px',
+              borderRadius: '14.5px',
+              backgroundImage: `url(${catCloudPattern})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.10,
+              mixBlendMode: 'multiply',
               pointerEvents: 'none',
-              zIndex: 0
+              zIndex: 1
             }}
-          >
-            <defs>
-              <clipPath id="mouse-speech-cloud-clip">
-                <path d="M 65,115 C 38,115 16,96 16,72 C 16,50 32,32 55,28 C 65,10 98,4 128,12 C 148,4 184,5 204,20 C 228,28 244,52 242,75 C 248,96 230,118 205,116 C 185,124 150,124 130,116 C 112,122 85,122 65,115 Z" />
-              </clipPath>
-            </defs>
+          />
 
-            {/* Corpo bianco a lobi della nuvola con tratteggi */}
-            <path
-              d="M 65,115 C 38,115 16,96 16,72 C 16,50 32,32 55,28 C 65,10 98,4 128,12 C 148,4 184,5 204,20 C 228,28 244,52 242,75 C 248,96 230,118 205,116 C 185,124 150,124 130,116 C 112,122 85,122 65,115 Z"
-              fill="#ffffff"
-              stroke="#0f172a"
-              strokeWidth="2.2"
-              strokeDasharray="5,4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            {/* Texture stellata di Coraline tantissimo dissolta (10%) */}
-            <image
-              href={catCloudPattern}
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid slice"
-              clipPath="url(#mouse-speech-cloud-clip)"
-              opacity="0.10"
-              style={{ mixBlendMode: 'multiply' }}
-            />
-
-            {/* Coda a batuffoli discendenti a sinistra verso il topo */}
-            <circle
-              cx="52"
-              cy="126"
-              r="6.5"
-              fill="#ffffff"
-              stroke="#0f172a"
-              strokeWidth="2"
-              strokeDasharray="3.5,3"
-              strokeLinecap="round"
-            />
-            <circle
-              cx="42"
-              cy="135"
-              r="4"
-              fill="#ffffff"
-              stroke="#0f172a"
-              strokeWidth="1.8"
-              strokeDasharray="2.5,2.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          {/* Puntatore / coda del fumetto in basso a sinistra verso il topo */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-6px',
+              left: '32px',
+              width: '10px',
+              height: '10px',
+              background: '#ffffff',
+              borderLeft: '1.5px solid #0f172a',
+              borderBottom: '1.5px solid #0f172a',
+              transform: 'rotate(-45deg)',
+              zIndex: 1
+            }}
+          />
 
           {/* CONTENUTO INFORMATIVO DELLA NUVOLETTA */}
           <div
             style={{
               position: 'relative',
               zIndex: 2,
-              padding: '16px 20px 22px 20px',
-              color: '#0f172a',
-              fontFamily: 'var(--font-body)',
               textAlign: 'center',
-              boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center'
@@ -214,7 +178,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
             <div
               style={{
                 fontFamily: 'var(--font-coraline)',
-                fontSize: '13.5px',
+                fontSize: '13px',
                 color: '#b45309',
                 marginBottom: '2px',
                 letterSpacing: '0.4px'
@@ -225,7 +189,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
 
             <div
               style={{
-                fontSize: '11.5px',
+                fontSize: '11px',
                 fontWeight: 650,
                 lineHeight: 1.35,
                 marginBottom: '6px'
@@ -249,7 +213,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
                   border: 'none',
                   borderRadius: '12px',
                   padding: '3px 9px',
-                  fontSize: '10.5px',
+                  fontSize: '10px',
                   fontWeight: 700,
                   fontFamily: 'var(--font-gothic)',
                   cursor: 'pointer',
@@ -270,7 +234,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
                   border: '1px solid rgba(15, 23, 42, 0.25)',
                   borderRadius: '12px',
                   padding: '3px 8px',
-                  fontSize: '10.5px',
+                  fontSize: '10px',
                   fontWeight: 700,
                   fontFamily: 'var(--font-gothic)',
                   cursor: 'pointer',
@@ -364,3 +328,4 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
 });
 
 export default FloatingJumpingMouse;
+
