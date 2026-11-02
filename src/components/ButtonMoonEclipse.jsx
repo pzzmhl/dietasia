@@ -389,9 +389,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 width: '100%',
                 height: '100%',
                 borderRadius: '24px',
-                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.97) 62%, rgba(48, 49, 49, 0.98) 100%)',
-                border: '1.5px solid rgba(47, 77, 108, 0.55)',
-                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(208, 207, 205, 0.18), 0 0 24px rgba(47, 77, 108, 0.25)',
+                background: 'linear-gradient(180deg, rgba(13, 44, 73, 0.94) 0%, rgba(12, 16, 19, 0.98) 55%, rgba(6, 9, 12, 0.99) 100%)',
+                border: '1.5px solid rgba(47, 77, 108, 0.45)',
+                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(47, 77, 108, 0.25), 0 0 24px rgba(13, 44, 73, 0.25)',
                 padding: '24px 16px 18px 16px',
                 position: 'relative',
                 overflow: 'hidden',
@@ -401,7 +401,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 boxSizing: 'border-box'
               }}
             >
-        {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E DISSOLTO) */}
+        {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E MOLTO SCURITO) */}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -409,9 +409,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.22,
-          filter: 'blur(2.2px)',
-          WebkitFilter: 'blur(2.2px)',
+          opacity: 0.08,
+          filter: 'blur(2.5px)',
+          WebkitFilter: 'blur(2.5px)',
           maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
           WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
           pointerEvents: 'none',
@@ -427,7 +427,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.08,
+          opacity: 0.05,
           filter: 'blur(2px)',
           WebkitFilter: 'blur(2px)',
           maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
@@ -437,7 +437,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           zIndex: 0
         }} />
 
-        {/* ALONE RADIALE BLU NOTTE CINEMATICO CORALINE */}
+        {/* ALONE RADIALE BLU NOTTE CINEMATICO CORALINE SCURITO */}
         <div style={{
           position: 'absolute',
           top: '35px',
@@ -445,7 +445,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           transform: 'translateX(-50%)',
           width: '260px',
           height: '240px',
-          background: 'radial-gradient(circle, rgba(47, 77, 108, 0.32) 0%, rgba(55, 74, 79, 0.18) 50%, rgba(20, 45, 76, 0.10) 70%, transparent 80%)',
+          background: 'radial-gradient(circle, rgba(13, 44, 73, 0.22) 0%, rgba(12, 16, 19, 0.15) 50%, transparent 75%)',
           pointerEvents: 'none',
           zIndex: 0
         }} />
@@ -471,22 +471,22 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           }}>
             La tua<br />settimana
           </div>
-          {/* 2. SOTTO: RITMO DELLA DIETA (BIANCO) */}
+          {/* 2. SOTTO: RITMO DELLA DIETA (CREMA CORALINE VINTAGE - NON BIANCO SPARATO) */}
           <div style={{
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
             textTransform: 'uppercase',
             letterSpacing: '1.3px',
-            color: '#ffffff',
+            color: '#DDCAB7',
             fontWeight: 700,
-            textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)'
+            textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)'
           }}>
             RITMO DELLA DIETA
           </div>
         </div>
 
         {/* =========================================================
-            LA LUNA CINEMATOGRAFICA A 7 FASI FLUTTUANTE (HERO)
+            LA LUNA CINEMATOGRAFICA A 7 FASI FLUTTUANTE (HERO SCURITA)
             ========================================================= */}
         <div style={{
           position: 'relative',
@@ -500,20 +500,20 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           animation: 'moonFloatingBreathe 3.6s ease-in-out infinite',
           willChange: 'transform'
         }}>
-          {/* Alone verde pulsante */}
+          {/* Alone soffuso della luna scurito */}
           <div style={{
             position: 'absolute',
-            inset: '-12px',
+            inset: '-8px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(139, 229, 116, 0.28) 0%, rgba(35, 65, 25, 0.12) 60%, transparent 75%)',
+            background: 'radial-gradient(circle, rgba(74, 150, 65, 0.18) 0%, rgba(13, 44, 73, 0.10) 55%, transparent 75%)',
             filter: isGlowActive
-              ? 'drop-shadow(0 0 28px rgba(139, 229, 116, 0.95))'
-              : 'drop-shadow(0 0 16px rgba(107, 142, 85, 0.45))',
+              ? 'drop-shadow(0 0 20px rgba(139, 229, 116, 0.65))'
+              : 'drop-shadow(0 0 12px rgba(13, 44, 73, 0.45))',
             animation: 'moonHaloPulse 3.6s ease-in-out infinite',
             pointerEvents: 'none'
           }} />
 
-          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE */}
+          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE CON FILTRO NOTTURNO SCURO */}
           {MOON_PHASES.map((imgSrc, idx) => {
             const isActive = idx === phaseIndex;
             return (
@@ -533,8 +533,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   transform: isActive ? 'scale(1)' : 'scale(0.985)',
                   transition: 'opacity 650ms cubic-bezier(0.4, 0, 0.2, 1), transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
                   filter: isGlowActive && isActive
-                    ? 'drop-shadow(0 0 22px rgba(139, 229, 116, 0.85))'
-                    : 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.95))',
+                    ? 'drop-shadow(0 0 20px rgba(139, 229, 116, 0.75)) brightness(0.78) contrast(1.12)'
+                    : 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.95)) brightness(0.76) contrast(1.15)',
                   willChange: 'opacity, transform',
                   pointerEvents: 'none'
                 }}
@@ -558,12 +558,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           gap: '4px',
           padding: '8px 6px',
           borderRadius: '16px',
-          background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
-          border: '1px solid rgba(112, 45, 160, 0.35)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.22)',
+          background: 'linear-gradient(180deg, rgba(8, 12, 18, 0.95) 0%, rgba(4, 7, 11, 0.98) 100%)',
+          border: '1px solid rgba(47, 77, 108, 0.35)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(47, 77, 108, 0.15)',
           overflow: 'hidden'
         }}>
-          {/* Livello 1: Texture cielo stellato dell'app molto sfocata (3px blur) */}
+          {/* Livello 1: Texture cielo stellato molto sfocata e scurita */}
           <div
             style={{
               position: 'absolute',
@@ -572,7 +572,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
-              opacity: 0.35,
+              opacity: 0.10,
               filter: 'blur(3px)',
               WebkitFilter: 'blur(3px)',
               pointerEvents: 'none',
@@ -759,9 +759,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           width: '100%',
           height: '100%',
           borderRadius: '24px',
-          background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.97) 62%, rgba(48, 49, 49, 0.98) 100%)',
-          border: '1.5px solid rgba(47, 77, 108, 0.55)',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(208, 207, 205, 0.18), 0 0 24px rgba(47, 77, 108, 0.25)',
+          background: 'linear-gradient(180deg, rgba(13, 44, 73, 0.94) 0%, rgba(12, 16, 19, 0.98) 55%, rgba(6, 9, 12, 0.99) 100%)',
+          border: '1.5px solid rgba(47, 77, 108, 0.45)',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(47, 77, 108, 0.25), 0 0 24px rgba(13, 44, 73, 0.25)',
           padding: '14px',
           position: 'relative',
           overflow: 'hidden',
@@ -771,7 +771,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           boxSizing: 'border-box'
         }}
       >
-            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E DISSOLTO) */}
+            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E MOLTO SCURITO) */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -779,9 +779,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
-              opacity: 0.18,
-              filter: 'blur(2.2px)',
-              WebkitFilter: 'blur(2.2px)',
+              opacity: 0.08,
+              filter: 'blur(2.5px)',
+              WebkitFilter: 'blur(2.5px)',
               maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
               WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
               pointerEvents: 'none',
