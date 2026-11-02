@@ -138,9 +138,9 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       style={{
         width: '100%',
         borderRadius: '24px',
-        background: 'linear-gradient(180deg, rgba(20, 10, 32, 0.96) 0%, rgba(13, 6, 22, 0.97) 65%, rgba(8, 3, 14, 0.98) 100%)',
-        border: '1.5px solid rgba(88, 28, 130, 0.45)',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(168, 85, 247, 0.22), 0 0 24px rgba(88, 28, 130, 0.2)',
+        background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.97) 62%, rgba(48, 49, 49, 0.98) 100%)',
+        border: '1.5px solid rgba(47, 77, 108, 0.55)',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(208, 207, 205, 0.18), 0 0 24px rgba(47, 77, 108, 0.25)',
         padding: '24px 14px 18px 14px',
         marginTop: '6px',
         marginBottom: '24px',
@@ -185,7 +185,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         zIndex: 0
       }} />
 
-      {/* ALONE RADIALE VIOLA OSCURO (MANO DELL'ALTRA MADRE) */}
+      {/* ALONE RADIALE BLU NOTTE CINEMATICO CORALINE */}
       <div style={{
         position: 'absolute',
         top: '20px',
@@ -193,22 +193,22 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         transform: 'translateX(-50%)',
         width: '260px',
         height: '190px',
-        background: 'radial-gradient(circle, rgba(112, 35, 168, 0.28) 0%, rgba(59, 7, 100, 0.16) 55%, transparent 75%)',
+        background: 'radial-gradient(circle, rgba(47, 77, 108, 0.32) 0%, rgba(55, 74, 79, 0.18) 50%, rgba(20, 45, 76, 0.10) 70%, transparent 80%)',
         pointerEvents: 'none',
         zIndex: 0
       }} />
 
-      {/* INTESTAZIONE DASHBOARD IN VIOLA OSCURO METALLICO (MANO DELL'ALTRA MADRE) */}
+      {/* INTESTAZIONE DASHBOARD IN BLU ACCIAIO & MIST CORALINE */}
       <h3 style={{
         position: 'relative',
         zIndex: 1,
         fontFamily: 'var(--font-coraline)',
         fontSize: '22px',
-        color: '#c084fc',
+        color: '#d0cfcd',
         textAlign: 'center',
         margin: '4px 0 20px 0',
         letterSpacing: '0.8px',
-        textShadow: '0 2px 8px rgba(0, 0, 0, 0.95), 0 0 14px rgba(168, 85, 247, 0.65), 0 0 26px rgba(88, 28, 130, 0.45)',
+        textShadow: '0 2px 8px rgba(0, 0, 0, 0.95), 0 0 14px rgba(47, 77, 108, 0.7), 0 0 24px rgba(55, 74, 79, 0.45)',
         lineHeight: 1.15
       }}>
         Dashboard
@@ -234,17 +234,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(18, 9, 28, 0.82)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'keys' 
               ? '1.5px solid var(--coraline-yellow)' 
-              : '1px solid rgba(120, 45, 175, 0.35)',
+              : '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: activeTooltip === 'keys' 
               ? '0 0 18px rgba(216, 198, 21, 0.5), inset 0 1px 0 rgba(216, 198, 21, 0.3)' 
-              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(168, 85, 247, 0.18)',
+              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -308,8 +308,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             letterSpacing: '0.8px',
             fontFamily: 'var(--font-gothic)',
             fontWeight: 700,
-            color: 'var(--coraline-parchment)',
-            opacity: 0.85,
+            color: '#d0cfcd',
+            opacity: 0.88,
             position: 'relative',
             zIndex: 1
           }}>
@@ -328,17 +328,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(18, 9, 28, 0.82)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'success' 
               ? '1.5px solid #8be574' 
-              : '1px solid rgba(120, 45, 175, 0.35)',
+              : '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: activeTooltip === 'success' 
               ? '0 0 18px rgba(139, 229, 116, 0.5), inset 0 1px 0 rgba(139, 229, 116, 0.3)' 
-              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(168, 85, 247, 0.18)',
+              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -401,8 +401,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             letterSpacing: '0.8px',
             fontFamily: 'var(--font-gothic)',
             fontWeight: 700,
-            color: 'var(--coraline-parchment)',
-            opacity: 0.85,
+            color: '#d0cfcd',
+            opacity: 0.88,
             position: 'relative',
             zIndex: 1
           }}>
@@ -421,17 +421,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(18, 9, 28, 0.82)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'cheat' 
               ? '1.5px solid #ef4444' 
-              : '1px solid rgba(120, 45, 175, 0.35)',
+              : '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: activeTooltip === 'cheat' 
               ? '0 0 18px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(239, 68, 68, 0.3)' 
-              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(168, 85, 247, 0.18)',
+              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -494,8 +494,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             letterSpacing: '0.8px',
             fontFamily: 'var(--font-gothic)',
             fontWeight: 700,
-            color: 'var(--coraline-parchment)',
-            opacity: 0.85,
+            color: '#d0cfcd',
+            opacity: 0.88,
             position: 'relative',
             zIndex: 1
           }}>
@@ -514,17 +514,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(18, 9, 28, 0.82)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'workout' 
               ? '1.5px solid #8be574' 
-              : '1px solid rgba(120, 45, 175, 0.35)',
+              : '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: activeTooltip === 'workout' 
               ? '0 0 18px rgba(139, 229, 116, 0.5), inset 0 1px 0 rgba(139, 229, 116, 0.3)' 
-              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(168, 85, 247, 0.18)',
+              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -587,8 +587,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             letterSpacing: '0.8px',
             fontFamily: 'var(--font-gothic)',
             fontWeight: 700,
-            color: 'var(--coraline-parchment)',
-            opacity: 0.85,
+            color: '#d0cfcd',
+            opacity: 0.88,
             position: 'relative',
             zIndex: 1
           }}>
@@ -607,17 +607,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(18, 9, 28, 0.82)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'streak' 
               ? '1.5px solid var(--coraline-yellow)' 
-              : '1px solid rgba(120, 45, 175, 0.35)',
+              : '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: activeTooltip === 'streak' 
               ? '0 0 18px rgba(216, 198, 21, 0.5), inset 0 1px 0 rgba(216, 198, 21, 0.3)' 
-              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(168, 85, 247, 0.18)',
+              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -680,8 +680,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             letterSpacing: '0.8px',
             fontFamily: 'var(--font-gothic)',
             fontWeight: 700,
-            color: 'var(--coraline-parchment)',
-            opacity: 0.85,
+            color: '#d0cfcd',
+            opacity: 0.88,
             position: 'relative',
             zIndex: 1
           }}>
@@ -700,17 +700,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(18, 9, 28, 0.82)',
+            backgroundColor: 'rgba(12, 16, 19, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'rate' 
               ? '1.5px solid #f472b6' 
-              : '1px solid rgba(120, 45, 175, 0.35)',
+              : '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: activeTooltip === 'rate' 
               ? '0 0 18px rgba(244, 114, 182, 0.5), inset 0 1px 0 rgba(244, 114, 182, 0.3)' 
-              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(168, 85, 247, 0.18)',
+              : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'pan-y',
@@ -799,11 +799,11 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             zIndex: 1,
             marginTop: '12px',
             padding: '10px 14px',
-            backgroundColor: 'rgba(18, 9, 28, 0.95)',
+            backgroundColor: 'rgba(12, 16, 19, 0.96)',
             border: `1.5px dashed ${currentTooltip.color}`,
             borderRadius: '14px',
             textAlign: 'center',
-            boxShadow: `0 8px 24px rgba(0, 0, 0, 0.8), 0 0 14px ${currentTooltip.glow}, inset 0 1px 0 rgba(168, 85, 247, 0.2)`,
+            boxShadow: `0 8px 24px rgba(0, 0, 0, 0.8), 0 0 14px ${currentTooltip.glow}, inset 0 1px 0 rgba(208, 207, 205, 0.2)`,
             animation: 'tooltipBadgePop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             display: 'flex',
             alignItems: 'center',
@@ -815,7 +815,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         >
           <span style={{
             fontSize: '12px',
-            color: 'var(--coraline-parchment)',
+            color: '#d0cfcd',
             fontFamily: 'var(--font-body)',
             fontWeight: 600,
             lineHeight: 1.35,
@@ -825,7 +825,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             ✦ {currentTooltip.text}
           </span>
           <span style={{
-            color: 'var(--coraline-parchment)',
+            color: '#d0cfcd',
             opacity: 0.6,
             fontSize: '12px',
             fontWeight: 700,

@@ -228,7 +228,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
         padding: '0 4px',
         marginBottom: '22px'
       }}>
-        {/* PICCOLO BOX CON PALLA DEL CIRCO E NUMERO DI STREAK A SINISTRA */}
+        {/* PICCOLO BOX CON PALLA DEL CIRCO E NUMERO DI STREAK A SINISTRA (PALETTE FILM CORALINE) */}
         <button
           type="button"
           onClick={handleScrollToDashboard}
@@ -238,9 +238,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             height: '46px',
             padding: '0 14px 0 10px',
             borderRadius: '14px',
-            background: 'linear-gradient(180deg, rgba(20, 10, 32, 0.96) 0%, rgba(13, 6, 22, 0.97) 65%, rgba(8, 3, 14, 0.98) 100%)',
-            border: '1.5px solid rgba(88, 28, 130, 0.48)',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(168, 85, 247, 0.25), 0 0 14px rgba(88, 28, 130, 0.22)',
+            background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.94) 0%, rgba(12, 16, 19, 0.97) 65%, rgba(48, 49, 49, 0.98) 100%)',
+            border: '1.5px solid rgba(47, 77, 108, 0.65)',
+            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(208, 207, 205, 0.22), 0 0 14px rgba(47, 77, 108, 0.35)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -270,7 +270,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               width: '26px',
               height: '26px',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 6px rgba(168, 85, 247, 0.45))',
+              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 8px rgba(47, 77, 108, 0.6))',
               pointerEvents: 'none',
               animation: 'starFloat 3.2s ease-in-out infinite'
             }}
@@ -280,11 +280,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               fontFamily: 'var(--font-gothic)',
               fontSize: '18px',
               fontWeight: 900,
-              color: '#ffffff',
+              color: '#d0cfcd',
               lineHeight: 1,
               position: 'relative',
               top: '-1px',
-              textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(255, 255, 255, 0.45)'
+              textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(47, 77, 108, 0.65)'
             }}
           >
             {streakCount}
@@ -316,9 +316,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               width: '46px',
               height: '46px',
               borderRadius: '14px',
-              background: '#091c2f',
-              border: '2px solid #1a456e',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.7), 0 0 10px rgba(26, 69, 110, 0.55)',
+              background: '#0c1013',
+              border: '2px solid rgba(47, 77, 108, 0.65)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.7), 0 0 12px rgba(47, 77, 108, 0.45)',
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
@@ -388,9 +388,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 width: '100%',
                 height: '100%',
                 borderRadius: '24px',
-                background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
-                border: '1px solid rgba(107, 142, 85, 0.32)',
-                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(154, 185, 123, 0.18)',
+                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.97) 62%, rgba(48, 49, 49, 0.98) 100%)',
+                border: '1.5px solid rgba(47, 77, 108, 0.55)',
+                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(208, 207, 205, 0.18), 0 0 24px rgba(47, 77, 108, 0.25)',
                 padding: '24px 16px 18px 16px',
                 position: 'relative',
                 overflow: 'hidden',
@@ -436,7 +436,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           zIndex: 0
         }} />
 
-        {/* ALONE RADIALE SMERALDO */}
+        {/* ALONE RADIALE BLU NOTTE CINEMATICO CORALINE */}
         <div style={{
           position: 'absolute',
           top: '35px',
@@ -444,7 +444,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           transform: 'translateX(-50%)',
           width: '260px',
           height: '240px',
-          background: 'radial-gradient(circle, rgba(107, 142, 85, 0.24) 0%, rgba(26, 69, 110, 0.16) 55%, transparent 75%)',
+          background: 'radial-gradient(circle, rgba(47, 77, 108, 0.32) 0%, rgba(55, 74, 79, 0.18) 50%, rgba(20, 45, 76, 0.10) 70%, transparent 80%)',
           pointerEvents: 'none',
           zIndex: 0
         }} />
@@ -758,9 +758,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           width: '100%',
           height: '100%',
           borderRadius: '24px',
-          background: 'linear-gradient(180deg, rgba(20, 10, 32, 0.96) 0%, rgba(13, 6, 22, 0.97) 65%, rgba(8, 3, 14, 0.98) 100%)',
-          border: '1.5px solid rgba(88, 28, 130, 0.45)',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(168, 85, 247, 0.22), 0 0 24px rgba(88, 28, 130, 0.2)',
+          background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.97) 62%, rgba(48, 49, 49, 0.98) 100%)',
+          border: '1.5px solid rgba(47, 77, 108, 0.55)',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(208, 207, 205, 0.18), 0 0 24px rgba(47, 77, 108, 0.25)',
           padding: '14px',
           position: 'relative',
           overflow: 'hidden',
@@ -806,7 +806,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               zIndex: 0
             }} />
 
-            {/* ALONE RADIALE VIOLA OSCURO (IDENTICO ALLA DASHBOARD) */}
+            {/* ALONE RADIALE BLU NOTTE CINEMATICO CORALINE */}
             <div style={{
               position: 'absolute',
               top: '35px',
@@ -814,12 +814,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               transform: 'translateX(-50%)',
               width: '260px',
               height: '240px',
-              background: 'radial-gradient(circle, rgba(112, 35, 168, 0.28) 0%, rgba(59, 7, 100, 0.16) 55%, transparent 75%)',
+              background: 'radial-gradient(circle, rgba(47, 77, 108, 0.32) 0%, rgba(55, 74, 79, 0.18) 50%, rgba(20, 45, 76, 0.10) 70%, transparent 80%)',
               pointerEvents: 'none',
               zIndex: 0
             }} />
 
-            {/* I 4 GRANDI BOX STATISTICHE IN GRIGLIA 2x2: AGGREGATI AL CENTRO CON SFONDO SCURO E SPIRALE SFOCATA */}
+            {/* I 4 GRANDI BOX STATISTICHE IN GRIGLIA 2x2: AGGREGATI AL CENTRO CON PALETTE FILM CORALINE */}
             <div style={{
               position: 'relative',
               zIndex: 1,
@@ -832,12 +832,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             }}>
               {/* BOX 1: ADERENZA DIETA (PIETRA VEGGENTE FLUTTUANTE GIGANTE) */}
               <div style={{
-                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 borderRadius: '20px',
-                border: '1px solid rgba(112, 45, 160, 0.35)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                border: '1px solid rgba(55, 74, 79, 0.45)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
                 padding: '12px 6px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -848,11 +848,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}>
-                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
                   pointerEvents: 'none',
                   borderRadius: 'inherit',
                   zIndex: 0
@@ -909,24 +909,24 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 <div style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: '11px',
-                  color: 'var(--coraline-parchment)',
+                  color: '#d0cfcd',
                   opacity: 0.9,
                   lineHeight: 1.25,
                   position: 'relative',
                   zIndex: 1
                 }}>
-                  Media: <strong style={{ color: '#e09f3e' }}>{stats.historicalAdherence}%</strong> <span style={{ color: comparisonDeltas.adh.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.adh.text}</span>
+                  Media: <strong style={{ color: '#ffffff' }}>{stats.historicalAdherence}%</strong> <span style={{ color: comparisonDeltas.adh.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.adh.text}</span>
                 </div>
               </div>
 
               {/* BOX 2: GIORNI RISPETTATI (STELLA ROSSA FLUTTUANTE GIGANTE) */}
               <div style={{
-                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 borderRadius: '20px',
-                border: '1px solid rgba(112, 45, 160, 0.35)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                border: '1px solid rgba(55, 74, 79, 0.45)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
                 padding: '12px 6px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -937,11 +937,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}>
-                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
                   pointerEvents: 'none',
                   borderRadius: 'inherit',
                   zIndex: 0
@@ -998,7 +998,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 <div style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: '11px',
-                  color: 'var(--coraline-parchment)',
+                  color: '#d0cfcd',
                   opacity: 0.9,
                   lineHeight: 1.25,
                   position: 'relative',
@@ -1010,12 +1010,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
 
               {/* BOX 3: BOTTONI NERI (BOTTONE NERO FLUTTUANTE GIGANTE) */}
               <div style={{
-                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 borderRadius: '20px',
-                border: '1px solid rgba(112, 45, 160, 0.35)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                border: '1px solid rgba(55, 74, 79, 0.45)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
                 padding: '12px 6px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1026,11 +1026,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}>
-                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
                   pointerEvents: 'none',
                   borderRadius: 'inherit',
                   zIndex: 0
@@ -1087,7 +1087,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 <div style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: '11px',
-                  color: 'var(--coraline-parchment)',
+                  color: '#d0cfcd',
                   opacity: 0.9,
                   lineHeight: 1.25,
                   position: 'relative',
@@ -1099,12 +1099,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
 
               {/* BOX 4: ALLENAMENTI BOBINSKY (PALLA DEL CAMBIO FLUTTUANTE GIGANTE) */}
               <div style={{
-                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 borderRadius: '20px',
-                border: '1px solid rgba(112, 45, 160, 0.35)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                border: '1px solid rgba(55, 74, 79, 0.45)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
                 padding: '12px 6px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1115,11 +1115,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}>
-                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(47, 77, 108, 0.30) 0%, rgba(55, 74, 79, 0.15) 55%, transparent 85%)',
                   pointerEvents: 'none',
                   borderRadius: 'inherit',
                   zIndex: 0
@@ -1176,7 +1176,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 <div style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: '11px',
-                  color: 'var(--coraline-parchment)',
+                  color: '#d0cfcd',
                   opacity: 0.9,
                   lineHeight: 1.25,
                   position: 'relative',
