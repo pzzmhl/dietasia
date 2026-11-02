@@ -145,7 +145,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
       {/* NUVOLETTA IDENTICA A QUELLA DEL GATTO: FUMETTO BIANCO PULITO CON TRAMA STELLATA DISSOLTA E PUNTA FUMETTO */}
       {isCloudOpen && (
         <div
-          onClick={handleOpenDayModal}
+          onClick={handleDismissToday}
           style={{
             position: 'absolute',
             bottom: '108px',
@@ -207,78 +207,46 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
             <div
               style={{
-                fontFamily: 'var(--font-coraline)',
-                fontSize: '13px',
-                color: '#b45309',
-                marginBottom: '2px',
-                letterSpacing: '0.4px'
-              }}
-            >
-              Topi Saltatori!
-            </div>
-
-            <div
-              style={{
-                fontSize: '11px',
+                fontSize: '11.5px',
                 fontWeight: 650,
                 lineHeight: 1.35,
-                marginBottom: '6px'
+                color: '#0f172a'
               }}
             >
               {missingCount === 1 ? (
-                <>Manca <strong>1 giorno</strong> ({formatDateLabel(firstMissingDate)}) da registrare!</>
+                <>Manca <strong>1 giorno</strong> da compilare</>
               ) : (
-                <>Mancano <strong>{missingCount} giorni</strong> da completare!</>
+                <>Mancano <strong>{missingCount} giorni</strong> da compilare</>
               )}
             </div>
 
-            {/* PULSANTI DI AZIONE */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={handleOpenDayModal}
-                style={{
-                  background: '#0f172a',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '3px 9px',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-gothic)',
-                  cursor: 'pointer',
-                  letterSpacing: '0.3px',
-                  touchAction: 'manipulation'
-                }}
-              >
-                Segna
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDismissToday}
-                title="Chiudi per oggi"
-                style={{
-                  background: 'rgba(15, 23, 42, 0.12)',
-                  color: '#0f172a',
-                  border: '1px solid rgba(15, 23, 42, 0.25)',
-                  borderRadius: '12px',
-                  padding: '3px 8px',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-gothic)',
-                  cursor: 'pointer',
-                  touchAction: 'manipulation'
-                }}
-              >
-                ✓ OK
-              </button>
-            </div>
+            {/* SOLO TASTO OK */}
+            <button
+              type="button"
+              onClick={handleDismissToday}
+              title="Chiudi avviso"
+              style={{
+                background: '#0f172a',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '3px 14px',
+                fontSize: '10.5px',
+                fontWeight: 700,
+                fontFamily: 'var(--font-gothic)',
+                cursor: 'pointer',
+                letterSpacing: '0.4px',
+                touchAction: 'manipulation'
+              }}
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
