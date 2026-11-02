@@ -112,23 +112,136 @@ export function saveDayLog(dateStr, updates) {
 }
 
 /**
- * Genera il payload completo di backup esportabile
+ * Genera il payload completo di backup esportabile (JSON)
  * @returns {string} Stringa JSON formattata
  */
 export function exportBackupData() {
+  const payload = exportFullCloudBackupPayload();
+  return JSON.stringify(payload, null, 2);
+}
+
+/**
+ * Ottiene la foto profilo personalizzata salvata (base64)
+ */
+export function getCustomAvatar() {
+  try {
+    return localStorage.getItem('coraline_custom_avatar') || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Salva o rimuove la foto profilo personalizzata (base64)
+ */
+export function saveCustomAvatar(base64Data) {
+  try {
+    if (base64Data) {
+      localStorage.setItem('coraline_custom_avatar', base64Data);
+    } else {
+      localStorage.removeItem('coraline_custom_avatar');
+    }
+    return true;
+  } catch (e) {
+    console.error('Errore salvataggio avatar:', e);
+    return false;
+  }
+}
+
+/**
+ * Genera l'oggetto completo di tutti i dati per il salvataggio nel Cloud Supabase
+ * @returns {object}
+ */
+export function exportFullCloudBackupPayload() {
   const logs = getAllLogs();
+  const workoutLogs = getWorkoutLogs();
+  let keysPerMonth = 4;
+  let reminderTime = '20:00';
+  let reminderEnabled = true;
+
+  try {
+    keysPerMonth = Number(localStorage.getItem('coraline_keys_per_month')) || 4;
+    reminderTime = localStorage.getItem('coraline_reminder_time') || '20:00';
+    reminderEnabled = localStorage.getItem('coraline_reminder_enabled') !== 'false';
+  } catch (e) {}
+
   const activeLogsCount = Object.values(logs).filter(
     (entry) => entry && entry.dietState && entry.dietState !== 'neutral'
   ).length;
-  const payload = {
+
+  return {
     app: 'coraline-diet-tracker-asia',
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     totalDaysLogged: activeLogsCount,
     streak: getConsecutiveDietStreak(logs),
-    logs
+    logs,
+    workoutLogs,
+    keysPerMonth,
+    profileAvatar: getCustomAvatar(),
+    preferences: {
+      reminderTime,
+      reminderEnabled
+    }
   };
-  return JSON.stringify(payload, null, 2);
+}
+
+/**
+ * Ripristina un payload completo dal Cloud Supabase (dieta, allenamento, chiavi, foto profilo, preferenze)
+ * @param {object} payload
+ */
+export function restoreFullCloudBackupPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw new Error('I dati di backup non sono validi o sono vuoti.');
+  }
+
+  // 1. Ripristina log dieta
+  let importedLogs = {};
+  if (payload.logs && typeof payload.logs === 'object') {
+    const res = importBackupData(JSON.stringify({ logs: payload.logs }));
+    importedLogs = res.logs || {};
+  }
+
+  // 2. Ripristina log allenamento
+  let importedWorkouts = {};
+  if (payload.workoutLogs && typeof payload.workoutLogs === 'object') {
+    try {
+      localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(payload.workoutLogs));
+      importedWorkouts = payload.workoutLogs;
+    } catch (e) {}
+  }
+
+  // 3. Ripristina chiavi per mese
+  if (payload.keysPerMonth) {
+    try {
+      localStorage.setItem('coraline_keys_per_month', String(payload.keysPerMonth));
+    } catch (e) {}
+  }
+
+  // 4. Ripristina foto profilo personalizzata
+  if (payload.profileAvatar !== undefined) {
+    saveCustomAvatar(payload.profileAvatar);
+  }
+
+  // 5. Ripristina preferenze
+  if (payload.preferences) {
+    try {
+      if (payload.preferences.reminderTime) {
+        localStorage.setItem('coraline_reminder_time', payload.preferences.reminderTime);
+      }
+      if (payload.preferences.reminderEnabled !== undefined) {
+        localStorage.setItem('coraline_reminder_enabled', payload.preferences.reminderEnabled ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  return {
+    success: true,
+    logs: importedLogs,
+    workoutLogs: importedWorkouts,
+    keysPerMonth: payload.keysPerMonth || 4,
+    profileAvatar: payload.profileAvatar || null
+  };
 }
 
 /**
@@ -204,44 +317,67 @@ export function clearAllLogs() {
 }
 
 /**
- * Trova i giorni passati (dal 1° del mese corrente a oggi) che richiedono attenzione.
- * - I giorni precedenti a oggi sono considerati non contrassegnati se sono 'neutral' o assenti.
- * - Il giorno odierno viene considerato non contrassegnato SOLO se sono già passate le 20:00.
+ * Trova i giorni passati non contrassegnati per l'avviso del Topo Saltatore.
+ * Regola richiesta:
+ * L'avviso NON deve apparire per oggi né per ieri (1 giorno fa).
+ * Deve apparire SOLO quando c'è un giorno non segnato indietro di ALMENO 2 giorni (l'altro ieri o precedente).
+ *
  * @param {Record<string, any>} allLogs
  * @returns {string[]} Elenco di date 'YYYY-MM-DD' non registrate
  */
 export function getUnmarkedPastDays(allLogs) {
   if (!allLogs || typeof allLogs !== 'object') return [];
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth();
-  const currentDay = today.getDate();
-  const currentHour = today.getHours();
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // La soglia massima è 2 giorni fa (l'altro ieri): oggi e ieri NON attivano il topo
+  const twoDaysAgo = new Date(now);
+  twoDaysAgo.setDate(now.getDate() - 2);
+
+  // Verifica le date in cui l'utente ha effettivamente registrato qualcosa
+  const recordedDates = Object.keys(allLogs).filter((dateKey) => {
+    const entry = allLogs[dateKey];
+    return entry && typeof entry === 'object' && entry.dietState && entry.dietState !== 'neutral';
+  });
+
+  if (recordedDates.length === 0) {
+    return [];
+  }
+
+  // Troviamo la data più vecchia registrata dall'utente
+  recordedDates.sort();
+  const [ey, em, ed] = recordedDates[0].split('-').map(Number);
+  const earliestRecordedDate = new Date(ey, em - 1, ed);
+
+  // Se 2 giorni fa è precedente alla prima data mai registrata, niente da allertare
+  if (twoDaysAgo < earliestRecordedDate) {
+    return [];
+  }
+
+  // Non andiamo indietro per più di 45 giorni nel passato per non allarmare vecchi periodi remoti
+  const maxLookback = new Date(now);
+  maxLookback.setDate(now.getDate() - 45);
+  const minDate = earliestRecordedDate > maxLookback ? earliestRecordedDate : maxLookback;
 
   const unmarked = [];
 
-  // Scansiona dal primo giorno del mese fino a ieri
-  for (let day = 1; day < currentDay; day++) {
-    const dayStr = String(day).padStart(2, '0');
-    const monthStr = String(currentMonth + 1).padStart(2, '0');
-    const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+  // Scansioniamo a ritroso da 2 giorni fa indietro fino a minDate
+  let cursor = new Date(twoDaysAgo);
+  while (cursor >= minDate) {
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
 
     const log = allLogs[dateStr];
-    if (!log || typeof log !== 'object' || !log.dietState || log.dietState === 'neutral') {
+    const isUnmarked = !log || typeof log !== 'object' || !log.dietState || log.dietState === 'neutral';
+
+    if (isUnmarked) {
       unmarked.push(dateStr);
     }
-  }
 
-  // Per il giorno odierno: allarma solo se sono già passate le ore 20:00 e non è ancora registrato
-  if (currentHour >= 20) {
-    const dayStr = String(currentDay).padStart(2, '0');
-    const monthStr = String(currentMonth + 1).padStart(2, '0');
-    const todayDateStr = `${currentYear}-${monthStr}-${dayStr}`;
-
-    const todayLog = allLogs[todayDateStr];
-    if (!todayLog || typeof todayLog !== 'object' || !todayLog.dietState || todayLog.dietState === 'neutral') {
-      unmarked.push(todayDateStr);
-    }
+    cursor.setDate(cursor.getDate() - 1);
   }
 
   return unmarked;
@@ -394,3 +530,64 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
 
   return computeChainAroundDate(latestDateStr);
 }
+
+// =========================================================
+// GESTIONE ALLENAMENTI ASIA (IL GRANDE BOBINSKY)
+// =========================================================
+const WORKOUT_STORAGE_KEY = 'coraline_workout_logs';
+
+/**
+ * Ottiene tutti i log di allenamento registrati
+ * @returns {Record<string, 'yes' | 'no'>}
+ */
+export function getWorkoutLogs() {
+  try {
+    const raw = localStorage.getItem(WORKOUT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+/**
+ * Salva o aggiorna lo stato di allenamento per una data
+ * @param {string} dateStr 'YYYY-MM-DD'
+ * @param {'yes' | 'no' | null} status 
+ * @returns {Record<string, 'yes' | 'no'>}
+ */
+export function saveWorkoutLog(dateStr, status) {
+  try {
+    const logs = getWorkoutLogs();
+    const updated = { ...logs };
+    if (!status) {
+      delete updated[dateStr];
+    } else {
+      updated[dateStr] = status;
+    }
+    localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.error('Errore salvataggio workout:', e);
+    return getWorkoutLogs();
+  }
+}
+
+/**
+ * Calcola i giorni di allenamento ('yes') per un determinato mese
+ * @param {Record<string, 'yes' | 'no'>} workoutLogs 
+ * @param {number} year 
+ * @param {number} month 0-indexed
+ * @returns {number}
+ */
+export function getMonthWorkoutCount(workoutLogs, year, month) {
+  if (!workoutLogs || typeof workoutLogs !== 'object') return 0;
+  const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  let count = 0;
+  Object.entries(workoutLogs).forEach(([dateStr, status]) => {
+    if (dateStr.startsWith(prefix) && status === 'yes') {
+      count++;
+    }
+  });
+  return count;
+}
+

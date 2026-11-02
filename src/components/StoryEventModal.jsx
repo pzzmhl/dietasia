@@ -90,9 +90,39 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
           opacity: visible ? 1 : 0,
           transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out',
           willChange: 'transform, opacity',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          position: 'relative'
         }}
       >
+        {/* Pulsante chiusura rapida ✕ */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Chiudi"
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(3, 10, 18, 0.65)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'var(--coraline-parchment)',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 10,
+            lineHeight: 1,
+            touchAction: 'manipulation',
+            padding: 0
+          }}
+        >
+          ✕
+        </button>
+
         {/* TITOLO IN FONT UFFICIALE CORALINE */}
         <h3
           style={{

@@ -81,6 +81,35 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
         }}
       />
 
+      {/* Pulsante chiusura rapida ✕ in alto a destra */}
+      <button
+        type="button"
+        onClick={handleDismiss}
+        aria-label="Chiudi"
+        style={{
+          position: 'absolute',
+          top: 'calc(env(safe-area-inset-top, 24px) + 12px)',
+          right: '16px',
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(3, 10, 18, 0.65)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          color: 'var(--coraline-parchment)',
+          fontSize: '13px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 10,
+          lineHeight: 1,
+          touchAction: 'manipulation',
+          padding: 0
+        }}
+      >
+        ✕
+      </button>
+
       {/* Spazio flessibile in alto per bilanciare il centraggio perfetto */}
       <div style={{ flex: '0 0 10px', width: '100%' }} />
 

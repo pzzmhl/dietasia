@@ -130,6 +130,35 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Pulsante chiusura rapida ✕ */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Chiudi"
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(3, 10, 18, 0.65)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'var(--coraline-parchment)',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 10,
+            lineHeight: 1,
+            touchAction: 'manipulation',
+            padding: 0
+          }}
+        >
+          ✕
+        </button>
+
         {/* NUVOLETTA A FORMA DI NUVOLA REALE GRIGIETTA IN STILE CORALINE */}
         <CoralineCatCloud
           quote={quote}

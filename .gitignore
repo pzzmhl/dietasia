@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Local env files
+.env
+.env*.local
+
 # Android build outputs & local config (if android is committed or generated)
 android/app/build/
 android/build/

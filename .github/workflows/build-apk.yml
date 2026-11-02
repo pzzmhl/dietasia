@@ -8,6 +8,17 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Crea una GitHub Release ufficiale'
+        required: false
+        type: boolean
+        default: false
+      tag_name:
+        description: 'Tag della Release (es. v2.6.0)'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: write
@@ -61,16 +72,28 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: 📦 Publish GitHub Release
+      # Pulisce le release orfane intermedie su GitHub mantenendo v1.0-beta e v2.5-beta
+      - name: 🧹 Cleanup intermediate releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for tag in v1.1-beta v1.2-beta v1.3-beta v1.4-beta v1.5-beta v1.6-beta v1.7-beta v1.8-beta v1.9-beta v2.0-beta v2.1-beta v2.2-beta v2.3-beta v2.4-beta; do
+            gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+          done
+
+      # Crea una nuova release ufficiale SOLO su tag esplicito 'v*' o dispatch con create_release=true
+      - name: 📦 Publish Official GitHub Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          (github.event_name == 'workflow_dispatch' && inputs.create_release == true)
         with:
           files: Coraline-Tracker-Beta.apk
-          name: Coraline Tracker (Beta) ${{ github.ref_name }}
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          name: Coraline Tracker ${{ inputs.tag_name || github.ref_name }}
           body: |
-            ### 🪡 Coraline Tracker (Beta) per Asia
+            ### 🪡 Coraline Tracker per Asia
             - File APK pronto per installazione su Android: scarica il file **Coraline-Tracker-Beta.apk** qui sotto.
-            - Estetica originale Coraline (Pietra verde, Bottone nero, Chiave Jolly).
-            - Motore GIF animate categorizzate in rotazione deck.
-            - Allarme Topo Saltatore del Circo di Bobinsky per i giorni non contrassegnati.
-            - Gestione orario notifiche quotidiane sul telefono.
+            - Esperienza nativa a tema Coraline (fasi lunari, bottoni neri, chiavi jolly, allenamenti Bobinsky).
+            - Dashboard con statistiche storiche comparative e scorrimento a carosello.
+            - Easter egg segreti della porticina e gatto tutor.

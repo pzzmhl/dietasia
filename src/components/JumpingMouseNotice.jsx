@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import jumpingMouseImg from '../assets/jumping-mouse.webp';
+import jumpingMiceCircusBg from '../assets/jumping-mice-circus-bg.webp';
 import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Avviso Topo Saltatore del Circo di Bobinsky:
- * Appare a schermo quando ci sono giorni passati (del mese corrente) non ancora contrassegnati.
- * Include animazione a tremolio (il topo che squilla energicamente la tromba)
- * e predisposizione per traccia audio (suono di tromba / voce di avviso).
+ * - Più spazio in alto e in basso (padding 18px)
+ * - Topo saltatore a sinistra più grande (96px) con animazione tromba
+ * - A destra allineati: titolo in font Coraline "Topi Saltatori!", 
+ *   avviso giorni mancanti in font normale, e pulsante [✓ OK]
+ * - Al clic su [✓ OK], la notifica si chiude per oggi e riappare eventualmente il giorno successivo
  */
 const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
   unmarkedDays = [],
   onSelectDay = () => {},
-  audioSrc = null // Predisposto per ricevere file audio (es. /src/assets/mouse-audio.mp3)
+  audioSrc = null
 }) {
-  // 1. TUTTI GLI HOOKS DEVONO ESSERE DICHIARATI RIGOROSAMENTE IN CIMA SENZA ALCUN EARLY RETURN
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
       const now = new Date();
@@ -24,51 +26,17 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
       return false;
     }
   });
+
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioRef = useRef(null);
 
-  const hasUnmarked = Array.isArray(unmarkedDays) && unmarkedDays.length > 0;
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-  const handleDismiss = () => {
-    setIsDismissed(true);
-    try {
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      localStorage.setItem('coraline_mouse_notice_dismissed_date', todayStr);
-    } catch (e) {}
-  };
+  const effectiveDays = Array.isArray(unmarkedDays) ? unmarkedDays : [];
+  const firstMissingDate = effectiveDays[0];
+  const missingCount = effectiveDays.length;
 
-  const handlePlayAudio = () => {
-    try {
-      if (audioRef.current && audioSrc) {
-        audioRef.current.currentTime = 0;
-        const p = audioRef.current.play();
-        if (p && typeof p.then === 'function') {
-          p.then(() => setIsPlayingAudio(true)).catch(() => {});
-        }
-      }
-    } catch (e) {}
-  };
-
-  // Tenta riproduzione audio non appena il componente appare (chiamato sempre incondizionatamente)
-  useEffect(() => {
-    if (hasUnmarked && audioSrc && audioRef.current && !isDismissed) {
-      handlePlayAudio();
-    }
-  }, [hasUnmarked, audioSrc, isDismissed]);
-
-  // 2. SOLO DOPO TUTTI GLI HOOKS: EARLY RETURN SE NON CI SONO GIORNI DA NOTIFICARE O SE È STATO CHIUSO
-  if (!hasUnmarked || isDismissed) {
-    return null;
-  }
-
-  // Il primo giorno mancante in ordine cronologico
-  const firstMissingDate = unmarkedDays[0];
-  if (!firstMissingDate) return null;
-
-  const missingCount = unmarkedDays.length;
-
-  // Formattazione manuale sicura senza dipendere da locale engine
   const formatDateLabel = (dStr) => {
     try {
       if (!dStr) return '';
@@ -85,9 +53,40 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
     }
   };
 
+  const handleConfirmOk = (e) => {
+    if (e) e.stopPropagation();
+    triggerHapticFeedback('selection');
+    setIsDismissed(true);
+    try {
+      localStorage.setItem('coraline_mouse_notice_dismissed_date', todayStr);
+    } catch (err) {}
+  };
+
+  const handlePlayAudio = () => {
+    try {
+      if (audioRef.current && audioSrc) {
+        audioRef.current.currentTime = 0;
+        const p = audioRef.current.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => setIsPlayingAudio(true)).catch(() => {});
+        }
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    if (audioSrc && audioRef.current && !isDismissed && effectiveDays.length > 0) {
+      handlePlayAudio();
+    }
+  }, [audioSrc, isDismissed, effectiveDays.length]);
+
+  // La notifica appare SOLO se c'è almeno un giorno non segnato indietro di 2 giorni (e se l'utente non ha cliccato OK oggi)
+  if (isDismissed || effectiveDays.length === 0) {
+    return null;
+  }
+
   return (
     <>
-      {/* Audio tag predisposto per traccia utente */}
       {audioSrc && (
         <audio
           ref={audioRef}
@@ -96,7 +95,7 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
         />
       )}
 
-      {/* BANNER / AVVISO DEL TOPO SALTATORE (CON SFONDO A VORTICE UGUALE AL CALENDARIO) */}
+      {/* BANNER / AVVISO DEL TOPO SALTATORE CON BORDO GIALLO TRATTEGGIATO */}
       <div
         role="button"
         tabIndex={0}
@@ -104,66 +103,69 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
           triggerHapticFeedback('selection');
           onSelectDay(firstMissingDate);
         }}
-        className="stitched-card vortex-card"
+        className="stitched-card"
         style={{
           width: '100%',
           marginBottom: '16px',
-          background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
-          border: '1.5px solid rgba(216, 198, 21, 0.55)',
-          borderRadius: '24px',
-          padding: '14px 16px',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), inset 0 1.5px 0 0 rgba(216, 198, 21, 0.35), 0 0 18px rgba(216, 198, 21, 0.22)',
+          background: 'rgba(5, 17, 30, 0.92)',
+          border: '2px dashed rgba(216, 198, 21, 0.85)',
+          borderRadius: '20px',
+          // Più spazio in alto e in basso (18px)
+          padding: '18px 16px 18px 14px',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 16px rgba(216, 198, 21, 0.22), inset 0 0 15px rgba(100, 80, 10, 0.25)',
           display: 'flex',
           alignItems: 'center',
-          gap: '14px',
+          gap: '16px',
           cursor: 'pointer',
           touchAction: 'manipulation',
-          animation: 'mouseNoticeEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxSizing: 'border-box'
+          animation: 'mouseNoticeEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxSizing: 'border-box',
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        {/* Pulsantino Chiusura / Riduci "✕" */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            triggerHapticFeedback('selection');
-            handleDismiss();
-          }}
-          aria-label="Chiudi avviso"
+        {/* SFONDO CIRCO DEI TOPI SALTATORI BEN VISIBILE (SENZA VORTICE) */}
+        <div
           style={{
             position: 'absolute',
-            top: '8px',
-            right: '8px',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-            border: 'none',
-            color: 'var(--coraline-parchment)',
-            fontSize: '13px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.7
+            inset: 0,
+            backgroundImage: `url(${jumpingMiceCircusBg})`,
+            backgroundPosition: 'center 40%',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.82,
+            filter: 'brightness(0.78) contrast(1.08)',
+            WebkitFilter: 'brightness(0.78) contrast(1.08)',
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+            zIndex: 0
           }}
-        >
-          ✕
-        </button>
+        />
 
-        {/* CONTENITORE DEL TOPO PIÙ GRANDE CHE TREMA E SQUILLA LA TROMBA */}
+        {/* VELATURA LEGGERA SFUMATA PER GARANTIRE PERFETTA LEGGIBILITÀ AI TESTI */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, rgba(5, 17, 30, 0.35) 0%, rgba(5, 17, 30, 0.45) 45%, rgba(5, 17, 30, 0.65) 100%)',
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+            zIndex: 0
+          }}
+        />
+
+        {/* LATO SINISTRO: TOPO SALTATORE ANCORA PIÙ GRANDE (96px) CHE SUONA LA TROMBA */}
         <div
           style={{
             flexShrink: 0,
-            width: '108px',
-            height: '108px',
+            width: '96px',
+            height: '96px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            cursor: 'pointer',
-            margin: '-4px 0 -4px -6px'
+            zIndex: 1,
+            cursor: 'pointer'
           }}
           onClick={(e) => {
             if (audioSrc) {
@@ -173,11 +175,6 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
           }}
           title={audioSrc ? 'Tocca per ascoltare la tromba!' : undefined}
         >
-          {/* Micro onde sonore che escono dal padiglione della tromba */}
-          <div className="sound-pulse-ring ring-1" />
-          <div className="sound-pulse-ring ring-2" />
-
-          {/* Immagine con animazione di squillo e vibrazione stop-motion */}
           <img
             src={jumpingMouseImg}
             alt="Topo Saltatore del Circo di Bobinsky"
@@ -188,7 +185,7 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95))',
+              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(216, 198, 21, 0.3))',
               willChange: 'transform',
               transform: 'translateZ(0)',
               pointerEvents: 'none'
@@ -196,45 +193,74 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
           />
         </div>
 
-        {/* SOLO TITOLO E SOTTOTITOLO */}
-        <div style={{ flex: 1, minWidth: 0, paddingRight: '14px' }}>
+        {/* LATO DESTRO: TITOLO IN FONT CORALINE, SPIEGAZIONE E PULSANTE [✓ OK] ALLINEATI */}
+        <div style={{ flex: 1, minWidth: 0, zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
           <h4
             style={{
               margin: '0 0 4px 0',
               color: 'var(--coraline-yellow)',
-              fontSize: '13.5px',
+              fontSize: '18px',
               fontWeight: 'normal',
               letterSpacing: '0.8px',
-              fontFamily: 'var(--font-coraline)'
+              lineHeight: 1.15,
+              fontFamily: 'var(--font-coraline)',
+              textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(216, 198, 21, 0.4)'
             }}
           >
-            Allarme Topi Saltatori!
+            Topi Saltatori!
           </h4>
 
           <p
             style={{
-              margin: 0,
-              fontSize: '12px',
+              margin: '0 0 10px 0',
+              fontSize: '11.5px',
               color: 'var(--coraline-parchment)',
-              lineHeight: 1.4,
-              opacity: 0.92
+              lineHeight: 1.35,
+              opacity: 0.9,
+              fontFamily: 'var(--font-body)',
+              textShadow: '0 1px 4px rgba(0, 0, 0, 0.95)'
             }}
           >
             {missingCount === 1 ? (
-              <>Il giorno <strong>{formatDateLabel(firstMissingDate)}</strong> non è contrassegnato. Tocca per completarlo.</>
+              <>Manca <strong>1 giorno</strong> ({formatDateLabel(firstMissingDate)}) da registrare nel calendario!</>
             ) : (
-              <>Ci sono <strong>{missingCount} giorni</strong> (dal {formatDateLabel(firstMissingDate)}) da completare.</>
+              <>Mancano <strong>{missingCount} giorni</strong> (a partire dal {formatDateLabel(firstMissingDate)}) da completare!</>
             )}
           </p>
+
+          {/* PULSANTE [✓ OK] RICHIESTO: Chiude la notifica per oggi e riappare domani se ci sono ancora giorni mancanti */}
+          <button
+            type="button"
+            onClick={handleConfirmOk}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '6px 24px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(216, 198, 21, 0.22)',
+              border: '1.5px solid var(--coraline-yellow)',
+              color: 'var(--coraline-yellow)',
+              fontSize: '12px',
+              fontFamily: 'var(--font-gothic)',
+              fontWeight: 800,
+              letterSpacing: '0.6px',
+              cursor: 'pointer',
+              touchAction: 'manipulation',
+              boxShadow: '0 0 10px rgba(216, 198, 21, 0.35)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            ✓ OK
+          </button>
         </div>
       </div>
 
       <style>{`
-        /* Animazione d'ingresso del banner */
         @keyframes mouseNoticeEnter {
           from {
             opacity: 0;
-            transform: translate3d(0, -8px, 0) scale(0.98);
+            transform: translate3d(0, -6px, 0) scale(0.98);
           }
           to {
             opacity: 1;
@@ -242,7 +268,6 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
           }
         }
 
-        /* Tremolio e squillo energico della tromba */
         .jumping-mouse-animated {
           animation: mouseTrumpetBlast 1.4s infinite cubic-bezier(0.25, 1, 0.5, 1);
           transform-origin: bottom center;
@@ -274,61 +299,10 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
             transform: translateY(-1px) rotate(-2deg) scale(1.02, 0.99);
           }
           54% {
-            /* Pausa respiro */
-            transform: translateY(0) rotate(0deg) scale(1);
-          }
-          64% {
-            /* Secondo squillo di tromba con tremolio */
-            transform: translateY(-3px) rotate(4deg) scale(1.05, 0.96);
-          }
-          70% {
-            transform: translateY(-1px) rotate(-3deg) scale(1.02, 0.98);
-          }
-          76% {
-            transform: translateY(-3px) rotate(3deg) scale(1.04, 0.97);
-          }
-          84% {
             transform: translateY(0) rotate(0deg) scale(1);
           }
           100% {
             transform: translateY(0) rotate(0deg) scale(1);
-          }
-        }
-
-        /* Onde concentriche sonore attorno al padiglione */
-        .sound-pulse-ring {
-          position: absolute;
-          top: 18px;
-          left: 4px;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          border: 1.5px solid var(--coraline-yellow);
-          pointer-events: none;
-          opacity: 0;
-        }
-
-        .ring-1 {
-          animation: trumpetRings 1.4s ease-out infinite;
-          animation-delay: 0.2s;
-        }
-
-        .ring-2 {
-          animation: trumpetRings 1.4s ease-out infinite;
-          animation-delay: 0.65s;
-        }
-
-        @keyframes trumpetRings {
-          0% {
-            transform: scale(0.4);
-            opacity: 0.8;
-          }
-          60% {
-            opacity: 0.4;
-          }
-          100% {
-            transform: scale(1.5);
-            opacity: 0;
           }
         }
       `}</style>

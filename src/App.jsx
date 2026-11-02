@@ -10,6 +10,7 @@ import SecretDoor from './components/SecretDoor';
 import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
 import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
+import CoralineDivider from './components/CoralineDivider';
 import SecretLoveModal from './components/SecretLoveModal';
 import SecretSettingsModal from './components/SecretSettingsModal';
 import { 
@@ -20,6 +21,8 @@ import {
   initNotificationChannels
 } from './services/notifications';
 import { triggerHapticFeedback } from './services/haptics';
+import { smoothScrollToElement } from './utils/scrollAnimation';
+import { initBackgroundMusic } from './services/backgroundMusic';
 
 // Immagini critiche per il rendering immediato e il preloading
 import catStandingImg from './assets/cat-standing.webp';
@@ -36,6 +39,7 @@ import wybieImg from './assets/wybie-proud.webp';
 import catModalBg from './assets/cat-modal-bg.webp';
 import secretDoorImg from './assets/secret-door.webp';
 import vortexBg from './assets/coraline-vortex-bg.webp';
+import starryBg from './assets/coraline-starry-bg.webp';
 
 import { 
   getTodayDateString, 
@@ -43,8 +47,14 @@ import {
   saveDayLog, 
   getMonthUsedKeys,
   getUnmarkedPastDays,
-  getConsecutiveDietStreak 
+  getConsecutiveDietStreak,
+  getWorkoutLogs,
+  saveWorkoutLog,
+  exportFullCloudBackupPayload,
+  getCustomAvatar,
+  saveCustomAvatar
 } from './utils/storage';
+import { triggerDebouncedCloudSync } from './services/supabase';
 import { getRandomCatQuote } from './data/catQuotes';
 
 export default function App() {
@@ -54,7 +64,9 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [displayYear, setDisplayYear] = useState(() => todayObj.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(() => todayObj.getMonth());
-  const [allLogs, setAllLogs] = useState({});
+  const [allLogs, setAllLogs] = useState(() => getAllLogs());
+  const [workoutLogs, setWorkoutLogs] = useState(() => getWorkoutLogs());
+  const [customAvatar, setCustomAvatar] = useState(() => getCustomAvatar());
   const [keysPerMonth, setKeysPerMonth] = useState(() => {
     try {
       return Number(localStorage.getItem('coraline_keys_per_month')) || 4;
@@ -62,6 +74,18 @@ export default function App() {
       return 4;
     }
   });
+
+  const handleSaveWorkout = useCallback((dateStr, status) => {
+    const updated = saveWorkoutLog(dateStr, status);
+    setWorkoutLogs(updated);
+    triggerDebouncedCloudSync(exportFullCloudBackupPayload);
+  }, []);
+
+  const handleAvatarChange = useCallback((newAvatar) => {
+    saveCustomAvatar(newAvatar);
+    setCustomAvatar(newAvatar);
+    triggerDebouncedCloudSync(exportFullCloudBackupPayload);
+  }, []);
 
   // Modal Selezione Esito Giorno
   const [dayModalState, setDayModalState] = useState({
@@ -117,6 +141,7 @@ export default function App() {
 
   // Modal Impostazioni / Profilo aperto dal tasto profilo in alto a destra
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('settings');
 
   const handleChangeKeysPerMonth = useCallback((newCount) => {
     setKeysPerMonth(newCount);
@@ -127,6 +152,12 @@ export default function App() {
 
   const handleRestoreSuccess = useCallback(() => {
     setAllLogs(getAllLogs());
+    setWorkoutLogs(getWorkoutLogs());
+    setCustomAvatar(getCustomAvatar());
+    try {
+      const k = Number(localStorage.getItem('coraline_keys_per_month')) || 4;
+      setKeysPerMonth(k);
+    } catch (e) {}
   }, []);
 
   // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
@@ -188,6 +219,7 @@ export default function App() {
   // Carica i dati salvati, applica le preferenze visive e ottimizza il rendering iniziale
   useEffect(() => {
     setAllLogs(getAllLogs());
+    initBackgroundMusic();
 
     try {
       if (typeof document !== 'undefined') {
@@ -252,6 +284,13 @@ export default function App() {
       }
       return prev + 1;
     });
+  }, []);
+
+  // Ritorna al mese e anno della data odierna al clic sul nome del mese
+  const handleResetToCurrentMonth = useCallback(() => {
+    const now = new Date();
+    setDisplayYear(now.getFullYear());
+    setDisplayMonth(now.getMonth());
   }, []);
 
   // Quando l'utente tocca un giorno del calendario o dell'avviso
@@ -323,6 +362,7 @@ export default function App() {
     saveDayLog(targetDate, { dietState: newStatus });
     const updatedLogs = getAllLogs();
     setAllLogs(updatedLogs);
+    triggerDebouncedCloudSync(exportFullCloudBackupPayload);
 
     // 1. Chiude il modal di selezione del giorno se aperto
     setDayModalState({ isOpen: false, dateStr: null });
@@ -432,12 +472,63 @@ export default function App() {
 
   return (
     <>
+      {/* SFONDO GLOBALE NOTTURNO STELLATO CON PUNTI LUCE SOFFUSI SFOCATI */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden',
+          backgroundColor: '#0a0b1a'
+        }}
+      >
+        {/* Livello 1: texture cielo stellato di Coraline a bassa opacità e sfocato */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${starryBg})`,
+            backgroundPosition: 'center center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'repeat',
+            opacity: 0.14,
+            filter: 'blur(1.6px)',
+            WebkitFilter: 'blur(1.6px)'
+          }}
+        />
+
+        {/* Livello 2: Punti luce stellari sfocati (1px - 2px) sparsi con eleganza */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              radial-gradient(1.5px 1.5px at 15% 12%, rgba(221, 202, 183, 0.75), transparent),
+              radial-gradient(2px 2px at 78% 18%, rgba(216, 198, 21, 0.65), transparent),
+              radial-gradient(1.2px 1.2px at 42% 28%, rgba(255, 255, 255, 0.7), transparent),
+              radial-gradient(2.2px 2.2px at 88% 42%, rgba(139, 229, 116, 0.55), transparent),
+              radial-gradient(1.5px 1.5px at 22% 52%, rgba(221, 202, 183, 0.6), transparent),
+              radial-gradient(2px 2px at 64% 65%, rgba(255, 255, 255, 0.65), transparent),
+              radial-gradient(1.8px 1.8px at 12% 76%, rgba(216, 198, 21, 0.55), transparent),
+              radial-gradient(2.4px 2.4px at 82% 84%, rgba(221, 202, 183, 0.7), transparent),
+              radial-gradient(1.4px 1.4px at 48% 92%, rgba(139, 229, 116, 0.6), transparent)
+            `,
+            filter: 'blur(1.2px)',
+            WebkitFilter: 'blur(1.2px)',
+            opacity: 0.85,
+            animation: 'coralineStarsSubtlePulse 6s ease-in-out infinite'
+          }}
+        />
+      </div>
+
       <div style={{
         minHeight: '100vh',
         width: '100%',
         maxWidth: '480px',
         margin: '0 auto',
-        padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px calc(env(safe-area-inset-bottom, 24px) + 60px) 16px',
+        padding: 'calc(env(safe-area-inset-top, 24px) + 20px) 16px calc(env(safe-area-inset-bottom, 24px) + 110px) 16px',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -445,44 +536,70 @@ export default function App() {
         touchAction: 'pan-y'
       }}>
         {/* 1. COMPONENTE PRINCIPALE DASHBOARD: BUTTON MOON ECLIPSE */}
-        <div style={{ marginBottom: '14px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <ButtonMoonEclipse
             allLogs={allLogs}
+            workoutLogs={workoutLogs}
             todayStr={todayStr}
-            onOpenSettings={() => setIsSettingsOpen(true)}
+            displayYear={displayYear}
+            displayMonth={displayMonth}
+            onOpenSettings={(tab = 'settings') => {
+              setSettingsTab(tab);
+              setIsSettingsOpen(true);
+            }}
+            customAvatar={customAvatar}
+            onScrollToDashboard={() => {
+              smoothScrollToElement('dashboard-stats-section', 1400);
+            }}
           />
         </div>
 
-        {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI PER GIORNI NON CONTRASSEGNATI */}
-      <JumpingMouseNotice
-        unmarkedDays={unmarkedDays}
-        onSelectDay={handleDayClick}
-      />
+        {/* 1. PRIMA LINEA DI DEMARCAZIONE IN STILE CORALINE: MANO DELL'ALTRA MADRE */}
+        <CoralineDivider variant="hand" />
 
-      {/* 3. IL CALENDARIO: GRIGLIA MENSILE */}
-      <CalendarGrid
-        selectedDate={selectedDate}
-        onSelectDate={handleDayClick}
-        allLogs={allLogs}
-        displayYear={displayYear}
-        displayMonth={displayMonth}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-      />
+        {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI & NOTIFICA ALLENAMENTO BOBINSKY */}
+        <JumpingMouseNotice
+          unmarkedDays={unmarkedDays}
+          onSelectDay={handleDayClick}
+        />
 
-      {/* 3.5 SCHEDA QUOTIDIANA ALLENAMENTO DI BOBINSKY */}
-      <BobinskyWorkoutCard todayStr={todayStr} />
+        <BobinskyWorkoutCard 
+          todayStr={todayStr} 
+          workoutLogs={workoutLogs}
+          onSaveWorkout={handleSaveWorkout}
+        />
 
-      {/* 4. LA DASHBOARD: CHIAVI GIGANTI E STATISTICHE */}
-      <MonthStatsBar
-        displayYear={displayYear}
-        displayMonth={displayMonth}
-        allLogs={allLogs}
-        keysPerMonth={keysPerMonth}
-      />
+        {/* 3. IL CALENDARIO: GRIGLIA MENSILE */}
+        <CalendarGrid
+          selectedDate={selectedDate}
+          onSelectDate={handleDayClick}
+          allLogs={allLogs}
+          workoutLogs={workoutLogs}
+          onSaveWorkout={handleSaveWorkout}
+          displayYear={displayYear}
+          displayMonth={displayMonth}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          onResetToCurrentMonth={handleResetToCurrentMonth}
+        />
 
-      {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
-      <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
+        {/* SECONDA LINEA DI DEMARCAZIONE IN STILE CORALINE: SCARAFAGGIO-BOTTONE VIOLA */}
+        <CoralineDivider variant="beetle" />
+
+        {/* 4. LA DASHBOARD: CHIAVI GIGANTI E STATISTICHE */}
+        <MonthStatsBar
+          displayYear={displayYear}
+          displayMonth={displayMonth}
+          allLogs={allLogs}
+          workoutLogs={workoutLogs}
+          keysPerMonth={keysPerMonth}
+        />
+
+        {/* 3. TERZA LINEA DI DEMARCAZIONE IN STILE CORALINE: INSETTO-ARMADIO ARANCIO */}
+        <CoralineDivider variant="wardrobe" />
+
+        {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
+        <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
@@ -494,7 +611,7 @@ export default function App() {
         title="Tocca per riascoltare l'ultima frase del Gatto"
         style={{
           position: 'fixed',
-          bottom: '10px',
+          bottom: 'calc(env(safe-area-inset-bottom, 12px) + 12px)',
           right: '12px',
           zIndex: 9980,
           background: 'none',
@@ -535,6 +652,17 @@ export default function App() {
             transform: translate3d(0, -6px, 0) rotate(1.2deg);
           }
         }
+
+        @keyframes coralineStarsSubtlePulse {
+          0%, 100% {
+            opacity: 0.72;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.95;
+            transform: scale(1.015);
+          }
+        }
       `}</style>
 
       {/* POP-UP COMPATTO PER LA SELEZIONE ESITO DEL GIORNO */}
@@ -573,10 +701,13 @@ export default function App() {
       <SecretSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        initialTab={settingsTab}
         keysPerMonth={keysPerMonth}
         onChangeKeysPerMonth={handleChangeKeysPerMonth}
         onRestoreSuccess={handleRestoreSuccess}
         onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
+        customAvatar={customAvatar}
+        onAvatarChange={handleAvatarChange}
       />
 
       {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}

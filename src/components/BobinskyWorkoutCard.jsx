@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import bobinskyImg from '../assets/bobinsky-training.webp';
-import vortexBg from '../assets/coraline-vortex-bg.webp';
-import starryBg from '../assets/coraline-starry-bg.webp';
+import circusBg from '../assets/bobinsky-circus-bg.webp';
 import { triggerHapticFeedback } from '../services/haptics';
+import BobinskyReactionModal from './BobinskyReactionModal';
 
 /**
- * Scheda Giornaliera di Bobinsky (Allenamento di Asia):
- * Chiede ad Asia una volta al giorno se si è allenata con due opzioni: [Sì] e [No].
- * I dati vengono salvati localmente per data (YYYY-MM-DD) per future statistiche.
+ * Notifica / Card del Grande Bobinsky:
+ * - Bordo e accenti nel colore specificato dall'utente: RGB(141, 109, 82).
+ * - Bobinsky a sinistra grande e ben visibile (92px).
+ * - Titolo in font Coraline "Allenamento?" in rgb(141, 109, 82).
+ * - Sottotitolo con data e spiegazione in font normale.
+ * - Pulsanti [Sì] e [No] allineati.
  */
-const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({ todayStr }) {
-  // Mappa di allenamenti per data: { "YYYY-MM-DD": "yes" | "no" }
-  const [workoutLogs, setWorkoutLogs] = useState(() => {
+const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({ 
+  todayStr,
+  workoutLogs: propWorkoutLogs,
+  onSaveWorkout
+}) {
+  // Mappa di allenamenti per data
+  const [localWorkoutLogs, setLocalWorkoutLogs] = useState(() => {
     try {
       const saved = localStorage.getItem('coraline_workout_logs');
       return saved ? JSON.parse(saved) : {};
@@ -20,364 +27,300 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({ todayStr }
     }
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-
+  const workoutLogs = propWorkoutLogs || localWorkoutLogs;
   const todayStatus = workoutLogs[todayStr] || null;
 
-  const handleSelectOption = (status) => {
-    triggerHapticFeedback('selection');
-    const updated = {
-      ...workoutLogs,
-      [todayStr]: status
-    };
-    setWorkoutLogs(updated);
-    setIsEditing(false);
+  // Stato per animazione immediata di chiusura al clic di Sì o No
+  const [justAnsweredStatus, setJustAnsweredStatus] = useState(null);
+  const [isDismissedAfterClick, setIsDismissedAfterClick] = useState(false);
+  const [reactionStatus, setReactionStatus] = useState(null);
+
+  // Formatta data odierna in italiano senza accenti su "i" (es. "Lunedi 2 Novembre")
+  const formatItalianDate = (dStr) => {
+    if (!dStr) return '';
     try {
-      localStorage.setItem('coraline_workout_logs', JSON.stringify(updated));
+      const [y, m, d] = dStr.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      const daysOfWeek = ['Domenica', 'Lunedi', 'Martedi', 'Mercoledi', 'Giovedi', 'Venerdi', 'Sabato'];
+      const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+      const dayName = daysOfWeek[date.getDay()];
+      const monthName = months[m - 1];
+      return `${dayName} ${d} ${monthName}`;
     } catch (e) {
-      console.error('Errore salvataggio allenamento Bobinsky:', e);
+      return dStr;
     }
   };
 
+  const handleSelectOption = (status) => {
+    triggerHapticFeedback(status === 'yes' ? 'success' : 'cheat');
+    
+    // Salva l'allenamento per oggi
+    if (onSaveWorkout) {
+      onSaveWorkout(todayStr, status);
+    } else {
+      const updated = { ...workoutLogs, [todayStr]: status };
+      setLocalWorkoutLogs(updated);
+      try {
+        localStorage.setItem('coraline_workout_logs', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Errore salvataggio allenamento Bobinsky:', e);
+      }
+    }
+
+    setJustAnsweredStatus(status);
+    setReactionStatus(status);
+  };
+
+  // Se l'utente ha risposto e l'animazione della foto a schermo intero è conclusa, scompare la card
+  if (isDismissedAfterClick && !reactionStatus) {
+    return null;
+  }
+
+  // Colore esatto indicato: R:141 G:109 B:82
+  const bobinskyColor = 'rgb(141, 109, 82)';
+
   return (
-    <div
+    <>
+      {/* MODAL REAZIONE FOTOGRAFICA BOBINSKY (SFONDO SFOCATO) */}
+      <BobinskyReactionModal
+        status={reactionStatus}
+        onClose={() => {
+          setReactionStatus(null);
+          setIsDismissedAfterClick(true);
+        }}
+      />
+
+      {!isDismissedAfterClick && (
+        <div
+          role="region"
+          aria-label="Avviso Allenamento Bobinsky"
+      className="stitched-card"
       style={{
         width: '100%',
-        borderRadius: '24px',
-        background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
-        border: '1px solid rgba(107, 142, 85, 0.32)',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(154, 185, 123, 0.18)',
-        padding: '16px 14px 18px 14px',
         marginBottom: '16px',
+        borderRadius: '20px',
+        background: 'rgba(5, 17, 30, 0.92)',
+        // Tratteggiato nel colore esatto di Bobinsky R:141 G:109 B:82
+        border: `2px dashed ${bobinskyColor}`,
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 16px rgba(141, 109, 82, 0.28), inset 0 0 15px rgba(141, 109, 82, 0.15)',
+        // Più spazio in alto e in basso (18px)
+        padding: '18px 16px 18px 14px',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        textAlign: 'center'
+        gap: '16px',
+        touchAction: 'manipulation',
+        animation: 'bobinskyNoticeEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
-      {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE */}
+      {/* SFONDO CIRCO DI TOPI DI BOBINSKY BEN VISIBILE (SENZA VORTICE) */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `url(${starryBg})`,
-          backgroundPosition: 'center center',
+          backgroundImage: `url(${circusBg})`,
+          backgroundPosition: 'center 46%',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.12,
-          filter: 'blur(2px)',
-          WebkitFilter: 'blur(2px)',
-          maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
-          WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
+          opacity: 0.82,
+          filter: 'brightness(0.78) contrast(1.08)',
+          WebkitFilter: 'brightness(0.78) contrast(1.08)',
           pointerEvents: 'none',
           borderRadius: 'inherit',
           zIndex: 0
         }}
       />
 
-      {/* TRAMA VORTICE / SPIRALE SFUMATA */}
+      {/* VELATURA LEGGERA SFUMATA PER GARANTIRE PERFETTA LEGGIBILITÀ AI TESTI */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `url(${vortexBg})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.07,
-          filter: 'blur(2px)',
-          WebkitFilter: 'blur(2px)',
-          maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-          WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+          background: 'linear-gradient(90deg, rgba(5, 17, 30, 0.35) 0%, rgba(5, 17, 30, 0.45) 45%, rgba(5, 17, 30, 0.65) 100%)',
           pointerEvents: 'none',
           borderRadius: 'inherit',
           zIndex: 0
         }}
       />
 
-      {/* ALONE RADIALE SMERALDO */}
+      {/* LATO SINISTRO: IL GRANDE BOBINSKY GRANDE E BEN VISIBILE (92px) */}
       <div
         style={{
-          position: 'absolute',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '240px',
-          height: '160px',
-          background: 'radial-gradient(circle, rgba(107, 142, 85, 0.18) 0%, rgba(26, 69, 110, 0.12) 55%, transparent 75%)',
-          pointerEvents: 'none',
-          zIndex: 0
-        }}
-      />
-
-      {/* INTESTAZIONE: TITOLO */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          textAlign: 'center',
-          marginBottom: '6px'
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: 'var(--font-coraline)',
-            fontSize: '22px',
-            color: '#8be574',
-            textAlign: 'center',
-            margin: 0,
-            letterSpacing: '0.8px',
-            textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(139, 229, 116, 0.45)',
-            lineHeight: 1.2
-          }}
-        >
-          Il Grande<br />Bobinsky
-        </h3>
-      </div>
-
-      {/* IMMAGINE DI BOBINSKY IN SPACCATA SULLA RINGHIERA */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          width: '100%',
-          maxWidth: '240px',
-          margin: '2px auto 10px auto',
+          flexShrink: 0,
+          width: '92px',
+          height: '92px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          animation: 'bobinskyFloat 3.8s ease-in-out infinite',
+          position: 'relative',
+          zIndex: 1,
+          animation: 'bobinskyNoticeFloat 3.5s ease-in-out infinite',
           willChange: 'transform'
         }}
       >
         <img
           src={bobinskyImg}
-          alt="Il Grande Bobinsky in spaccata"
+          alt="Il Grande Bobinsky"
           loading="eager"
           decoding="async"
           style={{
             width: '100%',
-            height: 'auto',
-            maxHeight: '135px',
+            height: '100%',
             objectFit: 'contain',
-            filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.9))',
+            filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(141, 109, 82, 0.35))',
             pointerEvents: 'none'
           }}
         />
       </div>
 
-      {/* SEZIONE DOMANDA O STATO RISPOSTA */}
-      {todayStatus && !isEditing ? (
-        // STATO GIÀ RISPOSTO PER OGGI
+      {/* LATO DESTRO: FONT CORALINE "Allenamento?", DATA E PULSANTI ALLINEATI */}
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          textAlign: 'left'
+        }}
+      >
+        {/* Titolo in Font Coraline in rgb(141, 109, 82): Allenamento? */}
         <div
           style={{
-            position: 'relative',
-            zIndex: 1,
-            width: '100%',
-            maxWidth: '310px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '8px',
-            marginTop: '2px'
+            fontFamily: 'var(--font-coraline)',
+            fontSize: '18px',
+            color: bobinskyColor,
+            letterSpacing: '0.8px',
+            lineHeight: 1.15,
+            marginBottom: '4px',
+            textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(141, 109, 82, 0.45)'
           }}
         >
-          {/* Badge Esito */}
-          <div
-            style={{
-              padding: '6px 16px',
-              borderRadius: '12px',
-              backgroundColor: todayStatus === 'yes' ? 'rgba(16, 80, 45, 0.55)' : 'rgba(60, 20, 25, 0.55)',
-              border: todayStatus === 'yes' ? '1.5px solid #8be574' : '1.5px solid rgba(239, 68, 68, 0.6)',
-              boxShadow: todayStatus === 'yes'
-                ? '0 0 12px rgba(139, 229, 116, 0.35)'
-                : '0 0 12px rgba(239, 68, 68, 0.35)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <span style={{ fontSize: '13px' }}>{todayStatus === 'yes' ? '🎪' : '💤'}</span>
-            <span
-              style={{
-                fontFamily: 'var(--font-gothic)',
-                fontSize: '13px',
-                fontWeight: 800,
-                color: todayStatus === 'yes' ? '#8be574' : '#fca5a5'
-              }}
-            >
-              {todayStatus === 'yes' ? 'Oggi ti sei allenata! ✦' : 'Oggi giorno di riposo'}
-            </span>
-          </div>
-
-          {/* Frase di Bobinsky */}
-          <p
-            style={{
-              margin: '2px 0 6px 0',
-              fontFamily: 'var(--font-body)',
-              fontStyle: 'italic',
-              fontSize: '13.5px',
-              lineHeight: 1.4,
-              color: 'var(--coraline-parchment)',
-              textShadow: '0 1px 3px rgba(0, 0, 0, 0.9)',
-              padding: '0 8px'
-            }}
-          >
-            {todayStatus === 'yes'
-              ? '«Molto bene, Asia! I muscoli sono scattanti come i miei Topi Saltatori!»'
-              : '«Niente salti oggi per Asia! Anche i più grandi acrobati hanno bisogno di riposo.»'}
-          </p>
-
-          {/* Pulsante Modifica Risposta */}
-          <button
-            onClick={() => {
-              triggerHapticFeedback('selection');
-              setIsEditing(true);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--coraline-parchment)',
-              opacity: 0.65,
-              fontSize: '11px',
-              fontFamily: 'var(--font-gothic)',
-              fontWeight: 700,
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              padding: '4px 8px'
-            }}
-          >
-            Modifica risposta
-          </button>
+          Allenamento?
         </div>
-      ) : (
-        // STATO IN ATTESA DI RISPOSTA PER OGGI
+
+        {/* Specifica del giorno esatto in italiano e spiegazione con font normale */}
         <div
           style={{
-            position: 'relative',
-            zIndex: 1,
-            width: '100%',
-            maxWidth: '310px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '12px'
+            fontFamily: 'var(--font-body)',
+            fontSize: '11.5px',
+            color: 'var(--coraline-parchment)',
+            opacity: 0.9,
+            lineHeight: 1.35,
+            marginBottom: '10px',
+            textShadow: '0 1px 4px rgba(0, 0, 0, 0.95)'
           }}
         >
-          {/* Domanda di Bobinsky */}
-          <div
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontStyle: 'italic',
-              fontSize: '14.5px',
-              fontWeight: 600,
-              color: '#ffffff',
-              lineHeight: 1.4,
-              textShadow: '0 1px 4px rgba(0, 0, 0, 0.95)'
-            }}
-          >
-            «Asia! Dimmi un po', oggi ti sei allenata?»
-          </div>
+          <span style={{ color: bobinskyColor, fontWeight: 700 }}>
+            {formatItalianDate(todayStr)}
+          </span>
+          <span style={{ opacity: 0.75 }}> — Segna se ti sei allenata per il circo di topi</span>
+        </div>
 
-          {/* Pulsanti SÌ e NO */}
+        {/* Le due opzioni [Sì] e [No] allineate a sinistra col testo */}
+        {justAnsweredStatus ? (
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '14px',
-              width: '100%'
+              padding: '6px 14px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(20, 10, 32, 0.92)',
+              border: '1.5px solid rgb(141, 109, 82)',
+              color: 'var(--coraline-parchment)',
+              fontFamily: 'var(--font-gothic)',
+              fontSize: '12px',
+              fontWeight: 800,
+              boxShadow: '0 0 12px rgba(141, 109, 82, 0.35)'
             }}
           >
-            {/* Opzione SÌ */}
+            {justAnsweredStatus === 'yes' ? '✓ Registrato: Allenamento Fatto!' : '✓ Registrato: Nessun Allenamento'}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
+              type="button"
               onClick={() => handleSelectOption('yes')}
               style={{
-                flex: 1,
-                maxWidth: '125px',
-                padding: '11px 16px',
-                borderRadius: '14px',
-                backgroundColor: 'rgba(16, 80, 45, 0.85)',
-                border: '1.5px solid #8be574',
-                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(139, 229, 116, 0.35)',
-                color: '#ffffff',
+                minWidth: '78px',
+                height: '34px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                padding: '6px 16px',
+                borderRadius: '10px',
+                border: todayStatus === 'yes' ? '1.5px solid rgb(141, 109, 82)' : `1px solid rgba(141, 109, 82, 0.45)`,
+                backgroundColor: todayStatus === 'yes' ? 'rgba(20, 10, 32, 0.95)' : 'rgba(6, 20, 34, 0.75)',
+                boxShadow: todayStatus === 'yes' ? '0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(221, 202, 183, 0.25), 0 0 10px rgba(141, 109, 82, 0.3)' : 'none',
+                color: todayStatus === 'yes' ? '#ffffff' : 'var(--coraline-parchment)',
                 fontFamily: 'var(--font-gothic)',
-                fontSize: '15px',
+                fontSize: '12px',
                 fontWeight: 800,
-                letterSpacing: '0.5px',
                 cursor: 'pointer',
-                transition: 'transform 0.1s ease',
-                touchAction: 'manipulation'
+                touchAction: 'manipulation',
+                transition: 'all 0.15s ease'
               }}
             >
-              Sì ✦
+              {todayStatus === 'yes' ? '✓ Sì' : 'Sì'}
             </button>
 
-            {/* Opzione NO */}
             <button
+              type="button"
               onClick={() => handleSelectOption('no')}
               style={{
-                flex: 1,
-                maxWidth: '125px',
-                padding: '11px 16px',
-                borderRadius: '14px',
-                backgroundColor: 'rgba(60, 20, 25, 0.85)',
-                border: '1.5px solid rgba(239, 68, 68, 0.55)',
-                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(239, 68, 68, 0.25)',
-                color: '#fca5a5',
+                minWidth: '78px',
+                height: '34px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                padding: '6px 16px',
+                borderRadius: '10px',
+                border: todayStatus === 'no' ? '1.5px solid rgb(141, 109, 82)' : `1px solid rgba(141, 109, 82, 0.45)`,
+                backgroundColor: todayStatus === 'no' ? 'rgba(20, 10, 32, 0.95)' : 'rgba(6, 20, 34, 0.75)',
+                boxShadow: todayStatus === 'no' ? '0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(221, 202, 183, 0.25), 0 0 10px rgba(141, 109, 82, 0.3)' : 'none',
+                color: todayStatus === 'no' ? '#ffffff' : 'var(--coraline-parchment)',
                 fontFamily: 'var(--font-gothic)',
-                fontSize: '15px',
+                fontSize: '12px',
                 fontWeight: 800,
-                letterSpacing: '0.5px',
                 cursor: 'pointer',
-                transition: 'transform 0.1s ease',
-                touchAction: 'manipulation'
+                touchAction: 'manipulation',
+                transition: 'all 0.15s ease'
               }}
             >
-              No
+              {todayStatus === 'no' ? '✓ No' : 'No'}
             </button>
           </div>
-
-          {/* Opzione Annulla (quando in modalità modifica) */}
-          {isEditing && (
-            <button
-              onClick={() => {
-                triggerHapticFeedback('selection');
-                setIsEditing(false);
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--coraline-parchment)',
-                opacity: 0.65,
-                fontSize: '11px',
-                fontFamily: 'var(--font-gothic)',
-                fontWeight: 700,
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                padding: '2px 8px'
-              }}
-            >
-              Annulla modifica
-            </button>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       <style>{`
-        @keyframes bobinskyFloat {
+        @keyframes bobinskyNoticeEnter {
+          from {
+            opacity: 0;
+            transform: translate3d(0, -6px, 0) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+
+        @keyframes bobinskyNoticeFloat {
           0%, 100% {
             transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translate3d(0, -4px, 0) rotate(0.8deg);
+            transform: translate3d(0, -3px, 0) rotate(1.2deg);
           }
         }
       `}</style>
-    </div>
+        </div>
+      )}
+    </>
   );
 });
 

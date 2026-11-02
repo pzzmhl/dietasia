@@ -70,6 +70,35 @@ export default function SecretLoveModal({ isOpen, onClose }) {
           boxSizing: 'border-box'
         }}
       >
+        {/* Pulsante chiusura rapida ✕ */}
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Chiudi"
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(3, 10, 18, 0.65)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'var(--coraline-parchment)',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 10,
+            lineHeight: 1,
+            touchAction: 'manipulation',
+            padding: 0
+          }}
+        >
+          ✕
+        </button>
+
         {/* Simbolo del Cuore Pulsante */}
         <div
           style={{

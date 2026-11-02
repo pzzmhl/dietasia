@@ -1,6 +1,8 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { calculateEclipseState } from '../utils/eclipseLogic.js';
 import { getConsecutiveDietStreak } from '../utils/storage.js';
+import { calculateHistoricalComparison } from '../utils/historicalStats.js';
+import { smoothScrollToElement } from '../utils/scrollAnimation.js';
 import { triggerHapticFeedback } from '../services/haptics';
 
 // Immagine profilo Boring Blue Boy da Coraline
@@ -12,10 +14,11 @@ import vortexBg from '../assets/coraline-vortex-bg.webp';
 // Sfondo cielo stellato magico di Coraline
 import starryBg from '../assets/coraline-starry-bg.webp';
 
-// Oggetti grafici reali di Coraline per gli esiti dei 7 giorni
+// Oggetti grafici reali di Coraline per gli esiti dei 7 giorni e le statistiche
 import seeingStoneImg from '../assets/seeing-stone.webp'; // Pietra verde (dieta seguita)
 import blackButtonImg from '../assets/black-button.webp'; // Bottone nero (sgarro)
 import keyImg from '../assets/key.webp';                 // Chiave nera (chiave jolly)
+import gearBallImg from '../assets/gear-ball.webp';       // Palla cambio allenamento Bobinsky
 
 // I 7 snapshot fotografici originali estratti direttamente dalla reference cinematografica di Coraline
 import moonPhase0 from '../assets/eclipse-phases/coraline-moon-phase-0.webp';
@@ -25,6 +28,11 @@ import moonPhase3 from '../assets/eclipse-phases/coraline-moon-phase-3.webp';
 import moonPhase4 from '../assets/eclipse-phases/coraline-moon-phase-4.webp';
 import moonPhase5 from '../assets/eclipse-phases/coraline-moon-phase-5.webp';
 import moonPhase6 from '../assets/eclipse-phases/coraline-moon-phase-6.webp';
+
+const MONTHS_IT = [
+  'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+  'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+];
 
 const MOON_PHASES = [
   moonPhase0,
@@ -38,9 +46,28 @@ const MOON_PHASES = [
 
 const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
   allLogs = {},
+  workoutLogs = {},
   todayStr,
-  onOpenSettings = () => {}
+  displayYear,
+  displayMonth,
+  onOpenSettings = () => {},
+  customAvatar = null,
+  onScrollToDashboard
 }) {
+  const currentYear = todayStr ? Number(todayStr.split('-')[0]) : new Date().getFullYear();
+  const currentMonth = todayStr ? Number(todayStr.split('-')[1]) - 1 : new Date().getMonth();
+  const year = displayYear !== undefined ? displayYear : currentYear;
+  const month = displayMonth !== undefined ? displayMonth : currentMonth;
+
+  const handleScrollToDashboard = () => {
+    triggerHapticFeedback('selection');
+    if (onScrollToDashboard) {
+      onScrollToDashboard();
+    } else {
+      smoothScrollToElement('dashboard-stats-section', 1400);
+    }
+  };
+
   // Calcolo matematico a 7 giorni: ogni giorno seguito sposta il bottone indietro, ogni sgarro avanti
   const eclipse = useMemo(() => {
     return calculateEclipseState(allLogs, todayStr);
@@ -52,6 +79,121 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
   const streakCount = useMemo(() => {
     return getConsecutiveDietStreak(allLogs);
   }, [allLogs]);
+
+  // Calcolo statistiche storiche per Scheda 2 del Carosello
+  const stats = useMemo(() => {
+    return calculateHistoricalComparison(allLogs, workoutLogs, year, month);
+  }, [allLogs, workoutLogs, year, month]);
+
+  // Variazioni percentuali rispetto alla media per le 4 box comparative
+  const comparisonDeltas = useMemo(() => {
+    // 1. Aderenza: delta rispetto alla media storica
+    const adhDelta = stats.adherenceDelta;
+    const adhSign = adhDelta > 0 ? `+${adhDelta}%` : adhDelta < 0 ? `${adhDelta}%` : '0%';
+    const adhColor = adhDelta > 0 ? '#4ade80' : adhDelta < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
+
+    // 2. Giorni Rispettati: delta rispetto alla media mensile
+    const avgSucc = parseFloat(stats.avgMonthlySuccess) || 0;
+    let succPct = 0;
+    if (avgSucc > 0) {
+      succPct = Math.round(((stats.currentSuccessCount - avgSucc) / avgSucc) * 100);
+    } else if (stats.currentSuccessCount > 0) {
+      succPct = 100;
+    }
+    const succSign = succPct > 0 ? `+${succPct}%` : succPct < 0 ? `${succPct}%` : '0%';
+    const succColor = succPct > 0 ? '#4ade80' : succPct < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
+
+    // 3. Sgarri: MENO sgarri è miglioramento (verde), PIÙ sgarri è peggioramento (rosso)
+    const avgCheat = parseFloat(stats.avgMonthlyCheats) || 0;
+    let cheatPct = 0;
+    if (avgCheat > 0) {
+      cheatPct = Math.round(((stats.currentCheatCount - avgCheat) / avgCheat) * 100);
+    } else if (stats.currentCheatCount > 0) {
+      cheatPct = 100;
+    }
+    const cheatSign = cheatPct > 0 ? `+${cheatPct}%` : cheatPct < 0 ? `${cheatPct}%` : '0%';
+    const cheatColor = cheatPct < 0 ? '#4ade80' : cheatPct > 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
+
+    // 4. Allenamenti: delta rispetto alla media mensile
+    const avgWork = parseFloat(stats.avgMonthlyWorkouts) || 0;
+    let workPct = 0;
+    if (avgWork > 0) {
+      workPct = Math.round(((stats.currentWorkoutCount - avgWork) / avgWork) * 100);
+    } else if (stats.currentWorkoutCount > 0) {
+      workPct = 100;
+    }
+    const workSign = workPct > 0 ? `+${workPct}%` : workPct < 0 ? `${workPct}%` : '0%';
+    const workColor = workPct > 0 ? '#4ade80' : workPct < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
+
+    return {
+      adh: { text: `(${adhSign})`, color: adhColor },
+      succ: { text: `(${succSign})`, color: succColor },
+      cheat: { text: `(${cheatSign})`, color: cheatColor },
+      work: { text: `(${workSign})`, color: workColor }
+    };
+  }, [stats]);
+
+  // Stato e navigazione a vista singola con due box fisici concatenati
+  const [activeTab, setActiveTab] = useState(0); // 0: Ritmo / Luna, 1: Statistiche
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const isHorizontalSwipe = useRef(null);
+
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isHorizontalSwipe.current = null;
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartX.current;
+    const deltaY = currentY - touchStartY.current;
+
+    if (isHorizontalSwipe.current === null) {
+      if (Math.abs(deltaX) > 6 || Math.abs(deltaY) > 6) {
+        isHorizontalSwipe.current = Math.abs(deltaX) > Math.abs(deltaY) * 1.1;
+      }
+    }
+
+    if (isHorizontalSwipe.current) {
+      // Resistenza ai bordi (rubber banding) se si trascina oltre il limite
+      if ((activeTab === 0 && deltaX > 0) || (activeTab === 1 && deltaX < 0)) {
+        setDragOffset(deltaX * 0.22);
+      } else {
+        setDragOffset(deltaX);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    if (isHorizontalSwipe.current) {
+      if (dragOffset < -45 && activeTab === 0) {
+        triggerHapticFeedback('selection');
+        setActiveTab(1);
+      } else if (dragOffset > 45 && activeTab === 1) {
+        triggerHapticFeedback('selection');
+        setActiveTab(0);
+      }
+    }
+    setDragOffset(0);
+    isHorizontalSwipe.current = null;
+  };
+
+  const handleSelectTab = (newTab) => {
+    if (newTab === activeTab) return;
+    triggerHapticFeedback('selection');
+    setActiveTab(newTab);
+  };
 
   // Effetto glow visivo quando la luna si libera (retrocessione del bottone)
   const [isGlowActive, setIsGlowActive] = useState(false);
@@ -76,7 +218,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
       marginBottom: '6px'
     }}>
       {/* =========================================================
-          1. TOP BAR: BOX STREAK A SINISTRA & ICONA PROFILO A DESTRA
+          1. TOP BAR: BOX STREAK A SINISTRA & NOTIFICHE + PROFILO A DESTRA
           ========================================================= */}
       <div style={{
         width: '100%',
@@ -84,23 +226,41 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 4px',
-        marginBottom: '10px'
+        marginBottom: '22px'
       }}>
         {/* PICCOLO BOX CON PALLA DEL CIRCO E NUMERO DI STREAK A SINISTRA */}
-        <div
-          title={`${streakCount} ${streakCount === 1 ? 'giorno consecutivo' : 'giorni consecutivi'} di dieta rispettata`}
-          aria-label={`Serie attuale: ${streakCount} giorni consecutivi`}
+        <button
+          type="button"
+          onClick={handleScrollToDashboard}
+          title={`Vai alla Dashboard (${streakCount} ${streakCount === 1 ? 'giorno consecutivo' : 'giorni consecutivi'} di serie)`}
+          aria-label={`Vai alla Dashboard: serie attuale ${streakCount} giorni consecutivi`}
           style={{
             height: '46px',
             padding: '0 14px 0 10px',
             borderRadius: '14px',
-            background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 100%)',
-            border: '1.5px solid rgba(107, 142, 85, 0.35)',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(154, 185, 123, 0.2)',
+            background: 'linear-gradient(180deg, rgba(20, 10, 32, 0.96) 0%, rgba(13, 6, 22, 0.97) 65%, rgba(8, 3, 14, 0.98) 100%)',
+            border: '1.5px solid rgba(88, 28, 130, 0.48)',
+            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(168, 85, 247, 0.25), 0 0 14px rgba(88, 28, 130, 0.22)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            userSelect: 'none'
+            userSelect: 'none',
+            cursor: 'pointer',
+            outline: 'none',
+            transition: 'transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease',
+            WebkitTapHighlightColor: 'transparent'
+          }}
+          onPointerDown={(e) => {
+            e.currentTarget.style.transform = 'scale(0.95)';
+            e.currentTarget.style.filter = 'brightness(1.15)';
+          }}
+          onPointerUp={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.filter = 'none';
+          }}
+          onPointerLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.filter = 'none';
           }}
         >
           <img
@@ -110,7 +270,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               width: '26px',
               height: '26px',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 2px 6px rgba(220, 38, 38, 0.65))',
+              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 6px rgba(168, 85, 247, 0.45))',
               pointerEvents: 'none'
             }}
           />
@@ -119,78 +279,126 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               fontFamily: 'var(--font-gothic)',
               fontSize: '18px',
               fontWeight: 900,
-              color: 'var(--coraline-yellow)',
+              color: '#ffffff',
               lineHeight: 1,
               position: 'relative',
               top: '-1px',
-              textShadow: '0 1px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(216, 198, 21, 0.45)'
+              textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(255, 255, 255, 0.45)'
             }}
           >
             {streakCount}
           </span>
-        </div>
-
-        {/* ICONA PROFILO A DESTRA (BORING BLUE BOY DA CORALINE) */}
-        <button
-          onClick={() => {
-            triggerHapticFeedback('selection');
-            onOpenSettings();
-          }}
-          aria-label="Apri impostazioni profilo"
-          title="Profilo & Impostazioni"
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            outline: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <div style={{
-            width: '46px',
-            height: '46px',
-            borderRadius: '14px',
-            background: '#091c2f',
-            border: '2px solid #1a456e',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.7), 0 0 10px rgba(26, 69, 110, 0.55)',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.15s ease'
-          }}>
-            <img
-              src={profileAvatarImg}
-              alt="Profilo di Asia"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-            />
-          </div>
         </button>
+
+        {/* GRUPPO A DESTRA: ICONA PROFILO ASIA */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* ICONA PROFILO A DESTRA (FOTO PERSONALIZZATA O BORING BLUE BOY DA CORALINE) */}
+          <button
+            onClick={() => {
+              triggerHapticFeedback('selection');
+              onOpenSettings('profile');
+            }}
+            aria-label="Apri impostazioni profilo"
+            title="Profilo & Impostazioni"
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              outline: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <div style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              background: '#091c2f',
+              border: '2px solid #1a456e',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.7), 0 0 10px rgba(26, 69, 110, 0.55)',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'transform 0.15s ease'
+            }}>
+              <img
+                src={customAvatar || profileAvatarImg}
+                alt="Profilo di Asia"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* =========================================================
-          2. DASHBOARD BOX CON SFONDO VORTICE / SPIRALE DELL'ALTRO MONDO
+          2. CAROUSEL A DUE BOX FISICI CONCATENATI CON SCORRIMENTO ORIZZONTALE A TUTTO SCHERMO
           ========================================================= */}
-      <div style={{
-        width: '100%',
-        borderRadius: '24px',
-        background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
-        border: '1px solid rgba(107, 142, 85, 0.32)',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(154, 185, 123, 0.18)',
-        padding: '20px 16px 16px 16px',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        style={{
+          width: 'calc(100% + 32px)',
+          marginLeft: '-16px',
+          marginRight: '-16px',
+          height: '388px',
+          minHeight: '388px',
+          maxHeight: '388px',
+          position: 'relative',
+          overflow: 'hidden',
+          touchAction: 'pan-y'
+        }}
+      >
+        {/* BINARIO ORIZZONTALE DEI DUE BOX CONCATENATI (200% LARGHEZZA) */}
+        <div
+          style={{
+            display: 'flex',
+            width: '200%',
+            height: '100%',
+            transform: isDragging
+              ? `translate3d(calc(${activeTab === 0 ? '0%' : '-50%'} + ${dragOffset}px), 0, 0)`
+              : (activeTab === 0 ? 'translate3d(0%, 0, 0)' : 'translate3d(-50%, 0, 0)'),
+            transition: isDragging ? 'none' : 'transform 0.52s cubic-bezier(0.2, 0.9, 0.3, 1)',
+            willChange: 'transform'
+          }}
+        >
+          {/* SLIDE 1: BOX LA TUA SETTIMANA */}
+          <div
+            style={{
+              width: '50%',
+              height: '100%',
+              flexShrink: 0,
+              padding: '0 16px',
+              boxSizing: 'border-box'
+            }}
+          >
+            <div
+              key="card-tab-0"
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '24px',
+                background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
+                border: '1px solid rgba(107, 142, 85, 0.32)',
+                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(154, 185, 123, 0.18)',
+                padding: '24px 16px 18px 16px',
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxSizing: 'border-box'
+              }}
+            >
         {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E DISSOLTO) */}
         <div style={{
           position: 'absolute',
@@ -263,6 +471,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           </div>
           {/* 2. SOTTO: RITMO DELLA DIETA (BIANCO) */}
           <div style={{
+            fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
             textTransform: 'uppercase',
             letterSpacing: '1.3px',
@@ -347,10 +556,63 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           gap: '4px',
           padding: '8px 6px',
           borderRadius: '16px',
-          backgroundColor: 'rgba(6, 20, 34, 0.75)',
-          border: '1px solid rgba(107, 142, 85, 0.22)',
-          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.5)'
+          background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+          border: '1px solid rgba(112, 45, 160, 0.35)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.22)',
+          overflow: 'hidden'
         }}>
+          {/* Livello 1: Texture cielo stellato dell'app molto sfocata (3px blur) */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${starryBg})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.35,
+              filter: 'blur(3px)',
+              WebkitFilter: 'blur(3px)',
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }}
+          />
+
+          {/* Livello 2: Stelline e punti luce diffusi identici allo sfondo totale dell'app (molto sfocati) */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `
+                radial-gradient(1.8px 1.8px at 12% 25%, rgba(221, 202, 183, 0.85), transparent),
+                radial-gradient(2.4px 2.4px at 28% 72%, rgba(216, 198, 21, 0.75), transparent),
+                radial-gradient(1.6px 1.6px at 45% 30%, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(2.2px 2.2px at 64% 68%, rgba(139, 229, 116, 0.7), transparent),
+                radial-gradient(2.5px 2.5px at 80% 22%, rgba(221, 202, 183, 0.8), transparent),
+                radial-gradient(1.8px 1.8px at 93% 76%, rgba(216, 198, 21, 0.75), transparent)
+              `,
+              filter: 'blur(2.2px)',
+              WebkitFilter: 'blur(2.2px)',
+              opacity: 0.8,
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }}
+          />
+
+          {/* Livello 3: Sfumatura violacea dark (mano dell'Altra Madre) con sentore blu-notte */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }}
+          />
+
           {daysBreakdown.map((item) => {
             const isToday = item.isToday;
             const state = item.dietState;
@@ -368,6 +630,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               <div
                 key={item.dateStr}
                 style={{
+                  position: 'relative',
+                  zIndex: 1,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -380,26 +644,30 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   boxShadow: isToday ? '0 0 10px rgba(139, 229, 116, 0.35)' : 'none'
                 }}
               >
-                {/* NOME DEL GIORNO DELLA SETTIMANA (LUN, MAR, MER...) */}
+                {/* NOME DEL GIORNO DELLA SETTIMANA (LUN, MAR, MER...) CON FONT DEL CALENDARIO */}
                 <span style={{
+                  fontFamily: 'var(--font-gothic)',
                   fontSize: '9.5px',
-                  fontWeight: isToday ? 800 : 600,
+                  fontWeight: isToday ? 800 : 700,
                   color: isToday ? '#ffffff' : 'rgba(221, 202, 183, 0.75)',
-                  letterSpacing: '0.2px',
+                  letterSpacing: '0.3px',
                   textTransform: 'uppercase',
-                  marginBottom: '1px'
+                  marginBottom: '2px',
+                  lineHeight: 1
                 }}>
                   {item.dayOfWeek}
                 </span>
 
-                {/* NUMERO DEL GIORNO */}
+                {/* NUMERO DEL GIORNO CON FONT DEL CALENDARIO */}
                 <span style={{
-                  fontSize: '8.5px',
-                  color: isToday ? '#8be574' : 'rgba(221, 202, 183, 0.5)',
-                  fontWeight: 600,
-                  marginBottom: '4px'
+                  fontFamily: 'var(--font-gothic)',
+                  fontSize: '11px',
+                  color: isToday ? '#8be574' : 'rgba(221, 202, 183, 0.7)',
+                  fontWeight: isToday ? 800 : 600,
+                  marginBottom: '4px',
+                  lineHeight: 1
                 }}>
-                  {isToday ? 'Oggi' : item.dayNumber}
+                  {item.dayNumber}
                 </span>
 
                 {/* OGGETTO REALE DI CORALINE CORRISPONDENTE ALL'ESITO */}
@@ -468,15 +736,571 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           })}
         </div>
       </div>
+    </div>
 
-      {/* ANIMAZIONE FLUTTUANTE ORGANICA DELLA LUNA */}
+    {/* SLIDE 2: BOX STATISTICHE COMPARATIVE (VIOLA COME LA DASHBOARD) */}
+    <div
+      style={{
+        width: '50%',
+        height: '100%',
+        flexShrink: 0,
+        padding: '0 16px',
+        boxSizing: 'border-box'
+      }}
+    >
+      <div
+        key="card-tab-1"
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: '24px',
+          background: 'linear-gradient(180deg, rgba(20, 10, 32, 0.96) 0%, rgba(13, 6, 22, 0.97) 65%, rgba(8, 3, 14, 0.98) 100%)',
+          border: '1.5px solid rgba(88, 28, 130, 0.45)',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(168, 85, 247, 0.22), 0 0 24px rgba(88, 28, 130, 0.2)',
+          padding: '14px',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          boxSizing: 'border-box'
+        }}
+      >
+            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E DISSOLTO) */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${starryBg})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.18,
+              filter: 'blur(2.2px)',
+              WebkitFilter: 'blur(2.2px)',
+              maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
+              WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }} />
+
+            {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${vortexBg})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.07,
+              filter: 'blur(2px)',
+              WebkitFilter: 'blur(2px)',
+              maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+              WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }} />
+
+            {/* ALONE RADIALE VIOLA OSCURO (IDENTICO ALLA DASHBOARD) */}
+            <div style={{
+              position: 'absolute',
+              top: '35px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '260px',
+              height: '240px',
+              background: 'radial-gradient(circle, rgba(112, 35, 168, 0.28) 0%, rgba(59, 7, 100, 0.16) 55%, transparent 75%)',
+              pointerEvents: 'none',
+              zIndex: 0
+            }} />
+
+            {/* I 4 GRANDI BOX STATISTICHE IN GRIGLIA 2x2: AGGREGATI AL CENTRO CON SFONDO SCURO E SPIRALE SFOCATA */}
+            <div style={{
+              position: 'relative',
+              zIndex: 1,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '10px',
+              width: '100%',
+              height: '100%',
+              boxSizing: 'border-box'
+            }}>
+              {/* BOX 1: ADERENZA DIETA (PIETRA VEGGENTE FLUTTUANTE GIGANTE) */}
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(112, 45, 160, 0.35)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                padding: '12px 6px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+              }}>
+                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${vortexBg})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.05,
+                  filter: 'blur(2px)',
+                  WebkitFilter: 'blur(2px)',
+                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                <img
+                  src={seeingStoneImg}
+                  alt="Aderenza Dieta"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 0 12px rgba(139, 229, 116, 0.75)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.9))',
+                    animation: 'stoneFloat 3.8s ease-in-out infinite',
+                    willChange: 'transform',
+                    marginBottom: '6px',
+                    position: 'relative',
+                    zIndex: 1
+                  }}
+                />
+
+                <div style={{
+                  fontFamily: 'var(--font-gothic)',
+                  fontSize: '28px',
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  color: '#ffffff',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(139, 229, 116, 0.4)',
+                  marginBottom: '4px',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  {stats.currentAdherence}%
+                </div>
+
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '11px',
+                  color: 'var(--coraline-parchment)',
+                  opacity: 0.9,
+                  lineHeight: 1.25,
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  Media: <strong style={{ color: '#e09f3e' }}>{stats.historicalAdherence}%</strong> <span style={{ color: comparisonDeltas.adh.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.adh.text}</span>
+                </div>
+              </div>
+
+              {/* BOX 2: GIORNI RISPETTATI (STELLA ROSSA FLUTTUANTE GIGANTE) */}
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(112, 45, 160, 0.35)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                padding: '12px 6px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+              }}>
+                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${vortexBg})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.05,
+                  filter: 'blur(2px)',
+                  WebkitFilter: 'blur(2px)',
+                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                <img
+                  src={streakStarImg}
+                  alt="Giorni Rispettati"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 4px 14px rgba(220, 38, 38, 0.8)) drop-shadow(0 0 10px rgba(239, 68, 68, 0.4))',
+                    animation: 'starFloat 3.2s ease-in-out infinite 0.4s',
+                    willChange: 'transform',
+                    marginBottom: '6px',
+                    position: 'relative',
+                    zIndex: 1
+                  }}
+                />
+
+                <div style={{
+                  fontFamily: 'var(--font-gothic)',
+                  fontSize: '28px',
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  color: '#8be574',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(139, 229, 116, 0.45)',
+                  marginBottom: '4px',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  {stats.currentSuccessCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>gg</span>
+                </div>
+
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '11px',
+                  color: 'var(--coraline-parchment)',
+                  opacity: 0.9,
+                  lineHeight: 1.25,
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  Media: <strong style={{ color: '#ffffff' }}>{stats.avgMonthlySuccess}/m</strong> <span style={{ color: comparisonDeltas.succ.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.succ.text}</span>
+                </div>
+              </div>
+
+              {/* BOX 3: BOTTONI NERI (BOTTONE NERO FLUTTUANTE GIGANTE) */}
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(112, 45, 160, 0.35)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                padding: '12px 6px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+              }}>
+                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${vortexBg})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.05,
+                  filter: 'blur(2px)',
+                  WebkitFilter: 'blur(2px)',
+                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                <img
+                  src={blackButtonImg}
+                  alt="Bottoni Neri"
+                  style={{
+                    width: '58px',
+                    height: '58px',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.5))',
+                    animation: 'buttonFloat 3.6s ease-in-out infinite 0.8s',
+                    willChange: 'transform',
+                    marginBottom: '6px',
+                    position: 'relative',
+                    zIndex: 1
+                  }}
+                />
+
+                <div style={{
+                  fontFamily: 'var(--font-gothic)',
+                  fontSize: '28px',
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  color: '#fca5a5',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(239, 68, 68, 0.45)',
+                  marginBottom: '4px',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  {stats.currentCheatCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>sgarri</span>
+                </div>
+
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '11px',
+                  color: 'var(--coraline-parchment)',
+                  opacity: 0.9,
+                  lineHeight: 1.25,
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  Media: <strong style={{ color: '#ffffff' }}>{stats.avgMonthlyCheats}/m</strong> <span style={{ color: comparisonDeltas.cheat.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.cheat.text}</span>
+                </div>
+              </div>
+
+              {/* BOX 4: ALLENAMENTI BOBINSKY (PALLA DEL CAMBIO FLUTTUANTE GIGANTE) */}
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(16, 12, 30, 0.88) 0%, rgba(8, 16, 32, 0.90) 100%)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(112, 45, 160, 0.35)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(168, 85, 247, 0.2), 0 0 16px rgba(88, 28, 130, 0.25)',
+                padding: '12px 6px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+              }}>
+                {/* Sfumatura violacea dark (aura viola come il box dei 7 giorni) */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'radial-gradient(ellipse at 50% 120%, rgba(88, 28, 130, 0.32) 0%, rgba(25, 12, 38, 0.2) 55%, transparent 85%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${vortexBg})`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.05,
+                  filter: 'blur(2px)',
+                  WebkitFilter: 'blur(2px)',
+                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+                  pointerEvents: 'none',
+                  borderRadius: 'inherit',
+                  zIndex: 0
+                }} />
+
+                <img
+                  src={gearBallImg}
+                  alt="Allenamenti"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 4px 14px rgba(224, 159, 62, 0.65)) drop-shadow(0 0 10px rgba(139, 229, 116, 0.35))',
+                    animation: 'stoneFloat 3.8s ease-in-out infinite 0.5s',
+                    willChange: 'transform',
+                    marginBottom: '6px',
+                    position: 'relative',
+                    zIndex: 1
+                  }}
+                />
+
+                <div style={{
+                  fontFamily: 'var(--font-gothic)',
+                  fontSize: '28px',
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  color: '#e09f3e',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(224, 159, 62, 0.45)',
+                  marginBottom: '4px',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  {stats.currentWorkoutCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>workout</span>
+                </div>
+
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '11px',
+                  color: 'var(--coraline-parchment)',
+                  opacity: 0.9,
+                  lineHeight: 1.25,
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  Media: <strong style={{ color: '#ffffff' }}>{stats.avgMonthlyWorkouts}/m</strong> <span style={{ color: comparisonDeltas.work.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.work.text}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      {/* =========================================================
+          INDICATORI DI PAGINA (PAGINATION DOTS) SOTTO LA SCHEDA
+          ========================================================= */}
+      <div
+        role="tablist"
+        aria-label="Pagine statistiche"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          marginTop: '12px',
+          marginBottom: '2px',
+          userSelect: 'none'
+        }}
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 0}
+          aria-label="Scheda 1: Ritmo della Dieta e Luna"
+          onClick={() => handleSelectTab(0)}
+          style={{
+            width: activeTab === 0 ? '22px' : '7px',
+            height: '7px',
+            borderRadius: '5px',
+            backgroundColor: activeTab === 0 ? 'rgba(226, 232, 240, 0.72)' : 'rgba(226, 232, 240, 0.22)',
+            border: activeTab === 0 ? '1px solid rgba(226, 232, 240, 0.85)' : '1px solid rgba(226, 232, 240, 0.15)',
+            boxShadow: activeTab === 0 ? '0 0 6px rgba(226, 232, 240, 0.35)' : 'none',
+            padding: 0,
+            cursor: 'pointer',
+            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+            touchAction: 'manipulation'
+          }}
+        />
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 1}
+          aria-label="Scheda 2: Statistiche Comparative e Medie"
+          onClick={() => handleSelectTab(1)}
+          style={{
+            width: activeTab === 1 ? '22px' : '7px',
+            height: '7px',
+            borderRadius: '5px',
+            backgroundColor: activeTab === 1 ? 'rgba(226, 232, 240, 0.72)' : 'rgba(226, 232, 240, 0.22)',
+            border: activeTab === 1 ? '1px solid rgba(226, 232, 240, 0.85)' : '1px solid rgba(226, 232, 240, 0.15)',
+            boxShadow: activeTab === 1 ? '0 0 6px rgba(226, 232, 240, 0.35)' : 'none',
+            padding: 0,
+            cursor: 'pointer',
+            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+            touchAction: 'manipulation'
+          }}
+        />
+      </div>
+
+      {/* ANIMAZIONI DI TRANSIZIONE SCHEDE E FLUTTUAZIONE LUNA & OGGETTI */}
       <style>{`
+        @keyframes coralineCardSoftFadeInRight {
+          0% {
+            opacity: 0;
+            transform: translate3d(10px, 0, 0);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+
+        @keyframes coralineCardSoftFadeInLeft {
+          0% {
+            opacity: 0;
+            transform: translate3d(-10px, 0, 0);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+
         @keyframes moonFloatingBreathe {
           0%, 100% {
             transform: translate3d(0, 0, 0) scale(1);
           }
           50% {
             transform: translate3d(0, -6px, 0) scale(1.015);
+          }
+        }
+
+        @keyframes stoneFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -5px, 0) rotate(2deg);
+          }
+        }
+
+        @keyframes starFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -5px, 0) rotate(-2deg);
+          }
+        }
+
+        @keyframes buttonFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -4.5px, 0) rotate(1.8deg);
           }
         }
       `}</style>

@@ -7,16 +7,12 @@ import { Capacitor } from '@capacitor/core';
  */
 
 export const isHapticsEnabled = () => {
-  try {
-    return localStorage.getItem('coraline_haptics_enabled') !== 'false';
-  } catch (e) {
-    return true;
-  }
+  return true;
 };
 
 export const setHapticsEnabled = (enabled) => {
   try {
-    localStorage.setItem('coraline_haptics_enabled', enabled ? 'true' : 'false');
+    localStorage.setItem('coraline_haptics_enabled', 'true');
   } catch (e) {}
 };
 

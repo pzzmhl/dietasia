@@ -1,10 +1,13 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
+import gearBallImg from '../assets/gear-ball.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 import starryBg from '../assets/coraline-starry-bg.webp';
 import coralineDollBg from '../assets/coraline-doll-bg.webp';
+import bobinskyWorkoutBg from '../assets/bobinsky-circus-calendar-bg.webp';
+import DayWorkoutModal from './DayWorkoutModal';
 import { triggerHapticFeedback } from '../services/haptics';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
@@ -61,38 +64,57 @@ const EmptyCell = React.memo(function EmptyCell() {
 const DayCell = React.memo(function DayCell({
   day,
   dateStr,
-  isSelected,
   isToday,
   dietState,
-  onSelectDate
+  workoutState,
+  calendarMode = 'diet',
+  onSelectDate,
+  onOpenWorkoutModal
 }) {
   // Stili e colori calcolati localmente con armonia sullo sfondo blu notte/smeraldo di Coraline
   let cellBg = 'rgba(4, 14, 25, 0.82)';
   let cellBorder = '1px solid rgba(107, 142, 85, 0.22)';
   let cellShadow = 'inset 0 1px 0 rgba(154, 185, 123, 0.1), 0 2px 6px rgba(0, 0, 0, 0.35)';
 
-  if (dietState === 'success') {
-    cellBg = 'rgba(16, 80, 45, 0.45)';
-    cellBorder = '1.5px solid rgba(139, 229, 116, 0.6)';
-    cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
-  } else if (dietState === 'cheat') {
-    cellBg = 'rgba(65, 15, 20, 0.52)';
-    cellBorder = '1.5px solid rgba(239, 68, 68, 0.55)';
-    cellShadow = 'inset 0 1px 0 rgba(239, 68, 68, 0.25), 0 2px 8px rgba(0, 0, 0, 0.45)';
-  } else if (dietState === 'cheat_key') {
-    cellBg = 'rgba(50, 40, 15, 0.5)';
-    cellBorder = '1.5px solid rgba(216, 198, 21, 0.65)';
-    cellShadow = 'inset 0 1px 0 rgba(216, 198, 21, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
-  } else if (isToday) {
-    cellBg = 'rgba(26, 69, 110, 0.4)';
-    cellBorder = '1.5px solid var(--coraline-gold)';
-    cellShadow = '0 0 10px rgba(216, 198, 21, 0.35)';
+  if (calendarMode === 'workout') {
+    if (workoutState === 'yes') {
+      cellBg = 'rgba(16, 80, 45, 0.45)';
+      cellBorder = '1.5px solid rgba(139, 229, 116, 0.6)';
+      cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
+    } else if (workoutState === 'no') {
+      // Quando l'allenamento non è stato fatto: sbiadisce molto con bordo tratteggiato
+      cellBg = 'rgba(4, 14, 25, 0.45)';
+      cellBorder = '1px dashed rgba(239, 68, 68, 0.35)';
+      cellShadow = 'none';
+    } else {
+      // Giorni non segnati: uguali al calendario dieta (non sbiaditi)
+      cellBg = 'rgba(4, 14, 25, 0.82)';
+      cellBorder = '1px solid rgba(107, 142, 85, 0.22)';
+      cellShadow = 'inset 0 1px 0 rgba(154, 185, 123, 0.1), 0 2px 6px rgba(0, 0, 0, 0.35)';
+    }
+  } else {
+    if (dietState === 'success') {
+      cellBg = 'rgba(16, 80, 45, 0.45)';
+      cellBorder = '1.5px solid rgba(139, 229, 116, 0.6)';
+      cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
+    } else if (dietState === 'cheat') {
+      cellBg = 'rgba(65, 15, 20, 0.52)';
+      cellBorder = '1.5px solid rgba(239, 68, 68, 0.55)';
+      cellShadow = 'inset 0 1px 0 rgba(239, 68, 68, 0.25), 0 2px 8px rgba(0, 0, 0, 0.45)';
+    } else if (dietState === 'cheat_key') {
+      cellBg = 'rgba(50, 40, 15, 0.5)';
+      cellBorder = '1.5px solid rgba(216, 198, 21, 0.65)';
+      cellShadow = 'inset 0 1px 0 rgba(216, 198, 21, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
+    }
   }
 
-  // Selettore del giorno: mantenuto in giallo dorato come richiesto esplicitamente
-  if (isSelected) {
+  // Solo il giorno odierno è evidenziato in giallo (nessun highlight persistente per i giorni cliccati)
+  if (isToday) {
     cellBorder = '2px solid var(--coraline-yellow)';
-    cellShadow = '0 0 14px rgba(216, 198, 21, 0.65), inset 0 0 8px rgba(216, 198, 21, 0.25)';
+    cellShadow = '0 0 12px rgba(216, 198, 21, 0.55), inset 0 0 6px rgba(216, 198, 21, 0.2)';
+    if (!dietState && (!workoutState || calendarMode !== 'workout')) {
+      cellBg = 'rgba(26, 69, 110, 0.4)';
+    }
   }
 
   // Micro-inclinazione artigianale stop-motion per gli oggetti reali
@@ -100,7 +122,11 @@ const DayCell = React.memo(function DayCell({
 
   const handleClick = () => {
     triggerHapticFeedback('selection');
-    onSelectDate(dateStr);
+    if (calendarMode === 'workout') {
+      onOpenWorkoutModal(dateStr);
+    } else {
+      onSelectDate(dateStr);
+    }
   };
 
   return (
@@ -116,10 +142,10 @@ const DayCell = React.memo(function DayCell({
         backgroundColor: cellBg,
         border: cellBorder,
         boxShadow: cellShadow,
-        color: isSelected ? 'var(--coraline-yellow)' : 'var(--coraline-parchment)',
+        color: isToday ? 'var(--coraline-yellow)' : 'var(--coraline-parchment)',
         fontFamily: 'var(--font-gothic)',
         fontSize: '14px',
-        fontWeight: isSelected ? 800 : 600,
+        fontWeight: isToday ? 800 : 600,
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -128,60 +154,95 @@ const DayCell = React.memo(function DayCell({
         lineHeight: 1,
         touchAction: 'pan-y',
         willChange: 'transform',
-        transform: isSelected ? 'scale(1.06) translateZ(0)' : 'translateZ(0)',
-        transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease'
+        opacity: (calendarMode === 'workout' && workoutState === 'no') ? 0.45 : 1,
+        transform: 'translateZ(0)',
+        transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease'
       }}
     >
-      {dietState === 'success' ? (
-        <img
-          src={seeingStoneImg}
-          alt="Dieta Rispettata"
-          loading="eager"
-          decoding="async"
-          className="stop-motion-icon"
-          style={{
-            width: '84%',
-            height: '84%',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))',
-            pointerEvents: 'none',
-            transform: `rotate(${organicRotation}deg)`
-          }}
-        />
-      ) : dietState === 'cheat' ? (
-        <img
-          src={blackButtonImg}
-          alt="Sgarrato"
-          loading="eager"
-          decoding="async"
-          className="stop-motion-icon"
-          style={{
-            width: '84%',
-            height: '84%',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85))',
-            pointerEvents: 'none',
-            transform: `rotate(${organicRotation}deg)`
-          }}
-        />
-      ) : dietState === 'cheat_key' ? (
-        <img
-          src={keyImg}
-          alt="Chiave Jolly Usata"
-          loading="eager"
-          decoding="async"
-          className="stop-motion-icon"
-          style={{
-            width: '86%',
-            height: '86%',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 12px rgba(225, 240, 255, 0.8)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9))',
-            pointerEvents: 'none',
-            transform: `rotate(${organicRotation}deg)`
-          }}
-        />
+      {calendarMode === 'workout' ? (
+        workoutState === 'yes' ? (
+          <img
+            src={gearBallImg}
+            alt="Allenamento Fatto"
+            loading="eager"
+            decoding="async"
+            className="stop-motion-icon"
+            style={{
+              width: '84%',
+              height: '84%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 6px rgba(139, 229, 116, 0.35))',
+              pointerEvents: 'none',
+              transform: `rotate(${organicRotation}deg)`
+            }}
+          />
+        ) : workoutState === 'no' ? (
+          <span
+            style={{
+              color: 'rgba(239, 68, 68, 0.85)',
+              fontFamily: 'var(--font-gothic)',
+              fontSize: '15px',
+              fontWeight: 800,
+              lineHeight: 1
+            }}
+          >
+            ✕
+          </span>
+        ) : (
+          <span>{day}</span>
+        )
       ) : (
-        <span>{day}</span>
+        dietState === 'success' ? (
+          <img
+            src={seeingStoneImg}
+            alt="Dieta Rispettata"
+            loading="eager"
+            decoding="async"
+            className="stop-motion-icon"
+            style={{
+              width: '84%',
+              height: '84%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))',
+              pointerEvents: 'none',
+              transform: `rotate(${organicRotation}deg)`
+            }}
+          />
+        ) : dietState === 'cheat' ? (
+          <img
+            src={blackButtonImg}
+            alt="Sgarrato"
+            loading="eager"
+            decoding="async"
+            className="stop-motion-icon"
+            style={{
+              width: '84%',
+              height: '84%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85))',
+              pointerEvents: 'none',
+              transform: `rotate(${organicRotation}deg)`
+            }}
+          />
+        ) : dietState === 'cheat_key' ? (
+          <img
+            src={keyImg}
+            alt="Chiave Jolly Usata"
+            loading="eager"
+            decoding="async"
+            className="stop-motion-icon"
+            style={{
+              width: '86%',
+              height: '86%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 12px rgba(225, 240, 255, 0.8)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9))',
+              pointerEvents: 'none',
+              transform: `rotate(${organicRotation}deg)`
+            }}
+          />
+        ) : (
+          <span>{day}</span>
+        )
       )}
     </button>
   );
@@ -194,12 +255,17 @@ const CalendarGrid = React.memo(function CalendarGrid({
   selectedDate, 
   onSelectDate, 
   allLogs = {},
+  workoutLogs = {},
+  onSaveWorkout,
   displayYear,
   displayMonth,
   onPrevMonth,
-  onNextMonth
+  onNextMonth,
+  onResetToCurrentMonth
 }) {
   const touchStartRef = useRef(null);
+  const [calendarMode, setCalendarMode] = useState('diet'); // 'diet' | 'workout'
+  const [workoutModalState, setWorkoutModalState] = useState({ isOpen: false, dateStr: null });
 
   const { firstDayColumn, daysArray, todayStr, leadingDaysCount, trailingDaysCount } = useMemo(() => {
     const count = new Date(displayYear, displayMonth + 1, 0).getDate();
@@ -292,7 +358,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         zIndex: 0
       }} />
 
-      {/* SFONDO CON LA BAMBOLA DI CORALINE (PIÙ SCURO E ATMOSFERICO) */}
+      {/* SFONDO CON LA BAMBOLA DI CORALINE (PER IL CALENDARIO DIETA) */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -300,14 +366,34 @@ const CalendarGrid = React.memo(function CalendarGrid({
         backgroundPosition: 'center 35%',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
-        opacity: 0.20,
+        opacity: calendarMode === 'diet' ? 0.20 : 0,
         filter: 'blur(1px) brightness(0.70) contrast(1.15)',
         WebkitFilter: 'blur(1px) brightness(0.70) contrast(1.15)',
         maskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.35) 90%)',
         WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.35) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
-        zIndex: 0
+        zIndex: 0,
+        transition: 'opacity 0.35s ease'
+      }} />
+
+      {/* SFONDO CON IL GRANDE BOBINSKY NEL CIRCO (PER IL CALENDARIO ALLENAMENTO) */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `url(${bobinskyWorkoutBg})`,
+        backgroundPosition: 'center 25%',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        opacity: calendarMode === 'workout' ? 0.28 : 0,
+        filter: 'blur(1.4px) brightness(0.58) contrast(1.05)',
+        WebkitFilter: 'blur(1.4px) brightness(0.58) contrast(1.05)',
+        maskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.3) 90%)',
+        WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.3) 90%)',
+        pointerEvents: 'none',
+        borderRadius: 'inherit',
+        zIndex: 0,
+        transition: 'opacity 0.35s ease'
       }} />
 
       {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
@@ -318,7 +404,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         backgroundPosition: 'center center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
-        opacity: 0.05,
+        opacity: calendarMode === 'workout' ? 0.02 : 0.05,
         filter: 'blur(2px)',
         WebkitFilter: 'blur(2px)',
         maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
@@ -328,7 +414,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         zIndex: 0
       }} />
 
-      {/* ALONE RADIALE SMERALDO SOTTILE */}
+      {/* ALONE RADIALE SOTTILE */}
       <div style={{
         position: 'absolute',
         top: '20px',
@@ -336,9 +422,12 @@ const CalendarGrid = React.memo(function CalendarGrid({
         transform: 'translateX(-50%)',
         width: '240px',
         height: '180px',
-        background: 'radial-gradient(circle, rgba(107, 142, 85, 0.10) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)',
+        background: calendarMode === 'workout'
+          ? 'radial-gradient(circle, rgba(141, 109, 82, 0.18) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)'
+          : 'radial-gradient(circle, rgba(107, 142, 85, 0.10) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)',
         pointerEvents: 'none',
-        zIndex: 0
+        zIndex: 0,
+        transition: 'background 0.35s ease'
       }} />
 
       {/* Intestazione Mese con font Dashboard al centro e freccette ai lati */}
@@ -378,17 +467,35 @@ const CalendarGrid = React.memo(function CalendarGrid({
           ◀
         </button>
 
-        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Verde Coraline) */}
-        <h2 style={{
-          fontFamily: 'var(--font-coraline)',
-          fontSize: '22px',
-          color: '#8be574',
-          textAlign: 'center',
-          margin: 0,
-          letterSpacing: '0.8px',
-          textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(139, 229, 116, 0.45)',
-          lineHeight: 1.15
-        }}>
+        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Verde Coraline) - Cliccabile per tornare al mese corrente */}
+        <h2
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            triggerHapticFeedback('selection');
+            if (onResetToCurrentMonth) {
+              onResetToCurrentMonth();
+            }
+          }}
+          title="Tocca per tornare al mese corrente"
+          aria-label={`Mese: ${MONTHS_IT[displayMonth]}. Tocca per tornare al mese corrente`}
+          style={{
+            fontFamily: 'var(--font-coraline)',
+            fontSize: '22px',
+            color: '#8be574',
+            textAlign: 'center',
+            margin: 0,
+            letterSpacing: '0.8px',
+            textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(139, 229, 116, 0.45)',
+            lineHeight: 1.15,
+            cursor: 'pointer',
+            touchAction: 'manipulation',
+            userSelect: 'none',
+            padding: '4px 10px',
+            borderRadius: '10px',
+            transition: 'transform 0.15s ease, opacity 0.15s ease'
+          }}
+        >
           {MONTHS_IT[displayMonth]}
         </h2>
 
@@ -471,20 +578,22 @@ const CalendarGrid = React.memo(function CalendarGrid({
           const m = String(displayMonth + 1).padStart(2, '0');
           const d = String(day).padStart(2, '0');
           const dateStr = `${displayYear}-${m}-${d}`;
-          const isSelected = dateStr === selectedDate;
           const isToday = dateStr === todayStr;
           const log = (allLogs && allLogs[dateStr]) || {};
           const dietState = log.dietState;
+          const workoutState = (workoutLogs && workoutLogs[dateStr]) || null;
 
           return (
             <DayCell
               key={dateStr}
               day={day}
               dateStr={dateStr}
-              isSelected={isSelected}
               isToday={isToday}
               dietState={dietState}
+              workoutState={workoutState}
+              calendarMode={calendarMode}
               onSelectDate={onSelectDate}
+              onOpenWorkoutModal={(dStr) => setWorkoutModalState({ isOpen: true, dateStr: dStr })}
             />
           );
         })}
@@ -494,6 +603,113 @@ const CalendarGrid = React.memo(function CalendarGrid({
           <EmptyCell key={`trail-${idx}`} />
         ))}
       </div>
+
+      {/* SLIDER / SEGMENTED CONTROL COMPATTO CON AURA BIANCA SPETTRALE DELICATA: DIETA / ALL. */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: '130px',
+          margin: '10px auto 2px auto',
+          padding: '2px',
+          backgroundColor: 'rgba(4, 14, 25, 0.85)',
+          borderRadius: '12px',
+          border: '1px solid rgba(220, 240, 255, 0.14)',
+          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.65)',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '3px',
+          boxSizing: 'border-box'
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            if (calendarMode !== 'diet') {
+              triggerHapticFeedback('selection');
+              setCalendarMode('diet');
+            }
+          }}
+          style={{
+            padding: '4px 6px',
+            borderRadius: '9px',
+            border: calendarMode === 'diet'
+              ? '1px solid rgba(255, 255, 255, 0.38)'
+              : '1px solid transparent',
+            background: calendarMode === 'diet'
+              ? 'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(220, 235, 245, 0.05) 60%, rgba(6, 20, 34, 0.4) 100%)'
+              : 'transparent',
+            boxShadow: calendarMode === 'diet'
+              ? '0 0 6px rgba(255, 255, 255, 0.22), inset 0 0 4px rgba(225, 240, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5)'
+              : 'none',
+            color: calendarMode === 'diet' ? '#e6edf3' : 'var(--coraline-parchment)',
+            opacity: calendarMode === 'diet' ? 0.95 : 0.5,
+            textShadow: calendarMode === 'diet' ? '0 0 5px rgba(255, 255, 255, 0.4)' : 'none',
+            fontFamily: 'var(--font-gothic)',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.4px',
+            cursor: 'pointer',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            transition: 'all 0.2s ease',
+            touchAction: 'manipulation'
+          }}
+        >
+          Dieta
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (calendarMode !== 'workout') {
+              triggerHapticFeedback('selection');
+              setCalendarMode('workout');
+            }
+          }}
+          style={{
+            padding: '4px 6px',
+            borderRadius: '9px',
+            border: calendarMode === 'workout'
+              ? '1px solid rgba(255, 255, 255, 0.38)'
+              : '1px solid transparent',
+            background: calendarMode === 'workout'
+              ? 'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(220, 235, 245, 0.05) 60%, rgba(6, 20, 34, 0.4) 100%)'
+              : 'transparent',
+            boxShadow: calendarMode === 'workout'
+              ? '0 0 6px rgba(255, 255, 255, 0.22), inset 0 0 4px rgba(225, 240, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5)'
+              : 'none',
+            color: calendarMode === 'workout' ? '#e6edf3' : 'var(--coraline-parchment)',
+            opacity: calendarMode === 'workout' ? 0.95 : 0.5,
+            textShadow: calendarMode === 'workout' ? '0 0 5px rgba(255, 255, 255, 0.4)' : 'none',
+            fontFamily: 'var(--font-gothic)',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.4px',
+            cursor: 'pointer',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            transition: 'all 0.2s ease',
+            touchAction: 'manipulation'
+          }}
+        >
+          All.
+        </button>
+      </div>
+
+      {/* MODAL ALLENAMENTO RAPIDO PER DATA */}
+      <DayWorkoutModal
+        isOpen={workoutModalState.isOpen}
+        dateStr={workoutModalState.dateStr}
+        currentStatus={workoutModalState.dateStr && workoutLogs ? workoutLogs[workoutModalState.dateStr] : null}
+        onSelectStatus={(status) => {
+          if (workoutModalState.dateStr && onSaveWorkout) {
+            onSaveWorkout(workoutModalState.dateStr, status);
+          }
+          setWorkoutModalState({ isOpen: false, dateStr: null });
+        }}
+        onClose={() => setWorkoutModalState({ isOpen: false, dateStr: null })}
+      />
     </div>
   );
 });
