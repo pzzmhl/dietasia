@@ -701,8 +701,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                         width: '18px',
                         height: '18px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 0 4px rgba(139, 229, 116, 0.7))',
-                        animation: 'stoneFloat 3.2s ease-in-out infinite'
+                        filter: 'drop-shadow(0 0 4px rgba(139, 229, 116, 0.7))'
                       }}
                     />
                   )}
@@ -716,8 +715,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                         width: '17px',
                         height: '17px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9))',
-                        animation: 'buttonFloat 3s ease-in-out infinite'
+                        filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9))'
                       }}
                     />
                   )}
@@ -731,8 +729,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                         width: '18px',
                         height: '18px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 0 4px rgba(255, 213, 79, 0.6))',
-                        animation: 'keyFloat 3.4s ease-in-out infinite'
+                        filter: 'drop-shadow(0 0 4px rgba(255, 213, 79, 0.6))'
                       }}
                     />
                   )}
