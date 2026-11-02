@@ -41,6 +41,7 @@ import catModalBg from './assets/cat-modal-bg.webp';
 import secretDoorImg from './assets/secret-door.webp';
 import vortexBg from './assets/coraline-vortex-bg.webp';
 import starryBg from './assets/coraline-starry-bg.webp';
+import catCloudPattern from './assets/cat-cloud-pattern.webp';
 
 import { 
   getTodayDateString, 
@@ -264,7 +265,8 @@ export default function App() {
       wybieImg,
       jumpingMouseImg,
       catModalBg,
-      secretDoorImg
+      secretDoorImg,
+      catCloudPattern
     ];
 
     allEssentialImages.forEach((src) => {
@@ -679,7 +681,7 @@ export default function App() {
               maxWidth: '220px',
               padding: '10px 14px',
               borderRadius: '16px',
-              background: '#ffffff',
+              backgroundColor: '#ffffff',
               border: '1.5px solid #0f172a',
               boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35)',
               color: '#0f172a',
@@ -695,6 +697,23 @@ export default function App() {
               boxSizing: 'border-box'
             }}
           >
+            {/* Texture a spirali e stelle di Coraline (molto dissolta nel riempimento bianco) */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: '1.5px',
+                borderRadius: '14.5px',
+                backgroundImage: `url(${catCloudPattern})`,
+                backgroundPosition: 'center center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                opacity: 0.10,
+                mixBlendMode: 'multiply',
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            />
+
             {/* Coda a triangolo stile Pokémon rivolta alla testa del Gatto */}
             <div
               style={{

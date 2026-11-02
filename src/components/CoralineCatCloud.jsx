@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import catCloudPattern from '../assets/cat-cloud-pattern.webp';
 
 /**
  * Calcola la tipologia di nuvola ottimale in base alla lunghezza della frase del Gatto:
@@ -147,6 +148,11 @@ const CoralineCatCloud = React.memo(function CoralineCatCloud({
               <stop offset="0%" stopColor="rgba(100, 118, 138, 0.22)" />
               <stop offset="70%" stopColor="rgba(40, 52, 65, 0)" />
             </radialGradient>
+
+            {/* Maschera di ritaglio per il pattern di Coraline */}
+            <clipPath id={`${uniqueId}-clip`}>
+              <path d={cfg.path} />
+            </clipPath>
           </defs>
 
           {/* Corpo a lobi della nuvola */}
@@ -160,6 +166,19 @@ const CoralineCatCloud = React.memo(function CoralineCatCloud({
             style={{
               filter: 'drop-shadow(inset 0 1px 3px rgba(255, 255, 255, 0.2))'
             }}
+          />
+
+          {/* Texture stellata di Coraline tantissimo dissolta nel riempimento */}
+          <image
+            href={catCloudPattern}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid slice"
+            clipPath={`url(#${uniqueId}-clip)`}
+            opacity="0.10"
+            pointerEvents="none"
           />
 
           {/* Sfumatura volumetrica centrale */}
