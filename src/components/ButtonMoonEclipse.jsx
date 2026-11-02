@@ -297,9 +297,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               objectFit: 'contain',
               filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 8px rgba(47, 77, 108, 0.6))',
               pointerEvents: 'none',
-              animation: 'starFloat 3.2s ease-in-out infinite',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              flexShrink: 0
             }}
           />
           <span
@@ -309,8 +309,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               fontWeight: 900,
               color: '#d0cfcd',
               lineHeight: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
               position: 'relative',
-              top: '-1px',
               zIndex: 1,
               textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(47, 77, 108, 0.65)'
             }}
