@@ -663,7 +663,7 @@ export default function App() {
           pointerEvents: 'none'
         }}
       >
-        {/* NUVOLETTA DIALOGO DEL GATTO: BIANCA IN STILE FUMETTO / POKÉMON */}
+        {/* NUVOLETTA DIALOGO DEL GATTO: VERA NUVOLA DEI CARTONI ANIMATI A LOBI CON TRATTEGGI */}
         {catSpeech && (
           <div
             key={catSpeech.id}
@@ -675,62 +675,104 @@ export default function App() {
             }}
             style={{
               position: 'absolute',
-              bottom: '122px',
+              bottom: '124px',
               right: '2px',
               width: 'max-content',
-              maxWidth: '220px',
-              padding: '10px 14px',
-              borderRadius: '16px',
-              backgroundColor: '#ffffff',
-              border: '1.5px solid #0f172a',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35)',
-              color: '#0f172a',
-              fontFamily: 'var(--font-body)',
-              fontSize: '12px',
-              lineHeight: 1.42,
-              fontWeight: 600,
-              textAlign: 'left',
-              userSelect: 'none',
+              maxWidth: '245px',
+              minWidth: '185px',
+              minHeight: '85px',
+              filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.65)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4))',
               cursor: 'pointer',
               pointerEvents: 'auto',
-              animation: 'catBubblePop 0.26s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
-              boxSizing: 'border-box'
+              animation: 'catBubblePop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              userSelect: 'none'
             }}
           >
-            {/* Texture a spirali e stelle di Coraline (molto dissolta nel riempimento bianco) */}
-            <div
+            {/* SFONDO VETTORIALE DELLA VERA NUVOLA A LOBI ARROTONDATI CON TRATTEGGI CARTONATI */}
+            <svg
+              viewBox="0 0 260 140"
+              preserveAspectRatio="none"
               style={{
                 position: 'absolute',
-                inset: '1.5px',
-                borderRadius: '14.5px',
-                backgroundImage: `url(${catCloudPattern})`,
-                backgroundPosition: 'center center',
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                opacity: 0.10,
-                mixBlendMode: 'multiply',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                overflow: 'visible',
                 pointerEvents: 'none',
-                zIndex: 1
+                zIndex: 0
               }}
-            />
+            >
+              <defs>
+                <clipPath id="cat-speech-cloud-clip">
+                  <path d="M 65,115 C 38,115 16,96 16,72 C 16,50 32,32 55,28 C 65,10 98,4 128,12 C 148,4 184,5 204,20 C 228,28 244,52 242,75 C 248,96 230,118 205,116 C 185,124 150,124 130,116 C 112,122 85,122 65,115 Z" />
+                </clipPath>
+              </defs>
 
-            {/* Coda a triangolo stile Pokémon rivolta alla testa del Gatto */}
+              {/* Corpo bianco a lobi della nuvola con tratteggi stile cartone animato */}
+              <path
+                d="M 65,115 C 38,115 16,96 16,72 C 16,50 32,32 55,28 C 65,10 98,4 128,12 C 148,4 184,5 204,20 C 228,28 244,52 242,75 C 248,96 230,118 205,116 C 185,124 150,124 130,116 C 112,122 85,122 65,115 Z"
+                fill="#ffffff"
+                stroke="#0f172a"
+                strokeWidth="2.2"
+                strokeDasharray="5,4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Texture stellata di Coraline tantissimo dissolta nel riempimento della nuvola */}
+              <image
+                href={catCloudPattern}
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                preserveAspectRatio="xMidYMid slice"
+                clipPath="url(#cat-speech-cloud-clip)"
+                opacity="0.10"
+                style={{ mixBlendMode: 'multiply' }}
+              />
+
+              {/* Coda a batuffoli / nuvolette discendenti verso il gatto */}
+              <circle
+                cx="174"
+                cy="126"
+                r="6.5"
+                fill="#ffffff"
+                stroke="#0f172a"
+                strokeWidth="2"
+                strokeDasharray="3.5,3"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="184"
+                cy="135"
+                r="4"
+                fill="#ffffff"
+                stroke="#0f172a"
+                strokeWidth="1.8"
+                strokeDasharray="2.5,2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            {/* Testo all'interno della nuvoletta */}
             <div
               style={{
-                position: 'absolute',
-                bottom: '-6px',
-                right: '32px',
-                width: '10px',
-                height: '10px',
-                background: '#ffffff',
-                borderRight: '1.5px solid #0f172a',
-                borderBottom: '1.5px solid #0f172a',
-                transform: 'rotate(45deg)',
-                zIndex: 1
+                position: 'relative',
+                zIndex: 2,
+                padding: '16px 24px 20px 22px',
+                color: '#0f172a',
+                fontFamily: 'var(--font-body)',
+                fontSize: '12px',
+                lineHeight: 1.4,
+                fontWeight: 650,
+                textAlign: 'center',
+                boxSizing: 'border-box'
               }}
-            />
-
-            <div style={{ position: 'relative', zIndex: 2 }}>
+            >
               {catSpeech.text}
             </div>
           </div>
