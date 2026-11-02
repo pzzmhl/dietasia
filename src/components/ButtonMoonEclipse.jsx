@@ -391,7 +391,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 width: '100%',
                 height: '100%',
                 borderRadius: '24px',
-                background: 'linear-gradient(180deg, rgba(13, 44, 73, 0.94) 0%, rgba(12, 16, 19, 0.98) 55%, rgba(6, 9, 12, 0.99) 100%)',
+                background: 'linear-gradient(180deg, rgba(6, 9, 12, 0.99) 0%, rgba(8, 18, 30, 0.96) 12%, rgba(13, 44, 73, 0.88) 32%, rgba(12, 22, 33, 0.94) 62%, rgba(6, 9, 12, 0.99) 100%)',
                 border: '1.5px solid rgba(47, 77, 108, 0.45)',
                 boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(47, 77, 108, 0.25), 0 0 24px rgba(13, 44, 73, 0.25)',
                 padding: '24px 16px 18px 16px',
@@ -403,6 +403,16 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 boxSizing: 'border-box'
               }}
             >
+        {/* SFUMATURA NERA CINEMATICA SIA DALL'ALTO CHE DAL BASSO */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, rgba(4, 6, 9, 0.88) 0%, rgba(4, 6, 9, 0.45) 16%, transparent 32%, transparent 68%, rgba(4, 6, 9, 0.55) 86%, rgba(4, 6, 9, 0.96) 100%)',
+          pointerEvents: 'none',
+          borderRadius: 'inherit',
+          zIndex: 0
+        }} />
+
         {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E MOLTO SCURITO) */}
         <div style={{
           position: 'absolute',

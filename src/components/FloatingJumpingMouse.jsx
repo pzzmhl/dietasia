@@ -29,12 +29,46 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
   });
 
   const [isCloudOpen, setIsCloudOpen] = useState(true);
+  const [testForced, setTestForced] = useState(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.has('testMouse') || sessionStorage.getItem('test_coraline_mouse') === 'true';
+      }
+    } catch (e) {}
+    return false;
+  });
   const hasPlayedEntranceSoundRef = useRef(false);
+
+  // Ascolta l'evento di test manuale per provare l'animazione e la trombetta
+  useEffect(() => {
+    const handleTestEvent = () => {
+      try {
+        localStorage.removeItem('coraline_mouse_notice_dismissed_date');
+      } catch (err) {}
+      setIsDismissed(false);
+      setIsCloudOpen(true);
+      setTestForced(true);
+      setTimeout(() => {
+        playTrumpetFanfare(0.85);
+      }, 250);
+    };
+
+    window.addEventListener('test-coraline-mouse', handleTestEvent);
+    window.testCoralineMouse = handleTestEvent;
+
+    return () => {
+      window.removeEventListener('test-coraline-mouse', handleTestEvent);
+    };
+  }, []);
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-  const effectiveDays = Array.isArray(unmarkedDays) ? unmarkedDays : [];
+  const sampleDays = ['2026-10-30', '2026-10-31'];
+  const effectiveDays = (Array.isArray(unmarkedDays) && unmarkedDays.length > 0)
+    ? unmarkedDays
+    : (testForced ? sampleDays : []);
   const firstMissingDate = effectiveDays[0];
   const missingCount = effectiveDays.length;
 
@@ -73,6 +107,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
     if (e) e.stopPropagation();
     triggerHapticFeedback('selection');
     setIsDismissed(true);
+    setTestForced(false);
     try {
       localStorage.setItem('coraline_mouse_notice_dismissed_date', todayStr);
     } catch (err) {}

@@ -907,7 +907,7 @@ export default function SecretSettingsModal({
                 </div>
               )}
 
-              <div style={{ marginTop: '10px', textAlign: 'right' }}>
+              <div style={{ marginTop: '10px', display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={handleTestNotification}
@@ -926,6 +926,32 @@ export default function SecretSettingsModal({
                   }}
                 >
                   ✦ Invia notifica di prova adesso
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback('key');
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('test-coraline-mouse'));
+                    }
+                    onClose();
+                  }}
+                  style={{
+                    background: 'rgba(216, 198, 21, 0.15)',
+                    border: '1px solid rgba(216, 198, 21, 0.5)',
+                    borderRadius: '8px',
+                    color: '#D8C615',
+                    fontFamily: 'var(--font-gothic)',
+                    fontSize: '10.5px',
+                    fontWeight: 700,
+                    letterSpacing: '0.4px',
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    touchAction: 'manipulation'
+                  }}
+                >
+                  🎺 Testa Topo a sinistra
                 </button>
               </div>
 
