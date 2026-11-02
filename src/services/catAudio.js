@@ -72,3 +72,4 @@ export function playRandomCatSound(volume = 0.85) {
 
   return CAT_SOUNDS_DB[nextIndex];
 }
+

@@ -13,7 +13,6 @@ import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
 import SecretLoveModal from './components/SecretLoveModal';
 import SecretSettingsModal from './components/SecretSettingsModal';
-import ScrollReveal from './components/ScrollReveal';
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
@@ -249,14 +248,12 @@ export default function App() {
       }
     } catch (e) {}
 
-    // 1. Decodifica immediata delle sole immagini visibili nel primo viewport (Dashboard & Gatto)
-    [catStandingImg, keyImg, vortexBg].forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-
-    // 2. Precaricamento in background a bassa priorità (Idle time) per i popup secondari
-    const deferredImages = [
+    // Precaricamento immediato di tutti gli asset per rendere l'intera pagina fluida e istantanea
+    const allEssentialImages = [
+      catStandingImg,
+      keyImg,
+      vortexBg,
+      starryBg,
       catSuccessImg,
       catFailImg,
       catCheatKeyImg,
@@ -270,18 +267,10 @@ export default function App() {
       secretDoorImg
     ];
 
-    const preloadDeferred = () => {
-      deferredImages.forEach((src) => {
-        const img = new Image();
-        img.src = src;
-      });
-    };
-
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(preloadDeferred, { timeout: 2000 });
-    } else {
-      setTimeout(preloadDeferred, 1200);
-    }
+    allEssentialImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
   }, []);
 
   // Navigazione mese memoizzata
@@ -575,70 +564,58 @@ export default function App() {
         </div>
 
         {/* 1. PRIMA LINEA DI DEMARCAZIONE IN STILE CORALINE: MANO DELL'ALTRA MADRE */}
-        <ScrollReveal delay={40}>
-          <CoralineDivider variant="hand" />
-        </ScrollReveal>
+        <CoralineDivider variant="hand" />
 
         {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI & NOTIFICA ALLENAMENTO BOBINSKY */}
         {unmarkedDays && unmarkedDays.length > 0 && (
-          <ScrollReveal delay={60}>
-            <JumpingMouseNotice
-              unmarkedDays={unmarkedDays}
-              onSelectDay={handleDayClick}
-            />
-          </ScrollReveal>
+          <JumpingMouseNotice
+            unmarkedDays={unmarkedDays}
+            onSelectDay={handleDayClick}
+          />
         )}
 
-        <ScrollReveal delay={80}>
-          <BobinskyWorkoutCard 
-            todayStr={todayStr} 
-            workoutLogs={workoutLogs}
-            onSaveWorkout={handleSaveWorkout}
-          />
-        </ScrollReveal>
+        <BobinskyWorkoutCard 
+          todayStr={todayStr} 
+          workoutLogs={workoutLogs}
+          onSaveWorkout={handleSaveWorkout}
+        />
 
         {/* 3. IL CALENDARIO: GRIGLIA MENSILE */}
-        <ScrollReveal delay={100}>
-          <CalendarGrid
-            selectedDate={selectedDate}
-            onSelectDate={handleDayClick}
-            allLogs={allLogs}
-            workoutLogs={workoutLogs}
-            onSaveWorkout={handleSaveWorkout}
-            displayYear={displayYear}
-            displayMonth={displayMonth}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            onResetToCurrentMonth={handleResetToCurrentMonth}
-          />
-        </ScrollReveal>
+        <CalendarGrid
+          selectedDate={selectedDate}
+          onSelectDate={handleDayClick}
+          allLogs={allLogs}
+          workoutLogs={workoutLogs}
+          onSaveWorkout={handleSaveWorkout}
+          displayYear={displayYear}
+          displayMonth={displayMonth}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          onResetToCurrentMonth={handleResetToCurrentMonth}
+        />
 
         {/* SECONDA LINEA DI DEMARCAZIONE IN STILE CORALINE: SCARAFAGGIO-BOTTONE VIOLA */}
-        <ScrollReveal delay={40}>
-          <CoralineDivider variant="beetle" />
-        </ScrollReveal>
+        <CoralineDivider variant="beetle" />
 
         {/* 4. LA DASHBOARD: CHIAVI GIGANTI E STATISTICHE */}
-        <ScrollReveal delay={80}>
-          <MonthStatsBar
-            displayYear={displayYear}
-            displayMonth={displayMonth}
-            allLogs={allLogs}
-            workoutLogs={workoutLogs}
-            keysPerMonth={keysPerMonth}
-            onCatSpeak={handleCatSpeak}
-          />
-        </ScrollReveal>
+        <MonthStatsBar
+          displayYear={displayYear}
+          displayMonth={displayMonth}
+          allLogs={allLogs}
+          workoutLogs={workoutLogs}
+          keysPerMonth={keysPerMonth}
+          onCatSpeak={handleCatSpeak}
+        />
 
         {/* 3. TERZA LINEA DI DEMARCAZIONE IN STILE CORALINE: INSETTO-ARMADIO ARANCIO */}
-        <ScrollReveal delay={40} style={{ position: 'relative', zIndex: 30 }}>
+        <div style={{ position: 'relative', zIndex: 30 }}>
           <CoralineDivider variant="wardrobe" />
-        </ScrollReveal>
+        </div>
 
         {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
-        <ScrollReveal delay={60} style={{ position: 'relative', zIndex: 10 }}>
+        <div style={{ position: 'relative', zIndex: 10 }}>
           <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
-        </ScrollReveal>
+        </div>
 
         {/* 6. LUNGA DISCESA NELLA NOTTE STELLATA VERSO LA DEDICA NASCOSTA */}
         <div
