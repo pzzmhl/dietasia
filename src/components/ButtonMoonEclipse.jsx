@@ -500,20 +500,30 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           animation: 'moonFloatingBreathe 3.6s ease-in-out infinite',
           willChange: 'transform'
         }}>
-          {/* Alone bianco e verde lunare (bianco al centro con riverbero smeraldo) */}
+          {/* 1. Ampia foschia eterea lunare ultra-sfumata (bianco al centro con dissolvenza smeraldo diffusa) */}
           <div style={{
             position: 'absolute',
-            inset: '-14px',
+            inset: '-32px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(220, 255, 225, 0.30) 30%, rgba(139, 229, 116, 0.22) 58%, rgba(74, 222, 128, 0.08) 72%, transparent 85%)',
-            filter: isGlowActive
-              ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 28px rgba(139, 229, 116, 0.85))'
-              : 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 20px rgba(139, 229, 116, 0.50))',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(210, 255, 220, 0.28) 32%, rgba(139, 229, 116, 0.20) 58%, rgba(74, 222, 128, 0.06) 75%, transparent 88%)',
+            filter: 'blur(22px)',
+            WebkitFilter: 'blur(22px)',
             animation: 'moonHaloPulse 3.6s ease-in-out infinite',
             pointerEvents: 'none'
           }} />
 
-          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE CON ALONE BIANCO E VERDE */}
+          {/* 2. Alone di luce soffusa a contatto con la luna (sfocatura morbida di raccordo) */}
+          <div style={{
+            position: 'absolute',
+            inset: '-16px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.48) 0%, rgba(220, 255, 225, 0.30) 40%, rgba(139, 229, 116, 0.18) 70%, transparent 88%)',
+            filter: 'blur(12px)',
+            WebkitFilter: 'blur(12px)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE CON CONTORNO MORBIDAMENTE SFUMATO */}
           {MOON_PHASES.map((imgSrc, idx) => {
             const isActive = idx === phaseIndex;
             return (
@@ -532,9 +542,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   opacity: isActive ? 1 : 0,
                   transform: isActive ? 'scale(1)' : 'scale(0.985)',
                   transition: 'opacity 650ms cubic-bezier(0.4, 0, 0.2, 1), transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  maskImage: 'radial-gradient(circle at center, black 65%, rgba(0, 0, 0, 0.85) 80%, rgba(0, 0, 0, 0.4) 92%, transparent 100%)',
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 65%, rgba(0, 0, 0, 0.85) 80%, rgba(0, 0, 0, 0.4) 92%, transparent 100%)',
                   filter: isGlowActive && isActive
-                    ? 'drop-shadow(0 0 16px rgba(255, 255, 255, 0.70)) drop-shadow(0 0 26px rgba(139, 229, 116, 0.85)) brightness(0.86) contrast(1.08)'
-                    : 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 18px rgba(139, 229, 116, 0.45)) drop-shadow(0 8px 24px rgba(0, 0, 0, 0.85)) brightness(0.84) contrast(1.10)',
+                    ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 30px rgba(139, 229, 116, 0.75)) brightness(0.88) contrast(1.05)'
+                    : 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 22px rgba(139, 229, 116, 0.40)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.75)) brightness(0.86) contrast(1.08)',
                   willChange: 'opacity, transform',
                   pointerEvents: 'none'
                 }}
