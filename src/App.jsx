@@ -140,6 +140,22 @@ export default function App() {
   // Riquadro Segreto per Asia (Easter egg "Ti amo" attivato con pressione prolungata della Porticina)
   const [isLoveModalOpen, setIsLoveModalOpen] = useState(false);
 
+  // Nuvoletta del Gatto Fluttuante (in stile Pokémon / Coraline per spiegazioni contestuali)
+  const [catSpeech, setCatSpeech] = useState(null);
+  const catSpeechTimerRef = useRef(null);
+
+  const handleCatSpeak = useCallback((text) => {
+    triggerHapticFeedback('key');
+    if (catSpeechTimerRef.current) {
+      clearTimeout(catSpeechTimerRef.current);
+    }
+    setCatSpeech({ id: Date.now(), text });
+    catSpeechTimerRef.current = setTimeout(() => {
+      setCatSpeech(null);
+      catSpeechTimerRef.current = null;
+    }, 6000);
+  }, []);
+
   // Modal Impostazioni / Profilo aperto dal tasto profilo in alto a destra
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('settings');
@@ -552,6 +568,7 @@ export default function App() {
             onScrollToDashboard={() => {
               smoothScrollToElement('dashboard-stats-section', 1400);
             }}
+            onCatSpeak={handleCatSpeak}
           />
         </div>
 
@@ -607,6 +624,7 @@ export default function App() {
             allLogs={allLogs}
             workoutLogs={workoutLogs}
             keysPerMonth={keysPerMonth}
+            onCatSpeak={handleCatSpeak}
           />
         </ScrollReveal>
 
@@ -648,49 +666,140 @@ export default function App() {
           </span>
         </div>
 
-      {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
-      <button
-        onClick={() => {
-          triggerHapticFeedback('selection');
-          setCatModalState((prev) => ({ ...prev, isOpen: true }));
-        }}
-        aria-label="Ascolta il Gatto Nero"
-        title="Tocca per riascoltare l'ultima frase del Gatto"
+      {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA CON NUVOLETTA POKÉMON/CORALINE */}
+      <div
         style={{
           position: 'fixed',
           bottom: 'calc(env(safe-area-inset-bottom, 12px) + 12px)',
           right: '12px',
           zIndex: 9980,
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer',
-          outline: 'none',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           animation: 'catCornerFloat 3.2s ease-in-out infinite',
           willChange: 'transform',
           transform: 'translateZ(0)',
-          touchAction: 'manipulation'
+          pointerEvents: 'none'
         }}
       >
-        <img
-          src={catStandingImg}
-          alt="Gatto Nero di Coraline"
-          loading="eager"
-          decoding="async"
-          style={{
-            height: '130px',
-            width: 'auto',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(13, 44, 73, 0.6))',
-            pointerEvents: 'none'
+        {/* NUVOLETTA DIALOGO DEL GATTO: FLUTTUA IN PERFETTA SIMBIOSI CON IL GATTO */}
+        {catSpeech && (
+          <div
+            key={catSpeech.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerHapticFeedback('selection');
+              if (catSpeechTimerRef.current) clearTimeout(catSpeechTimerRef.current);
+              setCatSpeech(null);
+            }}
+            style={{
+              position: 'absolute',
+              bottom: '122px',
+              right: '2px',
+              width: 'max-content',
+              maxWidth: '224px',
+              padding: '10px 14px',
+              borderRadius: '16px',
+              background: 'linear-gradient(145deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.98) 100%)',
+              border: '1.5px solid rgba(47, 77, 108, 0.85)',
+              boxShadow: '0 8px 26px rgba(0, 0, 0, 0.9), 0 0 16px rgba(47, 77, 108, 0.4), inset 0 1px 0 rgba(208, 207, 205, 0.25)',
+              color: '#d0cfcd',
+              fontFamily: 'var(--font-body)',
+              fontSize: '11.5px',
+              lineHeight: 1.4,
+              fontWeight: 500,
+              textAlign: 'left',
+              userSelect: 'none',
+              cursor: 'pointer',
+              pointerEvents: 'auto',
+              animation: 'catBubblePop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
+              boxSizing: 'border-box'
+            }}
+          >
+            {/* Coda a freccia/fumetto stile Pokémon rivolta alla testa del Gatto */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '-6px',
+                right: '32px',
+                width: '11px',
+                height: '11px',
+                background: 'rgba(12, 16, 19, 0.98)',
+                borderRight: '1.5px solid rgba(47, 77, 108, 0.85)',
+                borderBottom: '1.5px solid rgba(47, 77, 108, 0.85)',
+                transform: 'rotate(45deg)',
+                zIndex: 1
+              }}
+            />
+
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <div style={{
+                fontFamily: 'var(--font-coraline)',
+                fontSize: '11px',
+                color: '#8be574',
+                marginBottom: '2px',
+                letterSpacing: '0.4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span>Il Gatto:</span>
+                <span style={{ fontSize: '10px', opacity: 0.6 }}>✕</span>
+              </div>
+              <div style={{ letterSpacing: '0.1px' }}>{catSpeech.text}</div>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            triggerHapticFeedback('selection');
+            const randomQuote = getRandomCatQuote('neutral');
+            handleCatSpeak(randomQuote);
           }}
-        />
-      </button>
+          aria-label="Ascolta il Gatto Nero"
+          title="Tocca per ascoltare il Gatto"
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            outline: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            pointerEvents: 'auto',
+            touchAction: 'manipulation'
+          }}
+        >
+          <img
+            src={catStandingImg}
+            alt="Gatto Nero di Coraline"
+            loading="eager"
+            decoding="async"
+            style={{
+              height: '130px',
+              width: 'auto',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(13, 44, 73, 0.6))',
+              pointerEvents: 'none'
+            }}
+          />
+        </button>
+      </div>
 
       <style>{`
+        @keyframes catBubblePop {
+          0% {
+            opacity: 0;
+            transform: scale(0.85) translateY(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
         @keyframes catCornerFloat {
           0%, 100% {
             transform: translate3d(0, 0, 0) rotate(0deg);

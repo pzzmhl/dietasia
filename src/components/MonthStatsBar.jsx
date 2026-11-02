@@ -23,7 +23,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
   displayMonth, 
   allLogs = {},
   workoutLogs = {},
-  keysPerMonth = 4 
+  keysPerMonth = 4,
+  onCatSpeak
 }) {
   const [activeTooltip, setActiveTooltip] = useState(null);
   const tooltipTimeoutRef = useRef(null);
@@ -63,7 +64,31 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     };
   }, [allLogs, displayYear, displayMonth, keysPerMonth]);
 
-  // Gestione comparsa tooltip con dismiss automatico dopo 5 secondi
+  // Dettagli esplicativi pronunciati dal Gatto
+  const tooltipDetails = {
+    keys: {
+      text: `Chiavi Jolly: ne hai ${remainingKeys} su ${keysPerMonth} questo mese. Ti permettono uno sgarro senza penalizzare le statistiche!`
+    },
+    success: {
+      text: `Dieta seguita: ${successCount} giorni rispettati con successo questo mese. Continua così!`
+    },
+    cheat: {
+      text: `Sgarri registrati: ${cheatCount} giorni con bottone nero cucito senza chiave jolly.`
+    },
+    workout: {
+      text: `Allenamento: ${workoutCount} giorni di attività completati con il Signor Bobinsky!`
+    },
+    streak: {
+      text: `Giorni di fila: ${streakCount} giorni consecutivi di dieta rispettata. Non spezzare la serie!`
+    },
+    rate: {
+      text: cheatCount === 0
+        ? `Tasso di riuscita: 100% perfetto a ${MONTHS_IT[displayMonth]}, nessun giorno di sgarro!`
+        : `Tasso di riuscita: ${successPercentage}% di successo a ${MONTHS_IT[displayMonth]} (${cheatCount} sgarri).`
+    }
+  };
+
+  // Al tocco sulla card, evidenzia la card e fa parlare la nuvoletta del Gatto
   const toggleTooltip = (type) => {
     triggerHapticFeedback('selection');
 
@@ -72,17 +97,14 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       tooltipTimeoutRef.current = null;
     }
 
-    setActiveTooltip((prev) => {
-      const next = prev === type ? null : type;
-      if (next) {
-        // Scompare automaticamente dopo 5 secondi esatti (5000 ms)
-        tooltipTimeoutRef.current = setTimeout(() => {
-          setActiveTooltip(null);
-          tooltipTimeoutRef.current = null;
-        }, 5000);
-      }
-      return next;
-    });
+    setActiveTooltip(type);
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setActiveTooltip(null);
+    }, 4500);
+
+    if (onCatSpeak && tooltipDetails[type]) {
+      onCatSpeak(tooltipDetails[type].text);
+    }
   };
 
   // Pulizia del timer allo smontaggio del componente
@@ -93,44 +115,6 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       }
     };
   }, []);
-
-  // Dettagli diciture al tocco
-  const tooltipDetails = {
-    keys: {
-      text: `Chiavi Nere: ${remainingKeys}/${keysPerMonth} sgarri jolly questo mese`,
-      color: 'var(--coraline-yellow)',
-      glow: 'rgba(216, 198, 21, 0.4)'
-    },
-    success: {
-      text: `Pietra Verde: ${successCount} ${successCount === 1 ? 'giorno' : 'giorni'} di dieta rispettata questo mese`,
-      color: '#4ade80',
-      glow: 'rgba(74, 222, 128, 0.4)'
-    },
-    rate: {
-      text: cheatCount === 0
-        ? `Libellula: ${successPercentage}% di riuscita (100% perfetto a ${MONTHS_IT[displayMonth]}, nessun giorno di dieta non rispettata)`
-        : `Libellula: ${successPercentage}% di riuscita (${cheatCount} ${cheatCount === 1 ? 'giorno' : 'giorni'} di dieta non rispettata su ${daysInMonth} a ${MONTHS_IT[displayMonth]})`,
-      color: '#f472b6',
-      glow: 'rgba(244, 114, 182, 0.45)'
-    },
-    streak: {
-      text: `Palla del Circo: ${streakCount} ${streakCount === 1 ? 'giorno consecutivo' : 'giorni consecutivi'} di dieta rispettata`,
-      color: 'var(--coraline-yellow)',
-      glow: 'rgba(216, 198, 21, 0.4)'
-    },
-    cheat: {
-      text: `Bottone Nero: ${cheatCount} ${cheatCount === 1 ? 'giorno' : 'giorni'} di dieta non seguita (sgarrati)`,
-      color: '#f87171',
-      glow: 'rgba(239, 68, 68, 0.4)'
-    },
-    workout: {
-      text: `Palla del Cambio: ${workoutCount} ${workoutCount === 1 ? 'giorno' : 'giorni'} di allenamento questo mese`,
-      color: '#8be574',
-      glow: 'rgba(139, 229, 116, 0.45)'
-    }
-  };
-
-  const currentTooltip = activeTooltip ? tooltipDetails[activeTooltip] : null;
 
   return (
     <div 
@@ -783,58 +767,6 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           </div>
         </div>
       </div>
-
-      {/* DICITURA INTERATTIVA A COMPARSA AL TAP SULL'ICONA - POSIZIONATA SOTTO A TUTTA LA DASHBOARD */}
-      {currentTooltip && (
-        <div 
-          onClick={() => {
-            if (tooltipTimeoutRef.current) {
-              clearTimeout(tooltipTimeoutRef.current);
-              tooltipTimeoutRef.current = null;
-            }
-            setActiveTooltip(null);
-          }}
-          style={{
-            position: 'relative',
-            zIndex: 1,
-            marginTop: '12px',
-            padding: '10px 14px',
-            backgroundColor: 'rgba(12, 16, 19, 0.96)',
-            border: `1.5px dashed ${currentTooltip.color}`,
-            borderRadius: '14px',
-            textAlign: 'center',
-            boxShadow: `0 8px 24px rgba(0, 0, 0, 0.8), 0 0 14px ${currentTooltip.glow}, inset 0 1px 0 rgba(208, 207, 205, 0.2)`,
-            animation: 'tooltipBadgePop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            cursor: 'pointer',
-            touchAction: 'manipulation'
-          }}
-        >
-          <span style={{
-            fontSize: '12px',
-            color: '#d0cfcd',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            lineHeight: 1.35,
-            flex: 1,
-            textAlign: 'center'
-          }}>
-            ✦ {currentTooltip.text}
-          </span>
-          <span style={{
-            color: '#d0cfcd',
-            opacity: 0.6,
-            fontSize: '12px',
-            fontWeight: 700,
-            marginLeft: '4px'
-          }}>
-            ✕
-          </span>
-        </div>
-      )}
 
       <style>{`
         @keyframes ghostlyAuraPulse {

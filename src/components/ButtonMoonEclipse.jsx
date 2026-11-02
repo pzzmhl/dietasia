@@ -52,7 +52,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
   displayMonth,
   onOpenSettings = () => {},
   customAvatar = null,
-  onScrollToDashboard
+  onScrollToDashboard,
+  onCatSpeak
 }) {
   const currentYear = todayStr ? Number(todayStr.split('-')[0]) : new Date().getFullYear();
   const currentMonth = todayStr ? Number(todayStr.split('-')[1]) - 1 : new Date().getMonth();
@@ -831,23 +832,36 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               boxSizing: 'border-box'
             }}>
               {/* BOX 1: ADERENZA DIETA (PIETRA VEGGENTE FLUTTUANTE GIGANTE) */}
-              <div style={{
-                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                borderRadius: '20px',
-                border: '1px solid rgba(55, 74, 79, 0.45)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
-                padding: '12px 6px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                boxSizing: 'border-box'
-              }}>
+              <div 
+                role="button"
+                tabIndex={0}
+                aria-label="Aderenza Dieta: tocca per ascoltare la spiegazione del Gatto"
+                onClick={() => {
+                  triggerHapticFeedback('selection');
+                  if (onCatSpeak) {
+                    onCatSpeak(`Aderenza dieta: ${stats.currentAdherence}% questo mese, rispetto alla tua media del ${stats.historicalAdherence}%.`);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(55, 74, 79, 0.45)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  padding: '12px 6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation'
+                }}
+              >
                 {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
@@ -920,23 +934,36 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               </div>
 
               {/* BOX 2: GIORNI RISPETTATI (STELLA ROSSA FLUTTUANTE GIGANTE) */}
-              <div style={{
-                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                borderRadius: '20px',
-                border: '1px solid rgba(55, 74, 79, 0.45)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
-                padding: '12px 6px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                boxSizing: 'border-box'
-              }}>
+              <div 
+                role="button"
+                tabIndex={0}
+                aria-label="Giorni Rispettati: tocca per ascoltare la spiegazione del Gatto"
+                onClick={() => {
+                  triggerHapticFeedback('selection');
+                  if (onCatSpeak) {
+                    onCatSpeak(`Giorni rispettati: ${stats.currentSuccessCount} giorni di dieta seguita questo mese (la tua media mensile è di ${stats.avgMonthlySuccess}).`);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(55, 74, 79, 0.45)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  padding: '12px 6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation'
+                }}
+              >
                 {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
@@ -1009,23 +1036,36 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               </div>
 
               {/* BOX 3: BOTTONI NERI (BOTTONE NERO FLUTTUANTE GIGANTE) */}
-              <div style={{
-                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                borderRadius: '20px',
-                border: '1px solid rgba(55, 74, 79, 0.45)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
-                padding: '12px 6px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                boxSizing: 'border-box'
-              }}>
+              <div 
+                role="button"
+                tabIndex={0}
+                aria-label="Bottoni Neri: tocca per ascoltare la spiegazione del Gatto"
+                onClick={() => {
+                  triggerHapticFeedback('selection');
+                  if (onCatSpeak) {
+                    onCatSpeak(`Bottoni neri: ${stats.currentCheatCount} sgarri registrati questo mese (la tua media abituale è di ${stats.avgMonthlyCheats}).`);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(55, 74, 79, 0.45)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  padding: '12px 6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation'
+                }}
+              >
                 {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
@@ -1098,23 +1138,36 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               </div>
 
               {/* BOX 4: ALLENAMENTI BOBINSKY (PALLA DEL CAMBIO FLUTTUANTE GIGANTE) */}
-              <div style={{
-                background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                borderRadius: '20px',
-                border: '1px solid rgba(55, 74, 79, 0.45)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
-                padding: '12px 6px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                boxSizing: 'border-box'
-              }}>
+              <div 
+                role="button"
+                tabIndex={0}
+                aria-label="Allenamenti Bobinsky: tocca per ascoltare la spiegazione del Gatto"
+                onClick={() => {
+                  triggerHapticFeedback('selection');
+                  if (onCatSpeak) {
+                    onCatSpeak(`Allenamenti Bobinsky: ${stats.currentWorkoutCount} sessioni completate questo mese (la tua media è di ${stats.avgMonthlyWorkouts}).`);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20, 45, 76, 0.82) 0%, rgba(12, 16, 19, 0.90) 65%, rgba(48, 49, 49, 0.85) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(55, 74, 79, 0.45)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(208, 207, 205, 0.15), 0 0 14px rgba(47, 77, 108, 0.25)',
+                  padding: '12px 6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation'
+                }}
+              >
                 {/* Sfumatura aura Coraline cinematica */}
                 <div style={{
                   position: 'absolute',
