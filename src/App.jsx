@@ -682,7 +682,7 @@ export default function App() {
           pointerEvents: 'none'
         }}
       >
-        {/* NUVOLETTA DIALOGO DEL GATTO: FLUTTUA IN PERFETTA SIMBIOSI CON IL GATTO */}
+        {/* NUVOLETTA DIALOGO DEL GATTO: BIANCA IN STILE FUMETTO / POKÉMON */}
         {catSpeech && (
           <div
             key={catSpeech.id}
@@ -697,56 +697,43 @@ export default function App() {
               bottom: '122px',
               right: '2px',
               width: 'max-content',
-              maxWidth: '224px',
+              maxWidth: '220px',
               padding: '10px 14px',
               borderRadius: '16px',
-              background: 'linear-gradient(145deg, rgba(20, 45, 76, 0.96) 0%, rgba(12, 16, 19, 0.98) 100%)',
-              border: '1.5px solid rgba(47, 77, 108, 0.85)',
-              boxShadow: '0 8px 26px rgba(0, 0, 0, 0.9), 0 0 16px rgba(47, 77, 108, 0.4), inset 0 1px 0 rgba(208, 207, 205, 0.25)',
-              color: '#d0cfcd',
+              background: '#ffffff',
+              border: '1.5px solid #0f172a',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35)',
+              color: '#0f172a',
               fontFamily: 'var(--font-body)',
-              fontSize: '11.5px',
-              lineHeight: 1.4,
-              fontWeight: 500,
+              fontSize: '12px',
+              lineHeight: 1.42,
+              fontWeight: 600,
               textAlign: 'left',
               userSelect: 'none',
               cursor: 'pointer',
               pointerEvents: 'auto',
-              animation: 'catBubblePop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
+              animation: 'catBubblePop 0.26s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
               boxSizing: 'border-box'
             }}
           >
-            {/* Coda a freccia/fumetto stile Pokémon rivolta alla testa del Gatto */}
+            {/* Coda a triangolo stile Pokémon rivolta alla testa del Gatto */}
             <div
               style={{
                 position: 'absolute',
                 bottom: '-6px',
                 right: '32px',
-                width: '11px',
-                height: '11px',
-                background: 'rgba(12, 16, 19, 0.98)',
-                borderRight: '1.5px solid rgba(47, 77, 108, 0.85)',
-                borderBottom: '1.5px solid rgba(47, 77, 108, 0.85)',
+                width: '10px',
+                height: '10px',
+                background: '#ffffff',
+                borderRight: '1.5px solid #0f172a',
+                borderBottom: '1.5px solid #0f172a',
                 transform: 'rotate(45deg)',
                 zIndex: 1
               }}
             />
 
             <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{
-                fontFamily: 'var(--font-coraline)',
-                fontSize: '11px',
-                color: '#8be574',
-                marginBottom: '2px',
-                letterSpacing: '0.4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <span>Il Gatto:</span>
-                <span style={{ fontSize: '10px', opacity: 0.6 }}>✕</span>
-              </div>
-              <div style={{ letterSpacing: '0.1px' }}>{catSpeech.text}</div>
+              {catSpeech.text}
             </div>
           </div>
         )}
