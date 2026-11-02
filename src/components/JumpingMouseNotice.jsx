@@ -185,7 +185,7 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(216, 198, 21, 0.3))',
+              filter: 'drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(250, 204, 21, 0.8)) drop-shadow(0 0 24px rgba(234, 179, 8, 0.5))',
               willChange: 'transform',
               transform: 'translateZ(0)',
               pointerEvents: 'none'

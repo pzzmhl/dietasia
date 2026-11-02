@@ -281,7 +281,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
             height: '95px',
             width: 'auto',
             objectFit: 'contain',
-            filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 10px rgba(216, 198, 21, 0.35))',
+            filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(250, 204, 21, 0.8)) drop-shadow(0 0 24px rgba(234, 179, 8, 0.5))',
             willChange: 'transform',
             transform: 'translateZ(0)',
             pointerEvents: 'none'
