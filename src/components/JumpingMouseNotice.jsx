@@ -8,7 +8,7 @@ import { triggerHapticFeedback } from '../services/haptics';
  * Include animazione a tremolio (il topo che squilla energicamente la tromba)
  * e predisposizione per traccia audio (suono di tromba / voce di avviso).
  */
-export default function JumpingMouseNotice({
+const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
   unmarkedDays = [],
   onSelectDay = () => {},
   audioSrc = null // Predisposto per ricevere file audio (es. /src/assets/mouse-audio.mp3)
@@ -108,10 +108,11 @@ export default function JumpingMouseNotice({
         style={{
           width: '100%',
           marginBottom: '16px',
-          border: '1.5px solid var(--coraline-yellow)',
-          borderRadius: '20px',
+          background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
+          border: '1.5px solid rgba(216, 198, 21, 0.55)',
+          borderRadius: '24px',
           padding: '14px 16px',
-          boxShadow: 'inset 0 1.5px 0 0 rgba(216, 198, 21, 0.35), inset 0 0 18px rgba(6, 22, 37, 0.7), 0 12px 30px rgba(0, 0, 0, 0.85), 0 0 18px rgba(216, 198, 21, 0.22)',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.85), inset 0 1.5px 0 0 rgba(216, 198, 21, 0.35), 0 0 18px rgba(216, 198, 21, 0.22)',
           display: 'flex',
           alignItems: 'center',
           gap: '14px',
@@ -333,4 +334,6 @@ export default function JumpingMouseNotice({
       `}</style>
     </>
   );
-}
+});
+
+export default JumpingMouseNotice;

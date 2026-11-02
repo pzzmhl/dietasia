@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { App as CapApp } from '@capacitor/app';
-import AnimatedBanner from './components/AnimatedBanner';
+import ButtonMoonEclipse from './components/ButtonMoonEclipse';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
@@ -9,7 +9,9 @@ import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
 import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import JumpingMouseNotice from './components/JumpingMouseNotice';
+import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import SecretLoveModal from './components/SecretLoveModal';
+import SecretSettingsModal from './components/SecretSettingsModal';
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
@@ -113,11 +115,23 @@ export default function App() {
   // Riquadro Segreto per Asia (Easter egg "Ti amo" attivato con pressione prolungata della Porticina)
   const [isLoveModalOpen, setIsLoveModalOpen] = useState(false);
 
-  // Trigger per aggiornare istantaneamente la GIF nel banner animato
-  const [outcomeTrigger, setOutcomeTrigger] = useState(null);
+  // Modal Impostazioni / Profilo aperto dal tasto profilo in alto a destra
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const handleChangeKeysPerMonth = useCallback((newCount) => {
+    setKeysPerMonth(newCount);
+    try {
+      localStorage.setItem('coraline_keys_per_month', String(newCount));
+    } catch (e) {}
+  }, []);
+
+  const handleRestoreSuccess = useCallback(() => {
+    setAllLogs(getAllLogs());
+  }, []);
 
   // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
   const activeModalsRef = useRef({
+    settings: false,
     dailyGreeting: false,
     love: false,
     day: false,
@@ -126,6 +140,7 @@ export default function App() {
   });
 
   activeModalsRef.current = {
+    settings: isSettingsOpen,
     dailyGreeting: isDailyGreetingOpen,
     love: isLoveModalOpen,
     day: dayModalState.isOpen,
@@ -139,8 +154,10 @@ export default function App() {
     const registerBackHandler = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          const { dailyGreeting, love, day, story, cat } = activeModalsRef.current;
-          if (dailyGreeting) {
+          const { settings, dailyGreeting, love, day, story, cat } = activeModalsRef.current;
+          if (settings) {
+            setIsSettingsOpen(false);
+          } else if (dailyGreeting) {
             handleDismissDailyGreeting();
           } else if (love) {
             setIsLoveModalOpen(false);
@@ -292,9 +309,9 @@ export default function App() {
     scheduleDailyReminder(undefined, isTodayAlreadyLogged);
   }, [isTodayAlreadyLogged]);
 
-  // Selezione esito dal pop-up ottimizzata
-  const handleSelectStatusFromModal = useCallback((newStatus) => {
-    const targetDate = dayModalState.dateStr || selectedDate;
+  // Selezione esito dal pop-up o dalla dashboard ottimizzata
+  const handleSelectStatusFromModal = useCallback((newStatus, optionalDateStr = null) => {
+    const targetDate = optionalDateStr || dayModalState.dateStr || selectedDate;
     const oldLog = allLogs[targetDate] || {};
     const wasAlreadyKey = oldLog.dietState === 'cheat_key';
 
@@ -307,13 +324,14 @@ export default function App() {
     const updatedLogs = getAllLogs();
     setAllLogs(updatedLogs);
 
-    // 1. Chiude il modal di selezione del giorno
+    // 1. Chiude il modal di selezione del giorno se aperto
     setDayModalState({ isOpen: false, dateStr: null });
 
-    // 2. Trigger per cambiare la GIF del banner in base all'esito
-    setOutcomeTrigger({ status: newStatus, timestamp: Date.now() });
-
-    // 3. Logica Notifiche & Reazioni Evento
+    // Se l'aggiornamento proviene da un giorno passato della timeline demo, aggiorniamo solo i log senza sovrapporre i popup
+    const isTimelineEdit = optionalDateStr && optionalDateStr !== todayStr;
+    if (isTimelineEdit) {
+      return;
+    }
     if (newStatus === 'cheat_key') {
       const isNowLastKey = !wasAlreadyKey && (keysLeftInTargetMonth - 1 <= 0);
 
@@ -426,12 +444,16 @@ export default function App() {
         zIndex: 1,
         touchAction: 'pan-y'
       }}>
-        {/* 1. ZONA GIF: BANNER ANIMATO (SPAZIATO DALL'ALTO, NON ANCORATO AL BORDO SUPERIORE) */}
-      <div style={{ marginTop: '6px', marginBottom: '14px' }}>
-        <AnimatedBanner latestOutcomeTrigger={outcomeTrigger} />
-      </div>
+        {/* 1. COMPONENTE PRINCIPALE DASHBOARD: BUTTON MOON ECLIPSE */}
+        <div style={{ marginBottom: '14px' }}>
+          <ButtonMoonEclipse
+            allLogs={allLogs}
+            todayStr={todayStr}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
+        </div>
 
-      {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI PER GIORNI NON CONTRASSEGNATI */}
+        {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI PER GIORNI NON CONTRASSEGNATI */}
       <JumpingMouseNotice
         unmarkedDays={unmarkedDays}
         onSelectDay={handleDayClick}
@@ -447,6 +469,9 @@ export default function App() {
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
       />
+
+      {/* 3.5 SCHEDA QUOTIDIANA ALLENAMENTO DI BOBINSKY */}
+      <BobinskyWorkoutCard todayStr={todayStr} />
 
       {/* 4. LA DASHBOARD: CHIAVI GIGANTI E STATISTICHE */}
       <MonthStatsBar
@@ -542,6 +567,16 @@ export default function App() {
       <SecretLoveModal
         isOpen={isLoveModalOpen}
         onClose={() => setIsLoveModalOpen(false)}
+      />
+
+      {/* MODAL IMPOSTAZIONI COMPLETO APERTO DAL PROFILO IN ALTO A DESTRA */}
+      <SecretSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        keysPerMonth={keysPerMonth}
+        onChangeKeysPerMonth={handleChangeKeysPerMonth}
+        onRestoreSuccess={handleRestoreSuccess}
+        onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
       />
 
       {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}

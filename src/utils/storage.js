@@ -326,9 +326,25 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
     return streak;
   };
 
-  // 1. Se viene indicata una data di riferimento specifica (es. giorno appena cliccato):
+  // 1. Se viene indicata una data di riferimento specifica (es. giorno appena cliccato o oggi):
   if (referenceDateStr && typeof referenceDateStr === 'string') {
-    return computeChainAroundDate(referenceDateStr);
+    const targetLog = allLogs[referenceDateStr];
+    if (targetLog && (targetLog.dietState === 'success' || targetLog.dietState === 'cheat_key')) {
+      return computeChainAroundDate(referenceDateStr);
+    }
+    // Se la data indicata è oggi ed è ancora non compilata, recupera la serie attiva fino a ieri
+    const now = new Date();
+    const todayStr = formatYMD(now);
+    if (referenceDateStr === todayStr) {
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = formatYMD(yesterday);
+      const yesterdayState = allLogs[yesterdayStr]?.dietState;
+      if (yesterdayState === 'success' || yesterdayState === 'cheat_key') {
+        return computeChainAroundDate(yesterdayStr);
+      }
+    }
+    return 0;
   }
 
   // 2. Verifica la catena attiva legata a oggi o ieri

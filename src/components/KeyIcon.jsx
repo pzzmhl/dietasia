@@ -7,7 +7,7 @@ import keyImg from '../assets/key.webp';
  * - Stato 'active' (nitida, con bagliore oro) vs 'used' (sfumata a serratura usata).
  * - Fallback SVG istantaneo.
  */
-export default function KeyIcon({ 
+const KeyIcon = React.memo(function KeyIcon({ 
   size = 38, 
   isUsed = false, 
   className = '', 
@@ -67,4 +67,6 @@ export default function KeyIcon({
       className={className}
     />
   );
-}
+});
+
+export default KeyIcon;

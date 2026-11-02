@@ -103,23 +103,23 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           style={{
             fontFamily: 'var(--font-coraline)',
             fontSize: '15px',
-            color: 'var(--coraline-yellow)',
+            color: '#8be574',
             letterSpacing: '1px',
-            textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(216, 198, 21, 0.5)',
+            textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(139, 229, 116, 0.5)',
             marginBottom: '10px'
           }}
         >
           ✦ {greeting} ✦
         </div>
 
-        {/* 2. La frase che dice il gatto (in grande, pulita e centrale) */}
+        {/* 2. La frase che dice il gatto (in bianco, pulita e centrale) */}
         <h1
           style={{
             fontSize: '20px',
             fontFamily: 'var(--font-body)',
             fontWeight: 600,
             lineHeight: 1.45,
-            color: '#fdfbf7',
+            color: '#ffffff',
             letterSpacing: '-0.3px',
             margin: '0 0 16px 0',
             padding: '0 6px',
@@ -191,13 +191,13 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
             width: '60px',
             height: '60px',
             borderRadius: '50%',
-            backgroundColor: 'var(--coraline-yellow)',
-            border: '2px solid #fef08a',
+            backgroundColor: '#8be574',
+            border: '2px solid #bdf0ad',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 8px 26px rgba(0, 0, 0, 0.8), 0 0 22px rgba(216, 198, 21, 0.65), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
+            boxShadow: '0 8px 26px rgba(0, 0, 0, 0.8), 0 0 24px rgba(139, 229, 116, 0.65), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
             transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease',
             outline: 'none',
             touchAction: 'manipulation'

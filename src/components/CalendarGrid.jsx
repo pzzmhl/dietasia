@@ -2,6 +2,9 @@ import React, { useMemo, useRef } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
+import vortexBg from '../assets/coraline-vortex-bg.webp';
+import starryBg from '../assets/coraline-starry-bg.webp';
+import coralineDollBg from '../assets/coraline-doll-bg.webp';
 import { triggerHapticFeedback } from '../services/haptics';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
@@ -26,10 +29,10 @@ const EmptyCell = React.memo(function EmptyCell() {
         width: '100%',
         minWidth: 0,
         boxSizing: 'border-box',
-        borderRadius: '10px',
-        backgroundColor: 'rgba(6, 22, 37, 0.22)',
-        border: '1px dashed rgba(26, 69, 110, 0.32)',
-        boxShadow: 'inset 0 1px 0 0 rgba(221, 202, 183, 0.04)',
+        borderRadius: '12px',
+        backgroundColor: 'rgba(6, 20, 34, 0.35)',
+        border: '1px dashed rgba(107, 142, 85, 0.18)',
+        boxShadow: 'inset 0 1px 0 0 rgba(154, 185, 123, 0.04)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -42,7 +45,7 @@ const EmptyCell = React.memo(function EmptyCell() {
           fontFamily: 'var(--font-gothic)',
           fontSize: '13px',
           fontWeight: 600,
-          color: 'rgba(221, 202, 183, 0.32)',
+          color: 'rgba(221, 202, 183, 0.28)',
           lineHeight: 1
         }}
       >
@@ -63,36 +66,33 @@ const DayCell = React.memo(function DayCell({
   dietState,
   onSelectDate
 }) {
-  // Stili e colori calcolati localmente con armonia sullo sfondo blu di Coraline
-  let cellBg = 'rgba(6, 22, 37, 0.45)';
-  let cellBorder = '1px solid var(--border-dark-blue-subtle)';
-  let cellShadow = 'inset 0 1px 0 0 rgba(221, 202, 183, 0.12)';
+  // Stili e colori calcolati localmente con armonia sullo sfondo blu notte/smeraldo di Coraline
+  let cellBg = 'rgba(4, 14, 25, 0.82)';
+  let cellBorder = '1px solid rgba(107, 142, 85, 0.22)';
+  let cellShadow = 'inset 0 1px 0 rgba(154, 185, 123, 0.1), 0 2px 6px rgba(0, 0, 0, 0.35)';
 
   if (dietState === 'success') {
-    cellBg = 'rgba(21, 128, 61, 0.32)';
-    cellBorder = '1.5px solid rgba(52, 211, 153, 0.55)';
+    cellBg = 'rgba(16, 80, 45, 0.45)';
+    cellBorder = '1.5px solid rgba(139, 229, 116, 0.6)';
+    cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
   } else if (dietState === 'cheat') {
-    cellBg = 'rgba(69, 10, 10, 0.45)';
-    cellBorder = '1.5px solid rgba(239, 68, 68, 0.5)';
+    cellBg = 'rgba(65, 15, 20, 0.52)';
+    cellBorder = '1.5px solid rgba(239, 68, 68, 0.55)';
+    cellShadow = 'inset 0 1px 0 rgba(239, 68, 68, 0.25), 0 2px 8px rgba(0, 0, 0, 0.45)';
   } else if (dietState === 'cheat_key') {
-    cellBg = 'rgba(120, 99, 67, 0.38)';
-    cellBorder = '1.5px solid rgba(199, 164, 14, 0.7)';
+    cellBg = 'rgba(50, 40, 15, 0.5)';
+    cellBorder = '1.5px solid rgba(216, 198, 21, 0.65)';
+    cellShadow = 'inset 0 1px 0 rgba(216, 198, 21, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
   } else if (isToday) {
-    cellBg = 'rgba(120, 99, 67, 0.28)';
+    cellBg = 'rgba(26, 69, 110, 0.4)';
     cellBorder = '1.5px solid var(--coraline-gold)';
+    cellShadow = '0 0 10px rgba(216, 198, 21, 0.35)';
   }
 
+  // Selettore del giorno: mantenuto in giallo dorato come richiesto esplicitamente
   if (isSelected) {
-    cellBorder = dietState === 'success' 
-      ? '2px solid #34d399' 
-      : dietState === 'cheat' 
-      ? '2px solid #ef4444' 
-      : '2px solid var(--coraline-yellow)';
-    cellShadow = dietState === 'success'
-      ? '0 0 14px rgba(52, 211, 153, 0.5)'
-      : dietState === 'cheat'
-      ? '0 0 14px rgba(239, 68, 68, 0.5)'
-      : '0 0 14px rgba(216, 198, 21, 0.55)';
+    cellBorder = '2px solid var(--coraline-yellow)';
+    cellShadow = '0 0 14px rgba(216, 198, 21, 0.65), inset 0 0 8px rgba(216, 198, 21, 0.25)';
   }
 
   // Micro-inclinazione artigianale stop-motion per gli oggetti reali
@@ -112,7 +112,7 @@ const DayCell = React.memo(function DayCell({
         minWidth: 0,
         padding: '2px',
         boxSizing: 'border-box',
-        borderRadius: '10px',
+        borderRadius: '12px',
         backgroundColor: cellBg,
         border: cellBorder,
         boxShadow: cellShadow,
@@ -190,7 +190,7 @@ const DayCell = React.memo(function DayCell({
 /**
  * Calendario Mensile a Griglia stile Coraline (Hardware Accelerated, Gesture Swipe & 120 FPS)
  */
-export default function CalendarGrid({ 
+const CalendarGrid = React.memo(function CalendarGrid({ 
   selectedDate, 
   onSelectDate, 
   allLogs = {},
@@ -258,26 +258,100 @@ export default function CalendarGrid({
 
   return (
     <div 
-      className="stitched-card vortex-card" 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{ 
-        padding: '14px 10px', 
-        marginBottom: '16px',
         width: '100%',
+        borderRadius: '24px',
+        background: 'linear-gradient(180deg, rgba(5, 16, 28, 0.98) 0%, rgba(3, 10, 19, 0.99) 65%, rgba(2, 6, 12, 1) 100%)',
+        border: '1px solid rgba(107, 142, 85, 0.28)',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(154, 185, 123, 0.15)',
+        padding: '16px 12px 14px 12px', 
+        marginBottom: '16px',
         boxSizing: 'border-box',
+        position: 'relative',
+        overflow: 'hidden',
         touchAction: 'pan-y'
       }}
     >
+      {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `url(${starryBg})`,
+        backgroundPosition: 'center center',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        opacity: 0.06,
+        filter: 'blur(2px)',
+        WebkitFilter: 'blur(2px)',
+        maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
+        WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
+        pointerEvents: 'none',
+        borderRadius: 'inherit',
+        zIndex: 0
+      }} />
+
+      {/* SFONDO CON LA BAMBOLA DI CORALINE (PIÙ SCURO E ATMOSFERICO) */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `url(${coralineDollBg})`,
+        backgroundPosition: 'center 35%',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        opacity: 0.20,
+        filter: 'blur(1px) brightness(0.70) contrast(1.15)',
+        WebkitFilter: 'blur(1px) brightness(0.70) contrast(1.15)',
+        maskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.35) 90%)',
+        WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.35) 90%)',
+        pointerEvents: 'none',
+        borderRadius: 'inherit',
+        zIndex: 0
+      }} />
+
+      {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `url(${vortexBg})`,
+        backgroundPosition: 'center center',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        opacity: 0.05,
+        filter: 'blur(2px)',
+        WebkitFilter: 'blur(2px)',
+        maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+        WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
+        pointerEvents: 'none',
+        borderRadius: 'inherit',
+        zIndex: 0
+      }} />
+
+      {/* ALONE RADIALE SMERALDO SOTTILE */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '240px',
+        height: '180px',
+        background: 'radial-gradient(circle, rgba(107, 142, 85, 0.10) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }} />
+
       {/* Intestazione Mese con font Dashboard al centro e freccette ai lati */}
       <div style={{
+        position: 'relative',
+        zIndex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '14px',
+        marginBottom: '12px',
         padding: '0 4px'
       }}>
-        {/* Freccia Sinistra (Mese Precedente) */}
+        {/* Freccia Sinistra (Mese Precedente) - Bianca */}
         <button
           onClick={() => {
             triggerHapticFeedback('swipe');
@@ -285,38 +359,40 @@ export default function CalendarGrid({
           }}
           aria-label="Mese precedente"
           style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(6, 22, 37, 0.55)',
-            border: '1.5px solid var(--border-dark-blue)',
-            boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 2px 6px rgba(0, 0, 0, 0.35)',
-            color: 'var(--coraline-parchment)',
+            width: '36px',
+            height: '36px',
+            borderRadius: '12px',
+            backgroundColor: 'rgba(6, 20, 34, 0.75)',
+            border: '1px solid rgba(107, 142, 85, 0.32)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(154, 185, 123, 0.16)',
+            color: '#ffffff',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
-            touchAction: 'pan-y'
+            fontSize: '13px',
+            touchAction: 'pan-y',
+            transition: 'transform 0.1s ease'
           }}
         >
           ◀
         </button>
 
-        {/* Nome del Mese Centrato in Font Ufficiale Coraline */}
+        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Verde Coraline) */}
         <h2 style={{
           fontFamily: 'var(--font-coraline)',
-          fontSize: '16px',
-          color: 'var(--coraline-yellow)',
+          fontSize: '22px',
+          color: '#8be574',
           textAlign: 'center',
           margin: 0,
-          letterSpacing: '1px',
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(216, 198, 21, 0.35)'
+          letterSpacing: '0.8px',
+          textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(139, 229, 116, 0.45)',
+          lineHeight: 1.15
         }}>
           {MONTHS_IT[displayMonth]}
         </h2>
 
-        {/* Freccia Destra (Mese Successivo) */}
+        {/* Freccia Destra (Mese Successivo) - Bianca */}
         <button
           onClick={() => {
             triggerHapticFeedback('swipe');
@@ -324,57 +400,59 @@ export default function CalendarGrid({
           }}
           aria-label="Mese successivo"
           style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(6, 22, 37, 0.55)',
-            border: '1.5px solid var(--border-dark-blue)',
-            boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 2px 6px rgba(0, 0, 0, 0.35)',
-            color: 'var(--coraline-parchment)',
+            width: '36px',
+            height: '36px',
+            borderRadius: '12px',
+            backgroundColor: 'rgba(6, 20, 34, 0.75)',
+            border: '1px solid rgba(107, 142, 85, 0.32)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(154, 185, 123, 0.16)',
+            color: '#ffffff',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
-            touchAction: 'pan-y'
+            fontSize: '13px',
+            touchAction: 'pan-y',
+            transition: 'transform 0.1s ease'
           }}
         >
           ▶
         </button>
       </div>
 
-      {/* Intestazione Giorni della Settimana (LUN -> DOM) */}
+      {/* Intestazione Giorni della Settimana (LUN -> DOM) - Tutti uniformi in pergamena */}
       <div style={{
+        position: 'relative',
+        zIndex: 1,
         display: 'grid',
         gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
         gap: GRID_GAP,
         textAlign: 'center',
         marginBottom: '8px'
       }}>
-        {DAYS_HEADER.map((dayName, idx) => {
-          const isWeekend = idx >= 5;
-          return (
-            <div 
-              key={dayName} 
-              style={{ 
-                color: isWeekend ? 'var(--coraline-gold)' : 'var(--coraline-parchment)',
-                opacity: isWeekend ? 0.9 : 0.75,
-                fontSize: '11px',
-                fontFamily: 'var(--font-gothic)',
-                fontWeight: 700,
-                padding: '2px 0'
-              }}
-            >
-              {dayName}
-            </div>
-          );
-        })}
+        {DAYS_HEADER.map((dayName) => (
+          <div 
+            key={dayName} 
+            style={{ 
+              color: 'var(--coraline-parchment)',
+              opacity: 0.75,
+              fontSize: '11px',
+              fontFamily: 'var(--font-gothic)',
+              fontWeight: 700,
+              padding: '2px 0'
+            }}
+          >
+            {dayName}
+          </div>
+        ))}
       </div>
 
       {/* Griglia Giorni del Mese con Celle Memoizzate e transizione fluida */}
       <div 
         key={`${displayYear}-${displayMonth}`}
         style={{ 
+          position: 'relative',
+          zIndex: 1,
           display: 'grid', 
           gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', 
           gap: GRID_GAP,
@@ -418,4 +496,6 @@ export default function CalendarGrid({
       </div>
     </div>
   );
-}
+});
+
+export default CalendarGrid;

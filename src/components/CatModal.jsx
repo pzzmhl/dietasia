@@ -3,6 +3,7 @@ import catSuccessImg from '../assets/cat-success.webp';     // Dieta Corretta / 
 import catFailImg from '../assets/cat-fail.webp';           // Dieta Scorretta / Non Seguita (Bottone Nero) -> Gatto scettico
 import catCheatKeyImg from '../assets/cat-cheat-key.webp';  // Sgarro con Chiave Jolly -> Gatto con topolino circense in bocca
 import catModalBg from '../assets/cat-modal-bg.webp';
+import CoralineCatCloud from './CoralineCatCloud';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline):
@@ -129,71 +130,16 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* NUVOLETTA DI DIALOGO STILE CORALINE */}
-        <div
-          className="coraline-speech-bubble"
+        {/* NUVOLETTA A FORMA DI NUVOLA REALE GRIGIETTA IN STILE CORALINE */}
+        <CoralineCatCloud
+          quote={quote}
+          context={context}
+          stitchColor={bubbleStitchColor}
           style={{
-            width: '100%',
-            position: 'relative',
-            marginTop: '20px',
-            background: 'linear-gradient(145deg, rgba(8, 26, 44, 0.94) 0%, rgba(4, 16, 28, 0.94) 100%)',
-            border: `2px dashed ${bubbleStitchColor}`,
-            borderRadius: '20px',
-            padding: '16px 18px',
-            boxShadow: `0 8px 24px rgba(0,0,0,0.7), inset 0 0 16px rgba(0,0,0,0.5)`,
-            marginBottom: '16px',
-            animation: 'coralineBubblePop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-            willChange: 'transform, opacity'
+            marginTop: '12px',
+            marginBottom: '16px'
           }}
-        >
-          {/* Testo pronunciato dal Gatto */}
-          <p
-            style={{
-              color: 'var(--coraline-parchment)',
-              fontSize: '14px',
-              lineHeight: 1.5,
-              fontStyle: 'italic',
-              textAlign: 'center',
-              fontWeight: 500,
-              margin: 0,
-              fontFamily: 'var(--font-body)',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)'
-            }}
-          >
-            «{quote}»
-          </p>
-
-          {/* Coda a triangolo della nuvoletta */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-12px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '11px solid transparent',
-              borderRight: '11px solid transparent',
-              borderTop: `12px solid ${bubbleStitchColor}`,
-              filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.5))'
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-9px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '9px solid transparent',
-              borderRight: '9px solid transparent',
-              borderTop: '10px solid #061625'
-            }}
-          />
-        </div>
+        />
 
         {/* IMMAGINE DEL GATTO NERO */}
         <div
