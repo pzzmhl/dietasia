@@ -191,7 +191,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
               maxHeight: '44vh',
               width: 'auto',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 12px 28px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 18px rgba(74, 222, 128, 0.45))',
+              filter: 'drop-shadow(0 12px 28px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 18px rgba(168, 85, 247, 0.65)) drop-shadow(0 0 32px rgba(139, 92, 246, 0.4))',
               animation: 'dailyCatFloat 3.8s ease-in-out infinite',
               pointerEvents: 'none',
               willChange: 'transform'

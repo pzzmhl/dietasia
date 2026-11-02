@@ -770,7 +770,7 @@ export default function App() {
               height: '130px',
               width: 'auto',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(13, 44, 73, 0.6))',
+              filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(168, 85, 247, 0.75)) drop-shadow(0 0 24px rgba(139, 92, 246, 0.45))',
               pointerEvents: 'none'
             }}
           />
