@@ -8,7 +8,7 @@ import CatModal from './components/CatModal';
 import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
 import DailyCatGreetingModal from './components/DailyCatGreetingModal';
-import JumpingMouseNotice from './components/JumpingMouseNotice';
+import FloatingJumpingMouse from './components/FloatingJumpingMouse';
 import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
 import SecretLoveModal from './components/SecretLoveModal';
@@ -568,14 +568,6 @@ export default function App() {
         {/* 1. PRIMA LINEA DI DEMARCAZIONE IN STILE CORALINE: MANO DELL'ALTRA MADRE */}
         <CoralineDivider variant="hand" />
 
-        {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI & NOTIFICA ALLENAMENTO BOBINSKY */}
-        {unmarkedDays && unmarkedDays.length > 0 && (
-          <JumpingMouseNotice
-            unmarkedDays={unmarkedDays}
-            onSelectDay={handleDayClick}
-          />
-        )}
-
         <BobinskyWorkoutCard 
           todayStr={todayStr} 
           workoutLogs={workoutLogs}
@@ -646,6 +638,12 @@ export default function App() {
             fatto con amore dal tuo Michele
           </span>
         </div>
+
+      {/* TOPO SALTATORE FLOTTANTE IN BASSO A SINISTRA CON NUVOLETTA CARTONATA */}
+      <FloatingJumpingMouse
+        unmarkedDays={unmarkedDays}
+        onSelectDay={handleDayClick}
+      />
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA CON NUVOLETTA POKÉMON/CORALINE */}
       <div
