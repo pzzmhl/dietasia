@@ -782,7 +782,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           boxSizing: 'border-box'
         }}
       >
-            {/* SFONDO DELLE STELLINE DI CORALINE (ABBASTANZA VISIBILE) */}
+            {/* SFONDO DELLE STELLINE DI CORALINE (OSCURITO E BEN DOSATO) */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -790,13 +790,13 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
-              opacity: 0.35,
+              opacity: 0.20,
               pointerEvents: 'none',
               borderRadius: 'inherit',
               zIndex: 0
             }} />
 
-            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE */}
+            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SCURITO) */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -804,7 +804,17 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
-              opacity: 0.15,
+              opacity: 0.09,
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
+            }} />
+
+            {/* VELATURA SCURA CINEMATICA PER OSCURIRE LO SFONDO GENERALE */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(circle at center, rgba(12, 16, 19, 0.4) 0%, rgba(6, 9, 12, 0.72) 100%)',
               pointerEvents: 'none',
               borderRadius: 'inherit',
               zIndex: 0
@@ -818,7 +828,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
-              opacity: 0.07,
+              opacity: 0.05,
               filter: 'blur(2px)',
               WebkitFilter: 'blur(2px)',
               maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
@@ -836,12 +846,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               transform: 'translateX(-50%)',
               width: '260px',
               height: '240px',
-              background: 'radial-gradient(circle, rgba(47, 77, 108, 0.32) 0%, rgba(55, 74, 79, 0.18) 50%, rgba(20, 45, 76, 0.10) 70%, transparent 80%)',
+              background: 'radial-gradient(circle, rgba(47, 77, 108, 0.25) 0%, rgba(55, 74, 79, 0.12) 50%, rgba(20, 45, 76, 0.06) 70%, transparent 80%)',
               pointerEvents: 'none',
               zIndex: 0
             }} />
 
-            {/* I 4 GRANDI BOX STATISTICHE IN GRIGLIA 2x2: AGGREGATI AL CENTRO CON PALETTE FILM CORALINE */}
+            {/* I 4 GRANDI BOX STATISTICHE IN GRIGLIA 2x2: RIEMPIMENTO UGUALE AI BOX DELLA DASHBOARD */}
             <div style={{
               position: 'relative',
               zIndex: 1,
@@ -868,8 +878,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(47, 77, 108, 0.45)',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
+                  border: '1px solid rgba(55, 74, 79, 0.42)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -883,21 +893,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfondo delle stelline visibile all'interno del box */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${catCloudPattern})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.28,
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                {/* Spirale sfocata molto leggera identica alla Dashboard */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
@@ -905,7 +901,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backgroundPosition: 'center center',
                   backgroundSize: 'cover',
                   backgroundRepeat: 'no-repeat',
-                  opacity: 0.05,
+                  opacity: 0.045,
                   filter: 'blur(2px)',
                   WebkitFilter: 'blur(2px)',
                   maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
@@ -974,8 +970,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(47, 77, 108, 0.45)',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
+                  border: '1px solid rgba(55, 74, 79, 0.42)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -989,21 +985,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfondo delle stelline visibile all'interno del box */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${catCloudPattern})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.28,
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                {/* Spirale sfocata molto leggera identica alla Dashboard */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
@@ -1011,7 +993,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backgroundPosition: 'center center',
                   backgroundSize: 'cover',
                   backgroundRepeat: 'no-repeat',
-                  opacity: 0.05,
+                  opacity: 0.045,
                   filter: 'blur(2px)',
                   WebkitFilter: 'blur(2px)',
                   maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
@@ -1080,8 +1062,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(47, 77, 108, 0.45)',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
+                  border: '1px solid rgba(55, 74, 79, 0.42)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -1095,21 +1077,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfondo delle stelline visibile all'interno del box */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${catCloudPattern})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.28,
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                {/* Spirale sfocata molto leggera identica alla Dashboard */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
@@ -1117,7 +1085,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backgroundPosition: 'center center',
                   backgroundSize: 'cover',
                   backgroundRepeat: 'no-repeat',
-                  opacity: 0.05,
+                  opacity: 0.045,
                   filter: 'blur(2px)',
                   WebkitFilter: 'blur(2px)',
                   maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
@@ -1186,8 +1154,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(47, 77, 108, 0.45)',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.1)',
+                  border: '1px solid rgba(55, 74, 79, 0.42)',
+                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
                   padding: '12px 6px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -1201,21 +1169,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   touchAction: 'manipulation'
                 }}
               >
-                {/* Sfondo delle stelline visibile all'interno del box */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${catCloudPattern})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.28,
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                {/* Spirale sfocata e scura identica ai box della Dashboard */}
+                {/* Spirale sfocata molto leggera identica alla Dashboard */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
@@ -1223,7 +1177,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   backgroundPosition: 'center center',
                   backgroundSize: 'cover',
                   backgroundRepeat: 'no-repeat',
-                  opacity: 0.05,
+                  opacity: 0.045,
                   filter: 'blur(2px)',
                   WebkitFilter: 'blur(2px)',
                   maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
