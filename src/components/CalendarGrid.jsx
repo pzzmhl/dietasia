@@ -20,8 +20,8 @@ const MONTHS_IT = [
 
 /**
  * Cella vuota segnaposto per i giorni mancanti a inizio o fine mese.
- * Visualizza un quadratino discreto, meno marcato e con un trattino centrale (–)
- * per mantenere la griglia del calendario sempre geometricamente riempita.
+ * Visualizza un quadratino discreto in spago vintage (#786343) e pergamena (#DDCAB7)
+ * con trattino centrale (–) per mantenere la griglia del calendario geometricamente perfetta.
  */
 const EmptyCell = React.memo(function EmptyCell() {
   return (
@@ -33,9 +33,9 @@ const EmptyCell = React.memo(function EmptyCell() {
         minWidth: 0,
         boxSizing: 'border-box',
         borderRadius: '12px',
-        backgroundColor: 'rgba(6, 20, 34, 0.35)',
-        border: '1px dashed rgba(107, 142, 85, 0.18)',
-        boxShadow: 'inset 0 1px 0 0 rgba(154, 185, 123, 0.04)',
+        backgroundColor: 'rgba(13, 44, 73, 0.22)',
+        border: '1px dashed rgba(120, 99, 67, 0.32)',
+        boxShadow: 'inset 0 1px 0 0 rgba(221, 202, 183, 0.04)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -48,7 +48,7 @@ const EmptyCell = React.memo(function EmptyCell() {
           fontFamily: 'var(--font-gothic)',
           fontSize: '13px',
           fontWeight: 600,
-          color: 'rgba(221, 202, 183, 0.28)',
+          color: 'rgba(221, 202, 183, 0.30)',
           lineHeight: 1
         }}
       >
@@ -60,6 +60,7 @@ const EmptyCell = React.memo(function EmptyCell() {
 
 /**
  * Singola Cella del Calendario memoizzata per azzerare re-render dell'intero mese.
+ * Palette Coraline: #0D2C49 (Navy), #DDCAB7 (Pergamena), #786343 (Spago), #C7A40E (Oro), #D8C615 (Giallo)
  */
 const DayCell = React.memo(function DayCell({
   day,
@@ -71,10 +72,10 @@ const DayCell = React.memo(function DayCell({
   onSelectDate,
   onOpenWorkoutModal
 }) {
-  // Stili e colori calcolati localmente con armonia sullo sfondo blu notte/smeraldo di Coraline
-  let cellBg = 'rgba(4, 14, 25, 0.82)';
-  let cellBorder = '1px solid rgba(107, 142, 85, 0.22)';
-  let cellShadow = 'inset 0 1px 0 rgba(154, 185, 123, 0.1), 0 2px 6px rgba(0, 0, 0, 0.35)';
+  // Stili e colori sulla palette ufficiale di Coraline
+  let cellBg = 'rgba(13, 44, 73, 0.58)';
+  let cellBorder = '1px solid rgba(120, 99, 67, 0.35)';
+  let cellShadow = 'inset 0 1px 0 rgba(221, 202, 183, 0.08), 0 2px 6px rgba(0, 0, 0, 0.42)';
 
   if (calendarMode === 'workout') {
     if (workoutState === 'yes') {
@@ -83,37 +84,36 @@ const DayCell = React.memo(function DayCell({
       cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
     } else if (workoutState === 'no') {
       // Quando l'allenamento non è stato fatto: sbiadisce molto con bordo tratteggiato
-      cellBg = 'rgba(4, 14, 25, 0.45)';
+      cellBg = 'rgba(13, 44, 73, 0.3)';
       cellBorder = '1px dashed rgba(239, 68, 68, 0.35)';
       cellShadow = 'none';
     } else {
-      // Giorni non segnati: uguali al calendario dieta (non sbiaditi)
-      cellBg = 'rgba(4, 14, 25, 0.82)';
-      cellBorder = '1px solid rgba(107, 142, 85, 0.22)';
-      cellShadow = 'inset 0 1px 0 rgba(154, 185, 123, 0.1), 0 2px 6px rgba(0, 0, 0, 0.35)';
+      cellBg = 'rgba(13, 44, 73, 0.58)';
+      cellBorder = '1px solid rgba(120, 99, 67, 0.35)';
+      cellShadow = 'inset 0 1px 0 rgba(221, 202, 183, 0.08), 0 2px 6px rgba(0, 0, 0, 0.42)';
     }
   } else {
     if (dietState === 'success') {
-      cellBg = 'rgba(16, 80, 45, 0.45)';
-      cellBorder = '1.5px solid rgba(139, 229, 116, 0.6)';
+      cellBg = 'rgba(12, 52, 42, 0.65)';
+      cellBorder = '1.5px solid rgba(74, 222, 128, 0.65)';
       cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
     } else if (dietState === 'cheat') {
-      cellBg = 'rgba(65, 15, 20, 0.52)';
+      cellBg = 'rgba(52, 18, 24, 0.65)';
       cellBorder = '1.5px solid rgba(239, 68, 68, 0.55)';
       cellShadow = 'inset 0 1px 0 rgba(239, 68, 68, 0.25), 0 2px 8px rgba(0, 0, 0, 0.45)';
     } else if (dietState === 'cheat_key') {
-      cellBg = 'rgba(50, 40, 15, 0.5)';
-      cellBorder = '1.5px solid rgba(216, 198, 21, 0.65)';
-      cellShadow = 'inset 0 1px 0 rgba(216, 198, 21, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
+      cellBg = 'rgba(52, 42, 12, 0.65)';
+      cellBorder = '1.5px solid #D8C615';
+      cellShadow = 'inset 0 1px 0 rgba(216, 198, 21, 0.4), 0 0 10px rgba(199, 164, 14, 0.35)';
     }
   }
 
-  // Solo il giorno odierno è evidenziato in giallo (nessun highlight persistente per i giorni cliccati)
+  // Solo il giorno odierno è evidenziato in giallo vivo Coraline (#D8C615)
   if (isToday) {
-    cellBorder = '2px solid var(--coraline-yellow)';
-    cellShadow = '0 0 12px rgba(216, 198, 21, 0.55), inset 0 0 6px rgba(216, 198, 21, 0.2)';
+    cellBorder = '2px solid #D8C615';
+    cellShadow = '0 0 14px rgba(216, 198, 21, 0.62), inset 0 0 6px rgba(216, 198, 21, 0.25)';
     if (!dietState && (!workoutState || calendarMode !== 'workout')) {
-      cellBg = 'rgba(26, 69, 110, 0.4)';
+      cellBg = 'rgba(13, 44, 73, 0.88)';
     }
   }
 
@@ -142,7 +142,7 @@ const DayCell = React.memo(function DayCell({
         backgroundColor: cellBg,
         border: cellBorder,
         boxShadow: cellShadow,
-        color: isToday ? 'var(--coraline-yellow)' : 'var(--coraline-parchment)',
+        color: isToday ? '#D8C615' : '#DDCAB7',
         fontFamily: 'var(--font-gothic)',
         fontSize: '14px',
         fontWeight: isToday ? 800 : 600,
@@ -329,15 +329,22 @@ const CalendarGrid = React.memo(function CalendarGrid({
       style={{ 
         width: '100%',
         borderRadius: '24px',
-        background: 'linear-gradient(180deg, rgba(5, 16, 28, 0.98) 0%, rgba(3, 10, 19, 0.99) 65%, rgba(2, 6, 12, 1) 100%)',
-        border: '1px solid rgba(107, 142, 85, 0.28)',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(154, 185, 123, 0.15)',
+        background: calendarMode === 'workout'
+          ? 'linear-gradient(180deg, rgba(5, 16, 28, 0.98) 0%, rgba(3, 10, 19, 0.99) 65%, rgba(2, 6, 12, 1) 100%)'
+          : 'linear-gradient(180deg, rgba(13, 44, 73, 0.95) 0%, rgba(8, 26, 44, 0.98) 55%, rgba(4, 14, 25, 1) 100%)',
+        border: calendarMode === 'workout'
+          ? '1px solid rgba(141, 109, 82, 0.35)'
+          : '1.5px solid rgba(199, 164, 14, 0.45)',
+        boxShadow: calendarMode === 'workout'
+          ? '0 16px 40px rgba(0, 0, 0, 0.92)'
+          : '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1.5px 0 0 rgba(216, 198, 21, 0.38), inset 0 0 24px rgba(13, 44, 73, 0.65)',
         padding: '16px 12px 14px 12px', 
         marginBottom: '16px',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
-        touchAction: 'pan-y'
+        touchAction: 'pan-y',
+        transition: 'border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease'
       }}
     >
       {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE */}
@@ -424,7 +431,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         height: '180px',
         background: calendarMode === 'workout'
           ? 'radial-gradient(circle, rgba(141, 109, 82, 0.18) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)'
-          : 'radial-gradient(circle, rgba(107, 142, 85, 0.10) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)',
+          : 'radial-gradient(circle, rgba(216, 198, 21, 0.12) 0%, rgba(13, 44, 73, 0.25) 55%, transparent 75%)',
         pointerEvents: 'none',
         zIndex: 0,
         transition: 'background 0.35s ease'
@@ -440,7 +447,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         marginBottom: '12px',
         padding: '0 4px'
       }}>
-        {/* Freccia Sinistra (Mese Precedente) - Bianca */}
+        {/* Freccia Sinistra (Mese Precedente) - Palette Coraline */}
         <button
           onClick={() => {
             triggerHapticFeedback('swipe');
@@ -451,23 +458,25 @@ const CalendarGrid = React.memo(function CalendarGrid({
             width: '36px',
             height: '36px',
             borderRadius: '12px',
-            backgroundColor: 'rgba(6, 20, 34, 0.75)',
-            border: '1px solid rgba(107, 142, 85, 0.32)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(154, 185, 123, 0.16)',
-            color: '#ffffff',
+            backgroundColor: 'rgba(13, 44, 73, 0.85)',
+            border: calendarMode === 'workout' 
+              ? '1px solid rgba(141, 109, 82, 0.35)' 
+              : '1px solid rgba(199, 164, 14, 0.38)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(216, 198, 21, 0.22)',
+            color: '#DDCAB7',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '13px',
             touchAction: 'pan-y',
-            transition: 'transform 0.1s ease'
+            transition: 'transform 0.1s ease, border-color 0.35s ease'
           }}
         >
           ◀
         </button>
 
-        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Verde Coraline) - Cliccabile per tornare al mese corrente */}
+        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Giallo Coraline #D8C615) - Cliccabile per tornare al mese corrente */}
         <h2
           role="button"
           tabIndex={0}
@@ -482,24 +491,26 @@ const CalendarGrid = React.memo(function CalendarGrid({
           style={{
             fontFamily: 'var(--font-coraline)',
             fontSize: '22px',
-            color: '#8be574',
+            color: calendarMode === 'workout' ? 'rgb(141, 109, 82)' : '#D8C615',
             textAlign: 'center',
             margin: 0,
             letterSpacing: '0.8px',
-            textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(139, 229, 116, 0.45)',
+            textShadow: calendarMode === 'workout'
+              ? '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(141, 109, 82, 0.45)'
+              : '0 2px 8px rgba(0, 0, 0, 0.95), 0 0 14px rgba(216, 198, 21, 0.52)',
             lineHeight: 1.15,
             cursor: 'pointer',
             touchAction: 'manipulation',
             userSelect: 'none',
             padding: '4px 10px',
             borderRadius: '10px',
-            transition: 'transform 0.15s ease, opacity 0.15s ease'
+            transition: 'transform 0.15s ease, color 0.35s ease, text-shadow 0.35s ease'
           }}
         >
           {MONTHS_IT[displayMonth]}
         </h2>
 
-        {/* Freccia Destra (Mese Successivo) - Bianca */}
+        {/* Freccia Destra (Mese Successivo) - Palette Coraline */}
         <button
           onClick={() => {
             triggerHapticFeedback('swipe');
@@ -510,24 +521,26 @@ const CalendarGrid = React.memo(function CalendarGrid({
             width: '36px',
             height: '36px',
             borderRadius: '12px',
-            backgroundColor: 'rgba(6, 20, 34, 0.75)',
-            border: '1px solid rgba(107, 142, 85, 0.32)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(154, 185, 123, 0.16)',
-            color: '#ffffff',
+            backgroundColor: 'rgba(13, 44, 73, 0.85)',
+            border: calendarMode === 'workout' 
+              ? '1px solid rgba(141, 109, 82, 0.35)' 
+              : '1px solid rgba(199, 164, 14, 0.38)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(216, 198, 21, 0.22)',
+            color: '#DDCAB7',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '13px',
             touchAction: 'pan-y',
-            transition: 'transform 0.1s ease'
+            transition: 'transform 0.1s ease, border-color 0.35s ease'
           }}
         >
           ▶
         </button>
       </div>
 
-      {/* Intestazione Giorni della Settimana (LUN -> DOM) - Tutti uniformi in pergamena */}
+      {/* Intestazione Giorni della Settimana (LUN -> DOM) - Tutti in pergamena Coraline #DDCAB7 */}
       <div style={{
         position: 'relative',
         zIndex: 1,
@@ -541,8 +554,8 @@ const CalendarGrid = React.memo(function CalendarGrid({
           <div 
             key={dayName} 
             style={{ 
-              color: 'var(--coraline-parchment)',
-              opacity: 0.75,
+              color: '#DDCAB7',
+              opacity: 0.85,
               fontSize: '11px',
               fontFamily: 'var(--font-gothic)',
               fontWeight: 700,
@@ -604,18 +617,18 @@ const CalendarGrid = React.memo(function CalendarGrid({
         ))}
       </div>
 
-      {/* SLIDER / SEGMENTED CONTROL COMPATTO CON AURA BIANCA SPETTRALE DELICATA: DIETA / ALL. */}
+      {/* SLIDER / SEGMENTED CONTROL IN PALETTE CORALINE: DIETA / ALL. */}
       <div
         style={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: '130px',
+          maxWidth: '136px',
           margin: '10px auto 2px auto',
           padding: '2px',
-          backgroundColor: 'rgba(4, 14, 25, 0.85)',
+          backgroundColor: 'rgba(6, 20, 34, 0.94)',
           borderRadius: '12px',
-          border: '1px solid rgba(220, 240, 255, 0.14)',
-          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.65)',
+          border: '1px solid rgba(120, 99, 67, 0.35)',
+          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4)',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: '3px',
@@ -634,17 +647,17 @@ const CalendarGrid = React.memo(function CalendarGrid({
             padding: '4px 6px',
             borderRadius: '9px',
             border: calendarMode === 'diet'
-              ? '1px solid rgba(255, 255, 255, 0.38)'
+              ? '1px solid #D8C615'
               : '1px solid transparent',
             background: calendarMode === 'diet'
-              ? 'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(220, 235, 245, 0.05) 60%, rgba(6, 20, 34, 0.4) 100%)'
+              ? 'radial-gradient(ellipse at center, rgba(216, 198, 21, 0.25) 0%, rgba(13, 44, 73, 0.8) 100%)'
               : 'transparent',
             boxShadow: calendarMode === 'diet'
-              ? '0 0 6px rgba(255, 255, 255, 0.22), inset 0 0 4px rgba(225, 240, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5)'
+              ? '0 0 8px rgba(216, 198, 21, 0.45), inset 0 0 5px rgba(216, 198, 21, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5)'
               : 'none',
-            color: calendarMode === 'diet' ? '#e6edf3' : 'var(--coraline-parchment)',
-            opacity: calendarMode === 'diet' ? 0.95 : 0.5,
-            textShadow: calendarMode === 'diet' ? '0 0 5px rgba(255, 255, 255, 0.4)' : 'none',
+            color: calendarMode === 'diet' ? '#D8C615' : '#DDCAB7',
+            opacity: calendarMode === 'diet' ? 1 : 0.55,
+            textShadow: calendarMode === 'diet' ? '0 0 6px rgba(216, 198, 21, 0.5)' : 'none',
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
             fontWeight: 700,
@@ -671,17 +684,17 @@ const CalendarGrid = React.memo(function CalendarGrid({
             padding: '4px 6px',
             borderRadius: '9px',
             border: calendarMode === 'workout'
-              ? '1px solid rgba(255, 255, 255, 0.38)'
+              ? '1px solid rgba(141, 109, 82, 0.65)'
               : '1px solid transparent',
             background: calendarMode === 'workout'
-              ? 'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(220, 235, 245, 0.05) 60%, rgba(6, 20, 34, 0.4) 100%)'
+              ? 'radial-gradient(ellipse at center, rgba(141, 109, 82, 0.25) 0%, rgba(13, 44, 73, 0.75) 100%)'
               : 'transparent',
             boxShadow: calendarMode === 'workout'
-              ? '0 0 6px rgba(255, 255, 255, 0.22), inset 0 0 4px rgba(225, 240, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5)'
+              ? '0 0 8px rgba(141, 109, 82, 0.38), inset 0 0 5px rgba(141, 109, 82, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5)'
               : 'none',
-            color: calendarMode === 'workout' ? '#e6edf3' : 'var(--coraline-parchment)',
-            opacity: calendarMode === 'workout' ? 0.95 : 0.5,
-            textShadow: calendarMode === 'workout' ? '0 0 5px rgba(255, 255, 255, 0.4)' : 'none',
+            color: calendarMode === 'workout' ? 'rgb(215, 185, 155)' : '#DDCAB7',
+            opacity: calendarMode === 'workout' ? 1 : 0.55,
+            textShadow: calendarMode === 'workout' ? '0 0 5px rgba(141, 109, 82, 0.4)' : 'none',
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
             fontWeight: 700,
