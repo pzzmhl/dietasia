@@ -6,7 +6,7 @@
  */
 
 const STORAGE_KEY = 'coraline_bg_music_enabled';
-const AUDIO_SRC = '/audio/coraline-exploration.mp3';
+const AUDIO_SRC = '/audio/coraline-exploration.m4a';
 const TARGET_VOLUME = 0.066; // Volume abbassato del 70% per un sottofondo sussurrato e discreto
 const FADE_STEP_MS = 50;
 const FADE_DURATION_MS = 2400;

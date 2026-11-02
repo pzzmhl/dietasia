@@ -1,18 +1,20 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
 import { App as CapApp } from '@capacitor/app';
 import ButtonMoonEclipse from './components/ButtonMoonEclipse';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
-import DaySelectionModal from './components/DaySelectionModal';
-import CatModal from './components/CatModal';
-import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
-import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import FloatingJumpingMouse from './components/FloatingJumpingMouse';
 import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
-import SecretLoveModal from './components/SecretLoveModal';
-import SecretSettingsModal from './components/SecretSettingsModal';
+
+// Lazy loading dei modali secondari per azzerare il tempo di avvio e minimizzare il bundle iniziale
+const DaySelectionModal = lazy(() => import('./components/DaySelectionModal'));
+const CatModal = lazy(() => import('./components/CatModal'));
+const StoryEventModal = lazy(() => import('./components/StoryEventModal'));
+const SecretLoveModal = lazy(() => import('./components/SecretLoveModal'));
+const SecretSettingsModal = lazy(() => import('./components/SecretSettingsModal'));
+const DailyCatGreetingModal = lazy(() => import('./components/DailyCatGreetingModal'));
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
@@ -249,30 +251,45 @@ export default function App() {
       }
     } catch (e) {}
 
-    // Precaricamento immediato di tutti gli asset per rendere l'intera pagina fluida e istantanea
-    const allEssentialImages = [
-      catStandingImg,
-      keyImg,
-      vortexBg,
-      starryBg,
-      catSuccessImg,
-      catFailImg,
-      catCheatKeyImg,
-      blackButtonImg,
-      seeingStoneImg,
-      streakStarImg,
-      otherMotherImg,
-      wybieImg,
-      jumpingMouseImg,
-      catModalBg,
-      secretDoorImg,
-      catCloudPattern
-    ];
+    // Precaricamento deferito in idle per garantire un First Paint istantaneo e 60fps allo scroll
+    const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 350));
+    const idleHandle = scheduleIdle(() => {
+      const allEssentialImages = [
+        catStandingImg,
+        keyImg,
+        vortexBg,
+        starryBg,
+        catSuccessImg,
+        catFailImg,
+        catCheatKeyImg,
+        blackButtonImg,
+        seeingStoneImg,
+        streakStarImg,
+        otherMotherImg,
+        wybieImg,
+        jumpingMouseImg,
+        catModalBg,
+        secretDoorImg,
+        catCloudPattern
+      ];
 
-    allEssentialImages.forEach((src) => {
-      const img = new Image();
-      img.src = src;
+      allEssentialImages.forEach((src) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+      });
+
+      // Warm-up asincrono dei modali secondari
+      import('./components/DaySelectionModal');
+      import('./components/CatModal');
+      import('./components/SecretSettingsModal');
     });
+
+    return () => {
+      if (window.cancelIdleCallback && typeof idleHandle === 'number') {
+        window.cancelIdleCallback(idleHandle);
+      }
+    };
   }, []);
 
   // Navigazione mese memoizzata
@@ -850,57 +867,60 @@ export default function App() {
         }
       `}</style>
 
-      {/* POP-UP COMPATTO PER LA SELEZIONE ESITO DEL GIORNO */}
-      <DaySelectionModal
-        isOpen={dayModalState.isOpen}
-        dateStr={dayModalState.dateStr}
-        currentStatus={currentDayLog.dietState}
-        remainingKeys={remainingKeysForModal}
-        onSelectStatus={handleSelectStatusFromModal}
-        onClose={() => setDayModalState({ isOpen: false, dateStr: null })}
-      />
+      {/* MODALI CARICATI IN MODO ASINCRONO / ZERO OVERHEAD SULL'AVVIO */}
+      <Suspense fallback={null}>
+        {/* POP-UP COMPATTO PER LA SELEZIONE ESITO DEL GIORNO */}
+        <DaySelectionModal
+          isOpen={dayModalState.isOpen}
+          dateStr={dayModalState.dateStr}
+          currentStatus={currentDayLog.dietState}
+          remainingKeys={remainingKeysForModal}
+          onSelectStatus={handleSelectStatusFromModal}
+          onClose={() => setDayModalState({ isOpen: false, dateStr: null })}
+        />
 
-      {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}
-      <CatModal
-        isOpen={catModalState.isOpen}
-        quote={catModalState.quote}
-        context={catModalState.context}
-        onClose={() => setCatModalState((prev) => ({ ...prev, isOpen: false }))}
-      />
+        {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}
+        <CatModal
+          isOpen={catModalState.isOpen}
+          quote={catModalState.quote}
+          context={catModalState.context}
+          onClose={() => setCatModalState((prev) => ({ ...prev, isOpen: false }))}
+        />
 
-      {/* OVERLAY EVENTI SPECIALI DI TRAMA (ALTRA MADRE CHIAVI FINITE & WYBIE STREAK) */}
-      <StoryEventModal
-        isOpen={storyModalState.isOpen}
-        type={storyModalState.type}
-        streak={storyModalState.streak}
-        onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
-      />
+        {/* OVERLAY EVENTI SPECIALI DI TRAMA (ALTRA MADRE CHIAVI FINITE & WYBIE STREAK) */}
+        <StoryEventModal
+          isOpen={storyModalState.isOpen}
+          type={storyModalState.type}
+          streak={storyModalState.streak}
+          onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
+        />
 
-      {/* RIQUADRO SPECIALE "TI AMO" PER ASIA (EASTER EGG ATTIVATO DALLA PORTICINA) */}
-      <SecretLoveModal
-        isOpen={isLoveModalOpen}
-        onClose={() => setIsLoveModalOpen(false)}
-      />
+        {/* RIQUADRO SPECIALE "TI AMO" PER ASIA (EASTER EGG ATTIVATO DALLA PORTICINA) */}
+        <SecretLoveModal
+          isOpen={isLoveModalOpen}
+          onClose={() => setIsLoveModalOpen(false)}
+        />
 
-      {/* MODAL IMPOSTAZIONI COMPLETO APERTO DAL PROFILO IN ALTO A DESTRA */}
-      <SecretSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        initialTab={settingsTab}
-        keysPerMonth={keysPerMonth}
-        onChangeKeysPerMonth={handleChangeKeysPerMonth}
-        onRestoreSuccess={handleRestoreSuccess}
-        onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
-        customAvatar={customAvatar}
-        onAvatarChange={handleAvatarChange}
-      />
+        {/* MODAL IMPOSTAZIONI COMPLETO APERTO DAL PROFILO IN ALTO A DESTRA */}
+        <SecretSettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          initialTab={settingsTab}
+          keysPerMonth={keysPerMonth}
+          onChangeKeysPerMonth={handleChangeKeysPerMonth}
+          onRestoreSuccess={handleRestoreSuccess}
+          onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
+          customAvatar={customAvatar}
+          onAvatarChange={handleAvatarChange}
+        />
 
-      {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}
-      <DailyCatGreetingModal
-        isOpen={isDailyGreetingOpen}
-        onClose={handleDismissDailyGreeting}
-        dateStr={todayStr}
-      />
+        {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}
+        <DailyCatGreetingModal
+          isOpen={isDailyGreetingOpen}
+          onClose={handleDismissDailyGreeting}
+          dateStr={todayStr}
+        />
+      </Suspense>
       </div>
     </>
   );
