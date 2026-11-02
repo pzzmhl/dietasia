@@ -110,16 +110,6 @@ button:active:not(:disabled),
   transition: transform 0.08s cubic-bezier(0.2, 0, 0, 1), filter 0.08s ease;
 }
 
-/* Rispetto accessibilità Android per riduzione animazioni */
-@media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
 /* Atmosfera notturna con la palette Coraline */
 body {
   background-color: var(--bg-deep);
@@ -175,14 +165,51 @@ body {
   z-index: 0;
 }
 
-/* Preferenze Utente: disattiva trama vortice o fluttuazione continua se scelto nelle impostazioni */
+/* Preferenze Utente: disattiva trama vortice se scelto nelle impostazioni */
 body.no-vortex-bg .vortex-card::after {
   display: none !important;
 }
 
-body.no-floating-fx img,
-body.no-floating-fx div {
-  animation-play-state: paused !important;
+/* =========================================================
+   EFFETTO MODERNO DI GENERAZIONE ELEMENTI ALLO SCORRIMENTO
+   (Scroll-Driven Materialization & Staggered Reveal)
+   ========================================================= */
+.scroll-reveal-container {
+  opacity: 0;
+  transform: translate3d(0, 30px, 0) scale(0.975);
+  filter: blur(2.5px);
+  transition: 
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.5s ease-out;
+  will-change: opacity, transform, filter;
+  position: relative;
+}
+
+.scroll-reveal-container.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+}
+
+/* Bagliore etereo che si accende dolcemente quando l'elemento viene generato */
+.scroll-reveal-container.is-revealed::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  box-shadow: 0 0 20px rgba(112, 45, 160, 0.25), inset 0 0 14px rgba(216, 198, 21, 0.12);
+  pointer-events: none;
+  animation: revealSpawnGlow 1.2s ease-out forwards;
+}
+
+@keyframes revealSpawnGlow {
+  0% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Micro-animazioni Stop-Motion organiche per gli elementi tattili */

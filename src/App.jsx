@@ -13,6 +13,7 @@ import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
 import SecretLoveModal from './components/SecretLoveModal';
 import SecretSettingsModal from './components/SecretSettingsModal';
+import ScrollReveal from './components/ScrollReveal';
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
@@ -555,51 +556,69 @@ export default function App() {
         </div>
 
         {/* 1. PRIMA LINEA DI DEMARCAZIONE IN STILE CORALINE: MANO DELL'ALTRA MADRE */}
-        <CoralineDivider variant="hand" />
+        <ScrollReveal delay={40}>
+          <CoralineDivider variant="hand" />
+        </ScrollReveal>
 
         {/* 2. ZONA NOTIFICHE: AVVISO TOPI SALTATORI & NOTIFICA ALLENAMENTO BOBINSKY */}
-        <JumpingMouseNotice
-          unmarkedDays={unmarkedDays}
-          onSelectDay={handleDayClick}
-        />
+        {unmarkedDays && unmarkedDays.length > 0 && (
+          <ScrollReveal delay={60}>
+            <JumpingMouseNotice
+              unmarkedDays={unmarkedDays}
+              onSelectDay={handleDayClick}
+            />
+          </ScrollReveal>
+        )}
 
-        <BobinskyWorkoutCard 
-          todayStr={todayStr} 
-          workoutLogs={workoutLogs}
-          onSaveWorkout={handleSaveWorkout}
-        />
+        <ScrollReveal delay={80}>
+          <BobinskyWorkoutCard 
+            todayStr={todayStr} 
+            workoutLogs={workoutLogs}
+            onSaveWorkout={handleSaveWorkout}
+          />
+        </ScrollReveal>
 
         {/* 3. IL CALENDARIO: GRIGLIA MENSILE */}
-        <CalendarGrid
-          selectedDate={selectedDate}
-          onSelectDate={handleDayClick}
-          allLogs={allLogs}
-          workoutLogs={workoutLogs}
-          onSaveWorkout={handleSaveWorkout}
-          displayYear={displayYear}
-          displayMonth={displayMonth}
-          onPrevMonth={handlePrevMonth}
-          onNextMonth={handleNextMonth}
-          onResetToCurrentMonth={handleResetToCurrentMonth}
-        />
+        <ScrollReveal delay={100}>
+          <CalendarGrid
+            selectedDate={selectedDate}
+            onSelectDate={handleDayClick}
+            allLogs={allLogs}
+            workoutLogs={workoutLogs}
+            onSaveWorkout={handleSaveWorkout}
+            displayYear={displayYear}
+            displayMonth={displayMonth}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+            onResetToCurrentMonth={handleResetToCurrentMonth}
+          />
+        </ScrollReveal>
 
         {/* SECONDA LINEA DI DEMARCAZIONE IN STILE CORALINE: SCARAFAGGIO-BOTTONE VIOLA */}
-        <CoralineDivider variant="beetle" />
+        <ScrollReveal delay={40}>
+          <CoralineDivider variant="beetle" />
+        </ScrollReveal>
 
         {/* 4. LA DASHBOARD: CHIAVI GIGANTI E STATISTICHE */}
-        <MonthStatsBar
-          displayYear={displayYear}
-          displayMonth={displayMonth}
-          allLogs={allLogs}
-          workoutLogs={workoutLogs}
-          keysPerMonth={keysPerMonth}
-        />
+        <ScrollReveal delay={80}>
+          <MonthStatsBar
+            displayYear={displayYear}
+            displayMonth={displayMonth}
+            allLogs={allLogs}
+            workoutLogs={workoutLogs}
+            keysPerMonth={keysPerMonth}
+          />
+        </ScrollReveal>
 
         {/* 3. TERZA LINEA DI DEMARCAZIONE IN STILE CORALINE: INSETTO-ARMADIO ARANCIO */}
-        <CoralineDivider variant="wardrobe" />
+        <ScrollReveal delay={40}>
+          <CoralineDivider variant="wardrobe" />
+        </ScrollReveal>
 
         {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
-        <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
+        <ScrollReveal delay={60}>
+          <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
+        </ScrollReveal>
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA */}
       <button
@@ -622,7 +641,7 @@ export default function App() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          animation: 'catCornerBreathe 3s ease-in-out infinite',
+          animation: 'catCornerFloat 3.2s ease-in-out infinite',
           willChange: 'transform',
           transform: 'translateZ(0)',
           touchAction: 'manipulation'
@@ -644,12 +663,12 @@ export default function App() {
       </button>
 
       <style>{`
-        @keyframes catCornerBreathe {
+        @keyframes catCornerFloat {
           0%, 100% {
             transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translate3d(0, -6px, 0) rotate(1.2deg);
+            transform: translate3d(0, -9px, 0) rotate(1.8deg);
           }
         }
 

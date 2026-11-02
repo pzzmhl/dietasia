@@ -269,40 +269,28 @@ const JumpingMouseNotice = React.memo(function JumpingMouseNotice({
         }
 
         .jumping-mouse-animated {
-          animation: mouseTrumpetBlast 1.4s infinite cubic-bezier(0.25, 1, 0.5, 1);
+          animation: mouseTrumpetBlast 1.5s infinite ease-in-out;
           transform-origin: bottom center;
         }
 
         @keyframes mouseTrumpetBlast {
-          0% {
+          0%, 100% {
             transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
           }
-          8% {
-            transform: translate3d(0, 2px, 0) rotate(-2deg) scale(0.97, 1.03);
+          15% {
+            transform: translate3d(0, 2px, 0) rotate(-3deg) scale(0.96, 1.04);
           }
-          16% {
-            transform: translate3d(0, -4px, 0) rotate(5deg) scale(1.07, 0.95);
+          35% {
+            transform: translate3d(0, -9px, 0) rotate(6deg) scale(1.08, 0.94);
           }
-          22% {
-            transform: translate3d(0, -2px, 0) rotate(-4deg) scale(1.03, 0.98);
+          50% {
+            transform: translate3d(0, -12px, 0) rotate(-3deg) scale(1.05, 0.96);
           }
-          28% {
-            transform: translate3d(0, -4px, 0) rotate(4deg) scale(1.06, 0.95);
+          70% {
+            transform: translate3d(0, -4px, 0) rotate(4deg) scale(1.02);
           }
-          34% {
-            transform: translateY(-2px) rotate(-3deg) scale(1.02, 0.98);
-          }
-          40% {
-            transform: translateY(-4px) rotate(3deg) scale(1.05, 0.96);
-          }
-          46% {
-            transform: translateY(-1px) rotate(-2deg) scale(1.02, 0.99);
-          }
-          54% {
-            transform: translateY(0) rotate(0deg) scale(1);
-          }
-          100% {
-            transform: translateY(0) rotate(0deg) scale(1);
+          85% {
+            transform: translate3d(0, 0, 0) rotate(0deg) scale(0.98, 1.02);
           }
         }
       `}</style>

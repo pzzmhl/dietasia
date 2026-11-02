@@ -314,7 +314,7 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
             transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translate3d(0, -3px, 0) rotate(1.2deg);
+            transform: translate3d(0, -8px, 0) rotate(2.2deg);
           }
         }
       `}</style>

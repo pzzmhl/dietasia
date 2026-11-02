@@ -271,7 +271,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               height: '26px',
               objectFit: 'contain',
               filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 6px rgba(168, 85, 247, 0.45))',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              animation: 'starFloat 3.2s ease-in-out infinite'
             }}
           />
           <span
@@ -495,19 +496,19 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           alignItems: 'center',
           justifyContent: 'center',
           margin: '2px 0 16px 0',
-          animation: 'moonFloatingBreathe 3.8s ease-in-out infinite',
+          animation: 'moonFloatingBreathe 3.6s ease-in-out infinite',
           willChange: 'transform'
         }}>
           {/* Alone verde pulsante */}
           <div style={{
             position: 'absolute',
-            inset: '-10px',
+            inset: '-12px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(139, 229, 116, 0.25) 0%, rgba(35, 65, 25, 0.1) 60%, transparent 75%)',
+            background: 'radial-gradient(circle, rgba(139, 229, 116, 0.28) 0%, rgba(35, 65, 25, 0.12) 60%, transparent 75%)',
             filter: isGlowActive
-              ? 'drop-shadow(0 0 25px rgba(139, 229, 116, 0.9))'
-              : 'drop-shadow(0 0 14px rgba(107, 142, 85, 0.35))',
-            transition: 'filter 600ms ease',
+              ? 'drop-shadow(0 0 28px rgba(139, 229, 116, 0.95))'
+              : 'drop-shadow(0 0 16px rgba(107, 142, 85, 0.45))',
+            animation: 'moonHaloPulse 3.6s ease-in-out infinite',
             pointerEvents: 'none'
           }} />
 
@@ -687,7 +688,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                         width: '18px',
                         height: '18px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 0 4px rgba(139, 229, 116, 0.7))'
+                        filter: 'drop-shadow(0 0 4px rgba(139, 229, 116, 0.7))',
+                        animation: 'stoneFloat 3.2s ease-in-out infinite'
                       }}
                     />
                   )}
@@ -701,7 +703,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                         width: '17px',
                         height: '17px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9))'
+                        filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9))',
+                        animation: 'buttonFloat 3s ease-in-out infinite'
                       }}
                     />
                   )}
@@ -715,7 +718,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                         width: '18px',
                         height: '18px',
                         objectFit: 'contain',
-                        filter: 'drop-shadow(0 0 4px rgba(255, 213, 79, 0.6))'
+                        filter: 'drop-shadow(0 0 4px rgba(255, 213, 79, 0.6))',
+                        animation: 'keyFloat 3.4s ease-in-out infinite'
                       }}
                     />
                   )}
@@ -1273,7 +1277,18 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             transform: translate3d(0, 0, 0) scale(1);
           }
           50% {
-            transform: translate3d(0, -6px, 0) scale(1.015);
+            transform: translate3d(0, -9px, 0) scale(1.025);
+          }
+        }
+
+        @keyframes moonHaloPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.55;
+          }
+          50% {
+            transform: scale(1.12);
+            opacity: 0.95;
           }
         }
 
@@ -1282,7 +1297,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translate3d(0, -5px, 0) rotate(2deg);
+            transform: translate3d(0, -6px, 0) rotate(2.4deg);
           }
         }
 
@@ -1291,7 +1306,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translate3d(0, -5px, 0) rotate(-2deg);
+            transform: translate3d(0, -6px, 0) rotate(-2.4deg);
           }
         }
 
@@ -1300,7 +1315,16 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             transform: translate3d(0, 0, 0) rotate(0deg);
           }
           50% {
-            transform: translate3d(0, -4.5px, 0) rotate(1.8deg);
+            transform: translate3d(0, -5px, 0) rotate(2deg);
+          }
+        }
+
+        @keyframes keyFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(0, -6px, 0) rotate(-2deg);
           }
         }
       `}</style>

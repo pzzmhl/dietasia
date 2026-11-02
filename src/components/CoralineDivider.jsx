@@ -246,7 +246,7 @@ const CoralineDivider = React.memo(function CoralineDivider({
                 ? 'wardrobeGuardingPulse 2.4s ease-in-out infinite' 
                 : isBeetleFadingIn 
                 ? 'beetleFadeInReappear 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards' 
-                : 'none'
+                : 'dividerIconHoverFloat 3.4s ease-in-out infinite'
             }}
           />
         </button>
@@ -411,6 +411,16 @@ const CoralineDivider = React.memo(function CoralineDivider({
           }
           50% {
             transform: rotate(1.2deg);
+          }
+        }
+
+        /* 4. FLUTTUAZIONE ORGANICA A RIPOSO PER LE ICONE DEL DIVIDER */
+        @keyframes dividerIconHoverFloat {
+          0%, 100% {
+            transform: translate3d(0, 0, 0);
+          }
+          50% {
+            transform: translate3d(0, -4px, 0);
           }
         }
       `}</style>

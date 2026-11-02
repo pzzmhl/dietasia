@@ -229,11 +229,10 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
             width: '120px',
             height: '120px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(74, 222, 128, 0.35) 0%, rgba(13, 73, 50, 0.15) 50%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(74, 222, 128, 0.45) 0%, rgba(13, 73, 50, 0.22) 50%, transparent 70%)',
             filter: 'blur(14px)',
             pointerEvents: 'none',
-            opacity: isRevealed ? 1 : 0.4,
-            transition: 'opacity 0.4s ease'
+            animation: 'secretDoorAuraPulse 3s ease-in-out infinite'
           }}
         />
 
@@ -248,12 +247,9 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
             height: 'auto',
             objectFit: 'contain',
             borderRadius: '4px',
-            filter: isRevealed
-              ? 'drop-shadow(0 0 16px rgba(74, 222, 128, 0.75)) drop-shadow(0 10px 22px rgba(0, 0, 0, 0.95))'
-              : 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.4)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85))',
-            transition: 'filter 0.35s ease, transform 0.35s ease',
             pointerEvents: 'none',
-            animation: isRevealed ? 'secretDoorGlowPulse 3s ease-in-out infinite' : 'none'
+            animation: 'secretDoorGlowPulse 3s ease-in-out infinite',
+            willChange: 'transform, filter'
           }}
         />
       </button>
@@ -335,10 +331,23 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
       <style>{`
         @keyframes secretDoorGlowPulse {
           0%, 100% {
-            filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.65)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.9));
+            transform: scale(1) translateY(0);
+            filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.65)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
           }
           50% {
-            filter: drop-shadow(0 0 22px rgba(74, 222, 128, 0.9)) drop-shadow(0 10px 26px rgba(0, 0, 0, 0.95));
+            transform: scale(1.055) translateY(-6px);
+            filter: drop-shadow(0 0 24px rgba(74, 222, 128, 0.95)) drop-shadow(0 14px 26px rgba(0, 0, 0, 0.95));
+          }
+        }
+
+        @keyframes secretDoorAuraPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.55;
+          }
+          50% {
+            transform: scale(1.18);
+            opacity: 0.92;
           }
         }
 
