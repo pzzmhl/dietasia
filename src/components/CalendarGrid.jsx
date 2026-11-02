@@ -20,10 +20,12 @@ const MONTHS_IT = [
 
 /**
  * Cella vuota segnaposto per i giorni mancanti a inizio o fine mese.
- * Visualizza un quadratino discreto in spago vintage (#786343) e pergamena (#DDCAB7)
- * con trattino centrale (–) per mantenere la griglia del calendario geometricamente perfetta.
+ * Visualizza un quadratino discreto stilizzato a tema:
+ * - Dieta: spago vintage (#786343) e pergamena (#DDCAB7)
+ * - Palestra: legno scuro (#190A06), granata (#53150E) e bronzo (#8D6D52)
  */
-const EmptyCell = React.memo(function EmptyCell() {
+const EmptyCell = React.memo(function EmptyCell({ calendarMode = 'diet' }) {
+  const isWorkout = calendarMode === 'workout';
   return (
     <div
       aria-hidden="true"
@@ -33,9 +35,9 @@ const EmptyCell = React.memo(function EmptyCell() {
         minWidth: 0,
         boxSizing: 'border-box',
         borderRadius: '12px',
-        backgroundColor: 'rgba(13, 44, 73, 0.22)',
-        border: '1px dashed rgba(120, 99, 67, 0.32)',
-        boxShadow: 'inset 0 1px 0 0 rgba(221, 202, 183, 0.04)',
+        backgroundColor: isWorkout ? 'rgba(26, 12, 10, 0.32)' : 'rgba(13, 44, 73, 0.22)',
+        border: isWorkout ? '1px dashed rgba(141, 109, 82, 0.28)' : '1px dashed rgba(120, 99, 67, 0.32)',
+        boxShadow: isWorkout ? 'inset 0 1px 0 0 rgba(197, 155, 109, 0.05)' : 'inset 0 1px 0 0 rgba(221, 202, 183, 0.04)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -48,7 +50,7 @@ const EmptyCell = React.memo(function EmptyCell() {
           fontFamily: 'var(--font-gothic)',
           fontSize: '13px',
           fontWeight: 600,
-          color: 'rgba(221, 202, 183, 0.30)',
+          color: isWorkout ? 'rgba(212, 210, 187, 0.22)' : 'rgba(221, 202, 183, 0.30)',
           lineHeight: 1
         }}
       >
@@ -60,7 +62,9 @@ const EmptyCell = React.memo(function EmptyCell() {
 
 /**
  * Singola Cella del Calendario memoizzata per azzerare re-render dell'intero mese.
- * Palette Coraline: #0D2C49 (Navy), #DDCAB7 (Pergamena), #786343 (Spago), #C7A40E (Oro), #D8C615 (Giallo)
+ * Temi bivalenti:
+ * - Modalità Dieta: Palette Coraline (#0D2C49, #DDCAB7, #786343, #C7A40E, #D8C615)
+ * - Modalità Palestra: Palette Bobinsky (#53150E Granata Circo, #8D6D52 Bronzo, #C59B6D Ottone, #D4D2BB Pergamena, #190A06 Legno)
  */
 const DayCell = React.memo(function DayCell({
   day,
@@ -72,25 +76,29 @@ const DayCell = React.memo(function DayCell({
   onSelectDate,
   onOpenWorkoutModal
 }) {
-  // Stili e colori sulla palette ufficiale di Coraline
-  let cellBg = 'rgba(13, 44, 73, 0.58)';
-  let cellBorder = '1px solid rgba(120, 99, 67, 0.35)';
-  let cellShadow = 'inset 0 1px 0 rgba(221, 202, 183, 0.08), 0 2px 6px rgba(0, 0, 0, 0.42)';
+  const isWorkout = calendarMode === 'workout';
 
-  if (calendarMode === 'workout') {
+  let cellBg = isWorkout ? 'rgba(32, 14, 11, 0.68)' : 'rgba(13, 44, 73, 0.58)';
+  let cellBorder = isWorkout ? '1px solid rgba(141, 109, 82, 0.35)' : '1px solid rgba(120, 99, 67, 0.35)';
+  let cellShadow = isWorkout 
+    ? 'inset 0 1px 0 rgba(212, 210, 187, 0.08), 0 2px 6px rgba(0, 0, 0, 0.5)'
+    : 'inset 0 1px 0 rgba(221, 202, 183, 0.08), 0 2px 6px rgba(0, 0, 0, 0.42)';
+
+  if (isWorkout) {
     if (workoutState === 'yes') {
-      cellBg = 'rgba(16, 80, 45, 0.45)';
-      cellBorder = '1.5px solid rgba(139, 229, 116, 0.6)';
-      cellShadow = 'inset 0 1px 0 rgba(139, 229, 116, 0.3), 0 2px 8px rgba(0, 0, 0, 0.45)';
+      // Allenamento completato: Vittoria circense in ottone dorato lucido e bronzo
+      cellBg = 'rgba(48, 28, 16, 0.88)';
+      cellBorder = '1.5px solid rgb(197, 155, 109)';
+      cellShadow = 'inset 0 1px 0 rgba(212, 210, 187, 0.35), 0 0 12px rgba(141, 109, 82, 0.55), 0 2px 8px rgba(0, 0, 0, 0.65)';
     } else if (workoutState === 'no') {
-      // Quando l'allenamento non è stato fatto: sbiadisce molto con bordo tratteggiato
-      cellBg = 'rgba(13, 44, 73, 0.3)';
-      cellBorder = '1px dashed rgba(239, 68, 68, 0.35)';
+      // Nessun allenamento: Sfondo legno scuro circense con bordo tratteggiato sobrio (senza X rossa aggressiva)
+      cellBg = 'rgba(20, 8, 6, 0.45)';
+      cellBorder = '1px dashed rgba(141, 109, 82, 0.32)';
       cellShadow = 'none';
     } else {
-      cellBg = 'rgba(13, 44, 73, 0.58)';
-      cellBorder = '1px solid rgba(120, 99, 67, 0.35)';
-      cellShadow = 'inset 0 1px 0 rgba(221, 202, 183, 0.08), 0 2px 6px rgba(0, 0, 0, 0.42)';
+      cellBg = 'rgba(32, 14, 11, 0.68)';
+      cellBorder = '1px solid rgba(141, 109, 82, 0.35)';
+      cellShadow = 'inset 0 1px 0 rgba(212, 210, 187, 0.08), 0 2px 6px rgba(0, 0, 0, 0.5)';
     }
   } else {
     if (dietState === 'success') {
@@ -108,12 +116,22 @@ const DayCell = React.memo(function DayCell({
     }
   }
 
-  // Solo il giorno odierno è evidenziato in giallo vivo Coraline (#D8C615)
+  // Giorno odierno (Oggi):
+  // - Palestra: Ottone e Bronzo del Circo rgb(197, 155, 109)
+  // - Dieta: Giallo Impermeabile Coraline #D8C615
   if (isToday) {
-    cellBorder = '2px solid #D8C615';
-    cellShadow = '0 0 14px rgba(216, 198, 21, 0.62), inset 0 0 6px rgba(216, 198, 21, 0.25)';
-    if (!dietState && (!workoutState || calendarMode !== 'workout')) {
-      cellBg = 'rgba(13, 44, 73, 0.88)';
+    if (isWorkout) {
+      cellBorder = '2px solid rgb(197, 155, 109)';
+      cellShadow = '0 0 14px rgba(197, 155, 109, 0.65), inset 0 0 6px rgba(141, 109, 82, 0.35)';
+      if (!workoutState) {
+        cellBg = 'rgba(48, 20, 14, 0.88)';
+      }
+    } else {
+      cellBorder = '2px solid #D8C615';
+      cellShadow = '0 0 14px rgba(216, 198, 21, 0.62), inset 0 0 6px rgba(216, 198, 21, 0.25)';
+      if (!dietState) {
+        cellBg = 'rgba(13, 44, 73, 0.88)';
+      }
     }
   }
 
@@ -122,12 +140,16 @@ const DayCell = React.memo(function DayCell({
 
   const handleClick = () => {
     triggerHapticFeedback('selection');
-    if (calendarMode === 'workout') {
+    if (isWorkout) {
       onOpenWorkoutModal(dateStr);
     } else {
       onSelectDate(dateStr);
     }
   };
+
+  const dayNumberColor = isToday
+    ? (isWorkout ? 'rgb(235, 195, 150)' : '#D8C615')
+    : (isWorkout ? '#D4D2BB' : '#DDCAB7');
 
   return (
     <button
@@ -142,7 +164,7 @@ const DayCell = React.memo(function DayCell({
         backgroundColor: cellBg,
         border: cellBorder,
         boxShadow: cellShadow,
-        color: isToday ? '#D8C615' : '#DDCAB7',
+        color: dayNumberColor,
         fontFamily: 'var(--font-gothic)',
         fontSize: '14px',
         fontWeight: isToday ? 800 : 600,
@@ -154,12 +176,12 @@ const DayCell = React.memo(function DayCell({
         lineHeight: 1,
         touchAction: 'pan-y',
         willChange: 'transform',
-        opacity: (calendarMode === 'workout' && workoutState === 'no') ? 0.45 : 1,
+        opacity: (isWorkout && workoutState === 'no') ? 0.45 : 1,
         transform: 'translateZ(0)',
         transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease'
       }}
     >
-      {calendarMode === 'workout' ? (
+      {isWorkout ? (
         workoutState === 'yes' ? (
           <img
             src={gearBallImg}
@@ -171,7 +193,7 @@ const DayCell = React.memo(function DayCell({
               width: '84%',
               height: '84%',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 6px rgba(139, 229, 116, 0.35))',
+              filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 8px rgba(197, 155, 109, 0.55))',
               pointerEvents: 'none',
               transform: `rotate(${organicRotation}deg)`
             }}
@@ -179,14 +201,14 @@ const DayCell = React.memo(function DayCell({
         ) : workoutState === 'no' ? (
           <span
             style={{
-              color: 'rgba(239, 68, 68, 0.85)',
+              color: 'rgba(197, 155, 109, 0.45)',
               fontFamily: 'var(--font-gothic)',
-              fontSize: '15px',
-              fontWeight: 800,
+              fontSize: '13px',
+              fontWeight: 600,
               lineHeight: 1
             }}
           >
-            ✕
+            {day}
           </span>
         ) : (
           <span>{day}</span>
@@ -330,13 +352,13 @@ const CalendarGrid = React.memo(function CalendarGrid({
         width: '100%',
         borderRadius: '24px',
         background: calendarMode === 'workout'
-          ? 'linear-gradient(180deg, rgba(5, 16, 28, 0.98) 0%, rgba(3, 10, 19, 0.99) 65%, rgba(2, 6, 12, 1) 100%)'
+          ? 'linear-gradient(180deg, rgba(38, 16, 12, 0.96) 0%, rgba(24, 10, 8, 0.98) 55%, rgba(14, 6, 5, 1) 100%)'
           : 'linear-gradient(180deg, rgba(13, 44, 73, 0.95) 0%, rgba(8, 26, 44, 0.98) 55%, rgba(4, 14, 25, 1) 100%)',
         border: calendarMode === 'workout'
-          ? '1px solid rgba(141, 109, 82, 0.35)'
+          ? '1.5px solid rgba(141, 109, 82, 0.65)'
           : '1.5px solid rgba(199, 164, 14, 0.45)',
         boxShadow: calendarMode === 'workout'
-          ? '0 16px 40px rgba(0, 0, 0, 0.92)'
+          ? '0 16px 40px rgba(0, 0, 0, 0.95), inset 0 1.5px 0 0 rgba(197, 155, 109, 0.45), inset 0 0 24px rgba(83, 21, 14, 0.55)'
           : '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1.5px 0 0 rgba(216, 198, 21, 0.38), inset 0 0 24px rgba(13, 44, 73, 0.65)',
         padding: '16px 12px 14px 12px', 
         marginBottom: '16px',
@@ -392,11 +414,11 @@ const CalendarGrid = React.memo(function CalendarGrid({
         backgroundPosition: 'center 25%',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
-        opacity: calendarMode === 'workout' ? 0.28 : 0,
-        filter: 'blur(1.4px) brightness(0.58) contrast(1.05)',
-        WebkitFilter: 'blur(1.4px) brightness(0.58) contrast(1.05)',
-        maskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.3) 90%)',
-        WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 50%, rgba(0, 0, 0, 0.3) 90%)',
+        opacity: calendarMode === 'workout' ? 0.34 : 0,
+        filter: 'blur(1px) brightness(0.70) contrast(1.12)',
+        WebkitFilter: 'blur(1px) brightness(0.70) contrast(1.12)',
+        maskImage: 'radial-gradient(circle at 50% 45%, black 55%, rgba(0, 0, 0, 0.3) 90%)',
+        WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 55%, rgba(0, 0, 0, 0.3) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0,
@@ -430,7 +452,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         width: '240px',
         height: '180px',
         background: calendarMode === 'workout'
-          ? 'radial-gradient(circle, rgba(141, 109, 82, 0.18) 0%, rgba(26, 69, 110, 0.06) 55%, transparent 75%)'
+          ? 'radial-gradient(circle, rgba(141, 109, 82, 0.24) 0%, rgba(83, 21, 14, 0.18) 50%, transparent 75%)'
           : 'radial-gradient(circle, rgba(216, 198, 21, 0.12) 0%, rgba(13, 44, 73, 0.25) 55%, transparent 75%)',
         pointerEvents: 'none',
         zIndex: 0,
@@ -447,7 +469,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         marginBottom: '12px',
         padding: '0 4px'
       }}>
-        {/* Freccia Sinistra (Mese Precedente) - Palette Coraline */}
+        {/* Freccia Sinistra (Mese Precedente) */}
         <button
           onClick={() => {
             triggerHapticFeedback('swipe');
@@ -458,25 +480,27 @@ const CalendarGrid = React.memo(function CalendarGrid({
             width: '36px',
             height: '36px',
             borderRadius: '12px',
-            backgroundColor: 'rgba(13, 44, 73, 0.85)',
+            backgroundColor: calendarMode === 'workout' ? 'rgba(38, 16, 12, 0.88)' : 'rgba(13, 44, 73, 0.85)',
             border: calendarMode === 'workout' 
-              ? '1px solid rgba(141, 109, 82, 0.35)' 
+              ? '1px solid rgba(141, 109, 82, 0.5)' 
               : '1px solid rgba(199, 164, 14, 0.38)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(216, 198, 21, 0.22)',
-            color: '#DDCAB7',
+            boxShadow: calendarMode === 'workout'
+              ? '0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(197, 155, 109, 0.25)'
+              : '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(216, 198, 21, 0.22)',
+            color: calendarMode === 'workout' ? '#D4D2BB' : '#DDCAB7',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '13px',
             touchAction: 'pan-y',
-            transition: 'transform 0.1s ease, border-color 0.35s ease'
+            transition: 'transform 0.1s ease, border-color 0.35s ease, background-color 0.35s ease'
           }}
         >
           ◀
         </button>
 
-        {/* Nome del Mese Centrato in Font Ufficiale Coraline (Giallo Coraline #D8C615) - Cliccabile per tornare al mese corrente */}
+        {/* Nome del Mese Centrato in Font Ufficiale Coraline */}
         <h2
           role="button"
           tabIndex={0}
@@ -491,12 +515,12 @@ const CalendarGrid = React.memo(function CalendarGrid({
           style={{
             fontFamily: 'var(--font-coraline)',
             fontSize: '22px',
-            color: calendarMode === 'workout' ? 'rgb(141, 109, 82)' : '#D8C615',
+            color: calendarMode === 'workout' ? 'rgb(215, 175, 130)' : '#D8C615',
             textAlign: 'center',
             margin: 0,
             letterSpacing: '0.8px',
             textShadow: calendarMode === 'workout'
-              ? '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(141, 109, 82, 0.45)'
+              ? '0 2px 8px rgba(0, 0, 0, 0.95), 0 0 14px rgba(197, 155, 109, 0.55)'
               : '0 2px 8px rgba(0, 0, 0, 0.95), 0 0 14px rgba(216, 198, 21, 0.52)',
             lineHeight: 1.15,
             cursor: 'pointer',
@@ -510,7 +534,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
           {MONTHS_IT[displayMonth]}
         </h2>
 
-        {/* Freccia Destra (Mese Successivo) - Palette Coraline */}
+        {/* Freccia Destra (Mese Successivo) */}
         <button
           onClick={() => {
             triggerHapticFeedback('swipe');
@@ -521,26 +545,28 @@ const CalendarGrid = React.memo(function CalendarGrid({
             width: '36px',
             height: '36px',
             borderRadius: '12px',
-            backgroundColor: 'rgba(13, 44, 73, 0.85)',
+            backgroundColor: calendarMode === 'workout' ? 'rgba(38, 16, 12, 0.88)' : 'rgba(13, 44, 73, 0.85)',
             border: calendarMode === 'workout' 
-              ? '1px solid rgba(141, 109, 82, 0.35)' 
+              ? '1px solid rgba(141, 109, 82, 0.5)' 
               : '1px solid rgba(199, 164, 14, 0.38)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(216, 198, 21, 0.22)',
-            color: '#DDCAB7',
+            boxShadow: calendarMode === 'workout'
+              ? '0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(197, 155, 109, 0.25)'
+              : '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(216, 198, 21, 0.22)',
+            color: calendarMode === 'workout' ? '#D4D2BB' : '#DDCAB7',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '13px',
             touchAction: 'pan-y',
-            transition: 'transform 0.1s ease, border-color 0.35s ease'
+            transition: 'transform 0.1s ease, border-color 0.35s ease, background-color 0.35s ease'
           }}
         >
           ▶
         </button>
       </div>
 
-      {/* Intestazione Giorni della Settimana (LUN -> DOM) - Tutti in pergamena Coraline #DDCAB7 */}
+      {/* Intestazione Giorni della Settimana (LUN -> DOM) */}
       <div style={{
         position: 'relative',
         zIndex: 1,
@@ -554,7 +580,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
           <div 
             key={dayName} 
             style={{ 
-              color: '#DDCAB7',
+              color: calendarMode === 'workout' ? '#D4D2BB' : '#DDCAB7',
               opacity: 0.85,
               fontSize: '11px',
               fontFamily: 'var(--font-gothic)',
@@ -583,7 +609,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
       >
         {/* Quadratini segnaposto discreti con trattino per i giorni che mancano a inizio mese */}
         {Array.from({ length: leadingDaysCount }).map((_, idx) => (
-          <EmptyCell key={`lead-${idx}`} />
+          <EmptyCell key={`lead-${idx}`} calendarMode={calendarMode} />
         ))}
 
         {/* Giorni effettivi del mese */}
@@ -613,7 +639,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
 
         {/* Quadratini segnaposto discreti con trattino per i giorni che mancano a fine mese */}
         {Array.from({ length: trailingDaysCount }).map((_, idx) => (
-          <EmptyCell key={`trail-${idx}`} />
+          <EmptyCell key={`trail-${idx}`} calendarMode={calendarMode} />
         ))}
       </div>
 
