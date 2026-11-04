@@ -70,6 +70,8 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
       return;
     }
 
+    if (isUnlocking) return;
+
     if (!isRevealed) {
       setIsRevealed(true);
       triggerHapticFeedback('selection');

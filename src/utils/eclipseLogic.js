@@ -83,8 +83,10 @@ export const PHASE_CONFIG_7 = [
  */
 export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
   const refDateStr = referenceDateStr || getTodayDateString();
-  const [refY, refM, refD] = refDateStr.split('-').map(Number);
-  const baseDate = new Date(refY, refM - 1, refD);
+  const dateParts = (refDateStr && typeof refDateStr === 'string') ? refDateStr.split('-').map(Number) : [];
+  const baseDate = (dateParts.length === 3 && !isNaN(dateParts[0]) && !isNaN(dateParts[1]) && !isNaN(dateParts[2]))
+    ? new Date(dateParts[0], dateParts[1] - 1, dateParts[2])
+    : new Date();
 
   // Troviamo la prima data mai registrata nel database per non penalizzare giorni antecedenti all'installazione
   const recordedDates = Object.keys(allLogs || {}).filter((dateKey) => {

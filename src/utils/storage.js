@@ -1,5 +1,7 @@
-const STORAGE_KEY = 'coraline_asia_habit_tracker_v1';
-const BACKUP_SNAPSHOT_KEY = 'coraline_asia_habit_tracker_backup_snapshot';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
+
+const STORAGE_KEY = STORAGE_KEYS.HABIT_TRACKER_LOGS;
+const BACKUP_SNAPSHOT_KEY = STORAGE_KEYS.BACKUP_SNAPSHOT;
 
 // Cache in memoria RAM per azzerare I/O sincrono bloccante
 let logsMemoryCache = null;
@@ -26,8 +28,11 @@ export function getAllLogs() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      logsMemoryCache = JSON.parse(raw);
-      return logsMemoryCache;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        logsMemoryCache = parsed;
+        return logsMemoryCache;
+      }
     }
   } catch (err) {
     console.error("Errore lettura chiave primaria storage:", err);
@@ -38,7 +43,7 @@ export function getAllLogs() {
     const snapshotRaw = localStorage.getItem(BACKUP_SNAPSHOT_KEY);
     if (snapshotRaw) {
       const recovered = JSON.parse(snapshotRaw);
-      if (recovered && typeof recovered === 'object') {
+      if (recovered && typeof recovered === 'object' && !Array.isArray(recovered)) {
         console.warn("✦ Auto-ripristino eseguito con successo dallo snapshot di emergenza! ✦");
         logsMemoryCache = recovered;
         try {
@@ -125,7 +130,7 @@ export function exportBackupData() {
  */
 export function getCustomAvatar() {
   try {
-    return localStorage.getItem('coraline_custom_avatar') || null;
+    return localStorage.getItem(STORAGE_KEYS.CUSTOM_AVATAR) || null;
   } catch (e) {
     return null;
   }
@@ -137,9 +142,9 @@ export function getCustomAvatar() {
 export function saveCustomAvatar(base64Data) {
   try {
     if (base64Data) {
-      localStorage.setItem('coraline_custom_avatar', base64Data);
+      localStorage.setItem(STORAGE_KEYS.CUSTOM_AVATAR, base64Data);
     } else {
-      localStorage.removeItem('coraline_custom_avatar');
+      localStorage.removeItem(STORAGE_KEYS.CUSTOM_AVATAR);
     }
     return true;
   } catch (e) {
@@ -160,9 +165,9 @@ export function exportFullCloudBackupPayload() {
   let reminderEnabled = true;
 
   try {
-    keysPerMonth = Number(localStorage.getItem('coraline_keys_per_month')) || 4;
-    reminderTime = localStorage.getItem('coraline_reminder_time') || '20:00';
-    reminderEnabled = localStorage.getItem('coraline_reminder_enabled') !== 'false';
+    keysPerMonth = Number(localStorage.getItem(STORAGE_KEYS.KEYS_PER_MONTH)) || 4;
+    reminderTime = localStorage.getItem(STORAGE_KEYS.REMINDER_TIME) || '20:00';
+    reminderEnabled = localStorage.getItem(STORAGE_KEYS.REMINDER_ENABLED) !== 'false';
   } catch (e) {}
 
   const activeLogsCount = Object.values(logs).filter(
@@ -215,7 +220,7 @@ export function restoreFullCloudBackupPayload(payload) {
   // 3. Ripristina chiavi per mese
   if (payload.keysPerMonth) {
     try {
-      localStorage.setItem('coraline_keys_per_month', String(payload.keysPerMonth));
+      localStorage.setItem(STORAGE_KEYS.KEYS_PER_MONTH, String(payload.keysPerMonth));
     } catch (e) {}
   }
 
@@ -228,10 +233,10 @@ export function restoreFullCloudBackupPayload(payload) {
   if (payload.preferences) {
     try {
       if (payload.preferences.reminderTime) {
-        localStorage.setItem('coraline_reminder_time', payload.preferences.reminderTime);
+        localStorage.setItem(STORAGE_KEYS.REMINDER_TIME, payload.preferences.reminderTime);
       }
       if (payload.preferences.reminderEnabled !== undefined) {
-        localStorage.setItem('coraline_reminder_enabled', payload.preferences.reminderEnabled ? 'true' : 'false');
+        localStorage.setItem(STORAGE_KEYS.REMINDER_ENABLED, payload.preferences.reminderEnabled ? 'true' : 'false');
       }
     } catch (e) {}
   }
@@ -556,7 +561,7 @@ export function getMonthBestStreak(allLogs, year, month) {
 // =========================================================
 // GESTIONE ALLENAMENTI ASIA (IL GRANDE BOBINSKY)
 // =========================================================
-const WORKOUT_STORAGE_KEY = 'coraline_workout_logs';
+const WORKOUT_STORAGE_KEY = STORAGE_KEYS.WORKOUT_LOGS;
 let workoutLogsMemoryCache = null;
 
 /**
@@ -567,12 +572,17 @@ export function getWorkoutLogs() {
   if (workoutLogsMemoryCache !== null) return workoutLogsMemoryCache;
   try {
     const raw = localStorage.getItem(WORKOUT_STORAGE_KEY);
-    workoutLogsMemoryCache = raw ? JSON.parse(raw) : {};
-    return workoutLogsMemoryCache;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      workoutLogsMemoryCache = (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+      return workoutLogsMemoryCache;
+    }
   } catch (e) {
     workoutLogsMemoryCache = {};
     return workoutLogsMemoryCache;
   }
+  workoutLogsMemoryCache = {};
+  return workoutLogsMemoryCache;
 }
 
 /**

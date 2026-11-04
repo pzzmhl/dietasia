@@ -301,8 +301,10 @@ const CalendarGrid = React.memo(function CalendarGrid({
   const [workoutModalState, setWorkoutModalState] = useState({ isOpen: false, dateStr: null });
 
   const { firstDayColumn, daysArray, todayStr, leadingDaysCount, trailingDaysCount } = useMemo(() => {
-    const count = new Date(displayYear, displayMonth + 1, 0).getDate();
-    const rawFirst = new Date(displayYear, displayMonth, 1).getDay();
+    const safeYear = typeof displayYear === 'number' ? displayYear : new Date().getFullYear();
+    const safeMonth = typeof displayMonth === 'number' ? displayMonth : new Date().getMonth();
+    const count = new Date(safeYear, safeMonth + 1, 0).getDate();
+    const rawFirst = new Date(safeYear, safeMonth, 1).getDay();
     const col = rawFirst === 0 ? 7 : rawFirst;
     const arr = Array.from({ length: count }, (_, i) => i + 1);
     

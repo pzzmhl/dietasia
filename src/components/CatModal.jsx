@@ -4,6 +4,7 @@ import catFailImg from '../assets/cat-fail.webp';           // Dieta Scorretta /
 import catCheatKeyImg from '../assets/cat-cheat-key.webp';  // Sgarro con Chiave Jolly -> Gatto con topolino circense in bocca
 import catModalBg from '../assets/cat-modal-bg.webp';
 import CoralineCatCloud from './CoralineCatCloud';
+import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline):
@@ -202,7 +203,11 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
 
         {/* PULSANTE DI CONFERMA / CHIUSURA CON TONI SOFFUSI E FONT LEGGIBILE */}
         <button
-          onClick={onClose}
+          type="button"
+          onClick={() => {
+            triggerHapticFeedback('selection');
+            if (onClose) onClose();
+          }}
           style={{
             width: '100%',
             backgroundColor: buttonBg,

@@ -5,6 +5,7 @@
  */
 
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
 const NOTIFICATION_ID = 42;
 let channelInitialized = false;
@@ -74,13 +75,13 @@ export async function cancelDailyReminder() {
 export async function scheduleDailyReminder(timeStr, isTodayLogged = false) {
   let effectiveTime = timeStr;
   try {
-    const isEnabled = localStorage.getItem('coraline_reminder_enabled') !== 'false';
+    const isEnabled = localStorage.getItem(STORAGE_KEYS.REMINDER_ENABLED) !== 'false';
     if (!isEnabled) {
       await cancelDailyReminder();
       return false;
     }
     if (!effectiveTime) {
-      effectiveTime = localStorage.getItem('coraline_reminder_time') || '20:00';
+      effectiveTime = localStorage.getItem(STORAGE_KEYS.REMINDER_TIME) || '20:00';
     }
   } catch (e) {
     if (!effectiveTime) effectiveTime = '20:00';

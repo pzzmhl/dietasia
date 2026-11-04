@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
 // Chiavi da variabili d'ambiente Vite o da configurazione dinamica in localStorage
 const getSupabaseConfig = () => {
@@ -8,8 +9,8 @@ const getSupabaseConfig = () => {
   let localUrl = '';
   let localKey = '';
   try {
-    localUrl = localStorage.getItem('coraline_supabase_url') || '';
-    localKey = localStorage.getItem('coraline_supabase_anon_key') || '';
+    localUrl = localStorage.getItem(STORAGE_KEYS.SUPABASE_URL) || '';
+    localKey = localStorage.getItem(STORAGE_KEYS.SUPABASE_ANON_KEY) || '';
   } catch (e) {}
 
   const url = (envUrl && envUrl.trim()) || localUrl.trim();
@@ -65,11 +66,11 @@ export function isSupabaseConfigured() {
  */
 export function saveCustomSupabaseConfig(url, anonKey) {
   try {
-    if (url) localStorage.setItem('coraline_supabase_url', url.trim());
-    else localStorage.removeItem('coraline_supabase_url');
+    if (url) localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, url.trim());
+    else localStorage.removeItem(STORAGE_KEYS.SUPABASE_URL);
 
-    if (anonKey) localStorage.setItem('coraline_supabase_anon_key', anonKey.trim());
-    else localStorage.removeItem('coraline_supabase_anon_key');
+    if (anonKey) localStorage.setItem(STORAGE_KEYS.SUPABASE_ANON_KEY, anonKey.trim());
+    else localStorage.removeItem(STORAGE_KEYS.SUPABASE_ANON_KEY);
 
     // Reset istanza per applicare i nuovi dati
     supabaseInstance = null;
@@ -168,7 +169,7 @@ export async function uploadBackupToSupabase(backupPayload) {
 
   // Memorizza timestamp ultimo backup cloud in locale
   try {
-    localStorage.setItem('coraline_last_cloud_backup_time', payload.updated_at);
+    localStorage.setItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME, payload.updated_at);
   } catch (e) {}
 
   return payload.updated_at;
@@ -202,7 +203,7 @@ export async function downloadBackupFromSupabase() {
   }
 
   try {
-    localStorage.setItem('coraline_last_cloud_backup_time', data.updated_at);
+    localStorage.setItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME, data.updated_at);
   } catch (e) {}
 
   return {
@@ -212,27 +213,35 @@ export async function downloadBackupFromSupabase() {
 }
 
 /**
- * Sincronizzazione automatica silenziosa (chiamata dopo le modifiche se attiva)
+ * Sincronizzazione automatica silenziosa protetta da race condition e debounce
  */
 let autoSyncTimeout = null;
+let isSyncingInProgress = false;
+
 export function triggerDebouncedCloudSync(getBackupFn, delayMs = 3000) {
   try {
-    const isAutoSyncEnabled = localStorage.getItem('coraline_cloud_autosync') !== 'false';
+    const isAutoSyncEnabled = localStorage.getItem(STORAGE_KEYS.CLOUD_AUTOSYNC) !== 'false';
     if (!isAutoSyncEnabled || !isSupabaseConfigured()) return;
 
     if (autoSyncTimeout) clearTimeout(autoSyncTimeout);
 
     autoSyncTimeout = setTimeout(async () => {
+      if (isSyncingInProgress) {
+        triggerDebouncedCloudSync(getBackupFn, 2000);
+        return;
+      }
       try {
+        isSyncingInProgress = true;
         const user = await getSupabaseUser();
         if (!user) return;
         const payload = getBackupFn();
         if (payload) {
           await uploadBackupToSupabase(payload);
-          console.log('[Supabase] Auto-sync completato con successo!');
         }
       } catch (err) {
-        console.warn('[Supabase] Auto-sync fallito silenziosamente:', err.message);
+        // Fallimento silenzioso di background
+      } finally {
+        isSyncingInProgress = false;
       }
     }, delayMs);
   } catch (e) {}

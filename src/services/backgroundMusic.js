@@ -5,7 +5,9 @@
  * rispetto delle policy autoplay mobile e persistenza tra tutte le sessioni.
  */
 
-const STORAGE_KEY = 'coraline_bg_music_enabled';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
+
+const STORAGE_KEY = STORAGE_KEYS.BG_MUSIC_ENABLED;
 const AUDIO_SRC = '/audio/coraline-exploration.m4a';
 const TARGET_VOLUME = 0.066; // Volume abbassato del 70% per un sottofondo sussurrato e discreto
 const FADE_STEP_MS = 50;

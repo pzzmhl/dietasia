@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
@@ -26,15 +26,30 @@ export default function DaySelectionModal({
   onClose 
 }) {
   const [visible, setVisible] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
+      isSubmittingRef.current = false;
       const raf = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(raf);
     } else {
       setVisible(false);
     }
   }, [isOpen]);
+
+  const handleSelect = (status) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    onSelectStatus(status);
+  };
+
+  const handleClose = () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    triggerHapticFeedback('selection');
+    onClose();
+  };
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -119,10 +134,7 @@ export default function DaySelectionModal({
         {/* Pulsante chiusura rapida ✕ */}
         <button
           type="button"
-          onClick={() => {
-            triggerHapticFeedback('selection');
-            onClose();
-          }}
+          onClick={handleClose}
           aria-label="Chiudi"
           style={{
             position: 'absolute',
@@ -191,7 +203,7 @@ export default function DaySelectionModal({
             type="button"
             onClick={() => {
               triggerHapticFeedback('success');
-              onSelectStatus(currentStatus === 'success' ? 'neutral' : 'success');
+              handleSelect(currentStatus === 'success' ? 'neutral' : 'success');
             }}
             aria-label="Dieta Rispettata"
             title="Dieta Rispettata"
@@ -254,7 +266,7 @@ export default function DaySelectionModal({
             type="button"
             onClick={() => {
               triggerHapticFeedback('cheat');
-              onSelectStatus(currentStatus === 'cheat' ? 'neutral' : 'cheat');
+              handleSelect(currentStatus === 'cheat' ? 'neutral' : 'cheat');
             }}
             aria-label="Dieta Non Rispettata"
             title="Dieta Non Rispettata"
@@ -317,7 +329,7 @@ export default function DaySelectionModal({
             onClick={() => {
               if (!canUseKey) return;
               triggerHapticFeedback('key');
-              onSelectStatus(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key');
+              handleSelect(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key');
             }}
             disabled={!canUseKey}
             aria-label="Sgarro Jolly con Chiave"
@@ -383,7 +395,7 @@ export default function DaySelectionModal({
               type="button"
               onClick={() => {
                 triggerHapticFeedback('selection');
-                onSelectStatus('neutral');
+                handleSelect('neutral');
               }}
               aria-label="Azzera esito registrato"
               title="Azzera esito"

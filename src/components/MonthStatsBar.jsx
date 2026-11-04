@@ -30,12 +30,23 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
   const [activeTooltip, setActiveTooltip] = useState(null);
   const tooltipTimeoutRef = useRef(null);
 
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const safeYear = typeof displayYear === 'number' ? displayYear : new Date().getFullYear();
+  const safeMonth = typeof displayMonth === 'number' ? displayMonth : new Date().getMonth();
+
   const workoutCount = useMemo(() => {
-    return getMonthWorkoutCount(workoutLogs, displayYear, displayMonth);
-  }, [workoutLogs, displayYear, displayMonth]);
+    return getMonthWorkoutCount(workoutLogs, safeYear, safeMonth);
+  }, [workoutLogs, safeYear, safeMonth]);
 
   const { successCount, cheatCount, remainingKeys, streakCount, daysInMonth, successPercentage, loggedDays } = useMemo(() => {
-    const monthPrefix = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}`;
+    const monthPrefix = `${safeYear}-${String(safeMonth + 1).padStart(2, '0')}`;
     let sCount = 0;
     let cCount = 0;
     let kCount = 0;
@@ -49,12 +60,12 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     });
 
     const now = new Date();
-    const isViewingCurrentMonth = displayYear === now.getFullYear() && displayMonth === now.getMonth();
+    const isViewingCurrentMonth = safeYear === now.getFullYear() && safeMonth === now.getMonth();
     const streak = isViewingCurrentMonth
       ? getConsecutiveDietStreak(allLogs)
-      : getMonthBestStreak(allLogs, displayYear, displayMonth);
+      : getMonthBestStreak(allLogs, safeYear, safeMonth);
 
-    const totalDays = new Date(displayYear, displayMonth + 1, 0).getDate();
+    const totalDays = new Date(safeYear, safeMonth + 1, 0).getDate();
     const totalLogged = sCount + cCount + kCount;
     // Calcolo corretto dell'aderenza basato sui giorni registrati (allineato ad historicalStats)
     const rate = totalLogged > 0

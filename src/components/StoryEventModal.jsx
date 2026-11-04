@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import otherMotherImg from '../assets/other-mother-key.webp';
 import wybieImg from '../assets/wybie-proud.webp';
 import catModalBg from '../assets/cat-modal-bg.webp';
+import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Modal Eventi Speciali della Storia di Coraline:
@@ -199,7 +200,11 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
 
         {/* BOTTONE D'AZIONE CON FONT LEGGIBILE E CHIARO */}
         <button
-          onClick={onClose}
+          type="button"
+          onClick={() => {
+            triggerHapticFeedback('selection');
+            if (onClose) onClose();
+          }}
           style={{
             width: '100%',
             padding: '12px 14px',

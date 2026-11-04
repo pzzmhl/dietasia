@@ -17,8 +17,9 @@ export function getAllTimeBestStreak(allLogs = {}) {
   let prevDate = null;
 
   dates.forEach((dStr) => {
-    const [y, m, d] = dStr.split('-').map(Number);
-    const currentDate = new Date(y, m - 1, d);
+    const parts = (dStr && typeof dStr === 'string') ? dStr.split('-').map(Number) : [];
+    if (parts.length !== 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return;
+    const currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
     currentDate.setHours(12, 0, 0, 0);
 
     if (!prevDate) {
@@ -52,7 +53,10 @@ export function getAllTimeBestStreak(allLogs = {}) {
  * @param {number} displayMonth 0-indexed (0 per Gennaio, 11 per Dicembre)
  */
 export function calculateHistoricalComparison(allLogs = {}, workoutLogs = {}, displayYear, displayMonth) {
-  const currentPrefix = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}`;
+  const now = new Date();
+  const year = typeof displayYear === 'number' ? displayYear : now.getFullYear();
+  const month = typeof displayMonth === 'number' ? displayMonth : now.getMonth();
+  const currentPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
 
   let currentSuccessCount = 0;
   let currentCheatCount = 0;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import gearBallImg from '../assets/gear-ball.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 import { triggerHapticFeedback } from '../services/haptics';
@@ -19,9 +19,11 @@ export default function DayWorkoutModal({
 }) {
   const [visible, setVisible] = useState(false);
   const [reactionStatus, setReactionStatus] = useState(null);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
+      isSubmittingRef.current = false;
       const raf = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(raf);
     } else {
@@ -43,6 +45,8 @@ export default function DayWorkoutModal({
   const capitalizedDate = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
 
   const handleSelectWithReaction = (targetStatus) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     const nextStatus = currentStatus === targetStatus ? null : targetStatus;
     if (nextStatus) {
       triggerHapticFeedback(nextStatus === 'yes' ? 'success' : 'cheat');
@@ -51,6 +55,13 @@ export default function DayWorkoutModal({
       triggerHapticFeedback('selection');
       onSelectStatus(null);
     }
+  };
+
+  const handleClose = () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    triggerHapticFeedback('selection');
+    onClose();
   };
 
   return (
@@ -81,7 +92,7 @@ export default function DayWorkoutModal({
         willChange: 'opacity',
         transform: 'translateZ(0)'
       }}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="stitched-card vortex-card"
@@ -130,10 +141,7 @@ export default function DayWorkoutModal({
         {/* Pulsante chiusura ✕ */}
         <button
           type="button"
-          onClick={() => {
-            triggerHapticFeedback('selection');
-            onClose();
-          }}
+          onClick={handleClose}
           aria-label="Chiudi"
           style={{
             position: 'absolute',

@@ -64,9 +64,10 @@ import {
   triggerDebouncedCloudSync 
 } from './services/supabase';
 import { getRandomCatQuote, getSmartSituationalCatQuote } from './data/catQuotes';
+import { STORAGE_KEYS } from './constants/storageKeys.js';
 
 export default function App() {
-  const todayStr = getTodayDateString();
+  const [todayStr, setTodayStr] = useState(() => getTodayDateString());
   const todayObj = useMemo(() => new Date(todayStr + 'T00:00:00'), [todayStr]);
 
   const [selectedDate, setSelectedDate] = useState(todayStr);
@@ -77,7 +78,7 @@ export default function App() {
   const [customAvatar, setCustomAvatar] = useState(() => getCustomAvatar());
   const [keysPerMonth, setKeysPerMonth] = useState(() => {
     try {
-      return Number(localStorage.getItem('coraline_keys_per_month')) || 4;
+      return Number(localStorage.getItem(STORAGE_KEYS.KEYS_PER_MONTH)) || 4;
     } catch (e) {
       return 4;
     }
@@ -130,7 +131,7 @@ export default function App() {
   // Schermata Minimale Quotidiana del Gatto (Primo Accesso del Giorno)
   const [isDailyGreetingOpen, setIsDailyGreetingOpen] = useState(() => {
     try {
-      const lastGreetingDate = localStorage.getItem('coraline_last_daily_greeting_date');
+      const lastGreetingDate = localStorage.getItem(STORAGE_KEYS.LAST_DAILY_GREETING_DATE);
       return lastGreetingDate !== todayStr;
     } catch (e) {
       return false;
@@ -139,7 +140,7 @@ export default function App() {
 
   const handleDismissDailyGreeting = useCallback(() => {
     try {
-      localStorage.setItem('coraline_last_daily_greeting_date', todayStr);
+      localStorage.setItem(STORAGE_KEYS.LAST_DAILY_GREETING_DATE, todayStr);
     } catch (e) {}
     setIsDailyGreetingOpen(false);
   }, [todayStr]);
@@ -246,6 +247,14 @@ export default function App() {
             pauseMusicImmediately();
           } else {
             playMusicWithFadeIn();
+            // Verifica transizione mezzanotte se l'app è rimasta aperta in background
+            const freshToday = getTodayDateString();
+            setTodayStr((prev) => {
+              if (prev !== freshToday) {
+                return freshToday;
+              }
+              return prev;
+            });
           }
         });
       } catch (err) {
@@ -254,7 +263,17 @@ export default function App() {
     };
     registerNativeHandlers();
 
+    // Ascolto visibilità per browser/PWA (transizione mezzanotte)
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        const freshToday = getTodayDateString();
+        setTodayStr((prev) => (prev !== freshToday ? freshToday : prev));
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (backListener && backListener.remove) {
         backListener.remove();
       }
@@ -283,7 +302,7 @@ export default function App() {
           const cloudLogs = cloudRes.data.logs || {};
           const cloudCount = Object.keys(cloudLogs).length;
 
-          const localLastTime = localStorage.getItem('coraline_last_cloud_backup_time') || '';
+          const localLastTime = localStorage.getItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME) || '';
           const shouldRestore = localCount === 0 || (cloudRes.updatedAt && cloudRes.updatedAt > localLastTime && cloudCount >= localCount);
 
           if (shouldRestore) {
@@ -306,8 +325,8 @@ export default function App() {
 
     try {
       if (typeof document !== 'undefined') {
-        const floatOff = localStorage.getItem('coraline_floating_fx') === 'false';
-        const vortexOff = localStorage.getItem('coraline_vortex_enabled') === 'false';
+        const floatOff = localStorage.getItem(STORAGE_KEYS.FLOATING_FX) === 'false';
+        const vortexOff = localStorage.getItem(STORAGE_KEYS.VORTEX_ENABLED) === 'false';
         document.body.classList.toggle('no-floating-fx', floatOff);
         document.body.classList.toggle('no-vortex-bg', vortexOff);
       }
@@ -475,8 +494,8 @@ export default function App() {
         // Ancora qualche chiave rimasta: parla il Gatto
         const quote = getRandomCatQuote('key');
         try {
-          localStorage.setItem('coraline_last_cat_quote', quote);
-          localStorage.setItem('coraline_last_cat_context', 'key');
+          localStorage.setItem(STORAGE_KEYS.LAST_CAT_QUOTE, quote);
+          localStorage.setItem(STORAGE_KEYS.LAST_CAT_CONTEXT, 'key');
         } catch (e) {}
 
         if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
@@ -491,7 +510,7 @@ export default function App() {
     } else if (newStatus === 'success') {
       // Calcola il nuovo streak di dieta consecutiva ancorato alla data selezionata
       const newStreak = getConsecutiveDietStreak(updatedLogs, targetDate);
-      const lastCelebrated = Number(localStorage.getItem('coraline_last_celebrated_streak') || 0);
+      const lastCelebrated = Number(localStorage.getItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK) || 0);
 
       // NOTIFICA 1: Wybie celebra traguardi di costanza (3 giorni, ogni settimana 7/14/21/28... o 30 giorni)
       // Negli altri giorni interviene il Gatto con le sue frasi incoraggianti!
@@ -500,7 +519,7 @@ export default function App() {
 
       if (isMilestone) {
         try {
-          localStorage.setItem('coraline_last_celebrated_streak', String(newStreak));
+          localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, String(newStreak));
         } catch (e) {}
 
         sendWybieStreakNotification(newStreak);
@@ -515,8 +534,8 @@ export default function App() {
       } else {
         const quote = getRandomCatQuote('success');
         try {
-          localStorage.setItem('coraline_last_cat_quote', quote);
-          localStorage.setItem('coraline_last_cat_context', 'success');
+          localStorage.setItem(STORAGE_KEYS.LAST_CAT_QUOTE, quote);
+          localStorage.setItem(STORAGE_KEYS.LAST_CAT_CONTEXT, 'success');
         } catch (e) {}
 
         if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
@@ -531,13 +550,13 @@ export default function App() {
     } else if (newStatus === 'cheat') {
       // Se registra uno sgarro non autorizzato, resetta il tracker del traguardo streak
       try {
-        localStorage.setItem('coraline_last_celebrated_streak', '0');
+        localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, '0');
       } catch (e) {}
 
       const quote = getRandomCatQuote('cheat');
       try {
-        localStorage.setItem('coraline_last_cat_quote', quote);
-        localStorage.setItem('coraline_last_cat_context', 'cheat');
+        localStorage.setItem(STORAGE_KEYS.LAST_CAT_QUOTE, quote);
+        localStorage.setItem(STORAGE_KEYS.LAST_CAT_CONTEXT, 'cheat');
       } catch (e) {}
 
       if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
@@ -551,7 +570,7 @@ export default function App() {
     } else if (newStatus === 'neutral') {
       // Se si azzera una data, resettiamo il tracker di celebrazione per permettere nuovi test
       try {
-        localStorage.setItem('coraline_last_celebrated_streak', '0');
+        localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, '0');
       } catch (e) {}
     }
   }, [dayModalState.dateStr, selectedDate, allLogs, keysPerMonth, remainingKeys]);

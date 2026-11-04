@@ -3,6 +3,7 @@ import jumpingMouseImg from '../assets/jumping-mouse.webp';
 import catCloudPattern from '../assets/cat-cloud-pattern.webp';
 import { triggerHapticFeedback } from '../services/haptics';
 import { playTrumpetFanfare } from '../services/trumpetAudio';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
 /**
  * Topo Saltatore Fluttuante del Circo di Bobinsky:
@@ -21,7 +22,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
     try {
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      const dismissedDate = localStorage.getItem('coraline_mouse_notice_dismissed_date');
+      const dismissedDate = localStorage.getItem(STORAGE_KEYS.MOUSE_NOTICE_DISMISSED_DATE);
       return dismissedDate === todayStr;
     } catch (e) {
       return false;
@@ -45,7 +46,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
   useEffect(() => {
     const handleTestEvent = () => {
       try {
-        localStorage.removeItem('coraline_mouse_notice_dismissed_date');
+        localStorage.removeItem(STORAGE_KEYS.MOUSE_NOTICE_DISMISSED_DATE);
       } catch (err) {}
       setIsDismissed(false);
       setIsCloudOpen(true);
@@ -114,7 +115,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
     setIsDismissed(true);
     setTestForced(false);
     try {
-      localStorage.setItem('coraline_mouse_notice_dismissed_date', todayStr);
+      localStorage.setItem(STORAGE_KEYS.MOUSE_NOTICE_DISMISSED_DATE, todayStr);
     } catch (err) {}
   };
 

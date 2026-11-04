@@ -1,5 +1,6 @@
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
 /**
  * Servizio Haptic Engine Nativo per Android & Web
@@ -12,7 +13,7 @@ export const isHapticsEnabled = () => {
 
 export const setHapticsEnabled = (enabled) => {
   try {
-    localStorage.setItem('coraline_haptics_enabled', 'true');
+    localStorage.setItem(STORAGE_KEYS.HAPTICS_ENABLED, 'true');
   } catch (e) {}
 };
 

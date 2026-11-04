@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import bobinskyImg from '../assets/bobinsky-training.webp';
 import circusBg from '../assets/bobinsky-circus-bg.webp';
 import { triggerHapticFeedback } from '../services/haptics';
@@ -19,6 +19,7 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
 }) {
   // Mappa di allenamenti per data con fallback in memoria
   const [localWorkoutLogs, setLocalWorkoutLogs] = useState(() => propWorkoutLogs || {});
+  const isSubmittingRef = useRef(false);
 
   const workoutLogs = propWorkoutLogs || localWorkoutLogs;
   const todayStatus = workoutLogs[todayStr] || null;
@@ -45,6 +46,8 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
   };
 
   const handleSelectOption = (status) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     triggerHapticFeedback(status === 'yes' ? 'success' : 'cheat');
     
     // Salva l'allenamento per oggi

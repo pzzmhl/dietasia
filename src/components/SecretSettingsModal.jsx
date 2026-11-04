@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import profileAvatarImg from '../assets/profile-avatar.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
 import { 
   getAllLogs, 
   exportFullCloudBackupPayload,
@@ -182,7 +183,7 @@ export default function SecretSettingsModal({
   // STATI IMPOSTAZIONI
   const [reminderEnabled, setReminderEnabled] = useState(() => {
     try {
-      return localStorage.getItem('coraline_reminder_enabled') !== 'false';
+      return localStorage.getItem(STORAGE_KEYS.REMINDER_ENABLED) !== 'false';
     } catch (e) {
       return true;
     }
@@ -190,7 +191,7 @@ export default function SecretSettingsModal({
 
   const [reminderTime, setReminderTime] = useState(() => {
     try {
-      return localStorage.getItem('coraline_reminder_time') || '20:00';
+      return localStorage.getItem(STORAGE_KEYS.REMINDER_TIME) || '20:00';
     } catch (e) {
       return '20:00';
     }
@@ -259,14 +260,14 @@ export default function SecretSettingsModal({
   const [cloudMessage, setCloudMessage] = useState(null);
   const [lastCloudBackup, setLastCloudBackup] = useState(() => {
     try {
-      return localStorage.getItem('coraline_last_cloud_backup_time') || null;
+      return localStorage.getItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME) || null;
     } catch (e) {
       return null;
     }
   });
   const [autoSyncOn, setAutoSyncOn] = useState(() => {
     try {
-      return localStorage.getItem('coraline_cloud_autosync') !== 'false';
+      return localStorage.getItem(STORAGE_KEYS.CLOUD_AUTOSYNC) !== 'false';
     } catch (e) {
       return true;
     }
@@ -274,14 +275,14 @@ export default function SecretSettingsModal({
   const [showConfigInputs, setShowConfigInputs] = useState(false);
   const [customSupabaseUrl, setCustomSupabaseUrl] = useState(() => {
     try {
-      return localStorage.getItem('coraline_supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
+      return localStorage.getItem(STORAGE_KEYS.SUPABASE_URL) || import.meta.env.VITE_SUPABASE_URL || '';
     } catch (e) {
       return '';
     }
   });
   const [customSupabaseKey, setCustomSupabaseKey] = useState(() => {
     try {
-      return localStorage.getItem('coraline_supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+      return localStorage.getItem(STORAGE_KEYS.SUPABASE_ANON_KEY) || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
     } catch (e) {
       return '';
     }
@@ -306,7 +307,7 @@ export default function SecretSettingsModal({
       setUpdateLoading(false);
       getSupabaseUser().then((u) => setCloudUser(u)).catch(() => {});
       try {
-        const last = localStorage.getItem('coraline_last_cloud_backup_time');
+        const last = localStorage.getItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME);
         if (last) setLastCloudBackup(last);
       } catch (e) {}
     }
@@ -339,7 +340,7 @@ export default function SecretSettingsModal({
   const handleToggleReminder = async (enabled) => {
     setReminderEnabled(enabled);
     try {
-      localStorage.setItem('coraline_reminder_enabled', enabled ? 'true' : 'false');
+      localStorage.setItem(STORAGE_KEYS.REMINDER_ENABLED, enabled ? 'true' : 'false');
       if (enabled) {
         await scheduleDailyReminder(reminderTime, false);
       } else {
@@ -352,7 +353,7 @@ export default function SecretSettingsModal({
   const handleChangeReminderTime = async (newTime) => {
     setReminderTime(newTime);
     try {
-      localStorage.setItem('coraline_reminder_time', newTime);
+      localStorage.setItem(STORAGE_KEYS.REMINDER_TIME, newTime);
       if (reminderEnabled) {
         await scheduleDailyReminder(newTime, false);
       }
@@ -376,7 +377,7 @@ export default function SecretSettingsModal({
     const nextVal = Math.min(10, Math.max(1, keysPerMonth + delta));
     onChangeKeysPerMonth(nextVal);
     try {
-      localStorage.setItem('coraline_keys_per_month', String(nextVal));
+      localStorage.setItem(STORAGE_KEYS.KEYS_PER_MONTH, String(nextVal));
     } catch (e) {}
     triggerHapticFeedback('selection');
   };
@@ -408,6 +409,7 @@ export default function SecretSettingsModal({
 
   const handleCloudAuth = async (e) => {
     if (e) e.preventDefault();
+    if (cloudLoading) return;
     if (!cloudEmail || !cloudPassword) {
       setCloudMessage({ type: 'error', text: 'Inserisci sia email che password.' });
       return;
@@ -476,7 +478,7 @@ export default function SecretSettingsModal({
   };
 
   const handleCloudBackup = async () => {
-    if (!cloudUser) return;
+    if (!cloudUser || cloudLoading) return;
     setCloudLoading(true);
     setCloudMessage(null);
     triggerHapticFeedback('selection');
@@ -495,7 +497,7 @@ export default function SecretSettingsModal({
   };
 
   const handleCloudRestore = async () => {
-    if (!cloudUser) return;
+    if (!cloudUser || cloudLoading) return;
     if (!window.confirm("Vuoi ripristinare i dati dal Cloud? Questo sovrascriverà i dati locali con l'ultimo salvataggio cloud.")) {
       return;
     }
@@ -519,6 +521,7 @@ export default function SecretSettingsModal({
   };
 
   const handleCloudSignOut = async () => {
+    if (cloudLoading) return;
     triggerHapticFeedback('selection');
     setCloudLoading(true);
     try {
@@ -552,22 +555,28 @@ export default function SecretSettingsModal({
     setAutoSyncOn(enabled);
     triggerHapticFeedback('selection');
     try {
-      localStorage.setItem('coraline_cloud_autosync', enabled ? 'true' : 'false');
+      localStorage.setItem(STORAGE_KEYS.CLOUD_AUTOSYNC, enabled ? 'true' : 'false');
     } catch (e) {}
   };
 
   const handleUpdateApp = async () => {
+    if (updateLoading) return;
     triggerHapticFeedback('selection');
     setUpdateLoading(true);
     setUpdateStatus(null);
-    const CURRENT_APP_VERSION = '2.6.0';
+    const CURRENT_APP_VERSION = '2.7.0';
     const GITHUB_REPO = 'pzzmhl/dietasia';
     const FALLBACK_APK_URL = `https://github.com/${GITHUB_REPO}/releases/latest/download/Coraline-Tracker-Beta.apk`;
 
+    const controller = new AbortController();
+    const abortTimeout = setTimeout(() => controller.abort(), 8000);
+
     try {
       const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+        signal: controller.signal,
         headers: { Accept: 'application/vnd.github.v3+json' }
       });
+      clearTimeout(abortTimeout);
       if (res.ok) {
         const release = await res.json();
         const latestTag = (release.tag_name || '').replace(/^v/, '').trim();
@@ -601,6 +610,7 @@ export default function SecretSettingsModal({
         window.open(FALLBACK_APK_URL, '_system');
       }
     } catch (err) {
+      clearTimeout(abortTimeout);
       setUpdateStatus({ 
         type: 'info', 
         text: "✦ Avvio del download dell'aggiornamento APK..." 
