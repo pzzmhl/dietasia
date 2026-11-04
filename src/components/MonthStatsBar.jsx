@@ -7,7 +7,7 @@ import gearBallImg from '../assets/gear-ball.webp';
 import keyImg from '../assets/key.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 import starryBg from '../assets/coraline-starry-bg.webp';
-import { getConsecutiveDietStreak, getMonthWorkoutCount } from '../utils/storage';
+import { getConsecutiveDietStreak, getMonthBestStreak, getMonthWorkoutCount } from '../utils/storage';
 import { triggerHapticFeedback } from '../services/haptics';
 import { getUIElementExplanation } from '../data/catQuotes';
 
@@ -34,7 +34,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     return getMonthWorkoutCount(workoutLogs, displayYear, displayMonth);
   }, [workoutLogs, displayYear, displayMonth]);
 
-  const { successCount, cheatCount, remainingKeys, streakCount, daysInMonth, successPercentage } = useMemo(() => {
+  const { successCount, cheatCount, remainingKeys, streakCount, daysInMonth, successPercentage, loggedDays } = useMemo(() => {
     const monthPrefix = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}`;
     let sCount = 0;
     let cCount = 0;
@@ -48,11 +48,17 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       }
     });
 
-    const streak = getConsecutiveDietStreak(allLogs);
+    const now = new Date();
+    const isViewingCurrentMonth = displayYear === now.getFullYear() && displayMonth === now.getMonth();
+    const streak = isViewingCurrentMonth
+      ? getConsecutiveDietStreak(allLogs)
+      : getMonthBestStreak(allLogs, displayYear, displayMonth);
+
     const totalDays = new Date(displayYear, displayMonth + 1, 0).getDate();
-    // Calcolo a ritroso: parte dal 100% per l'intero mese e scende ogni volta che si inserisce una dieta non rispettata (cheatCount)
-    const rate = totalDays > 0 
-      ? Math.max(0, Math.round(((totalDays - cCount) / totalDays) * 100)) 
+    const totalLogged = sCount + cCount + kCount;
+    // Calcolo corretto dell'aderenza basato sui giorni registrati (allineato ad historicalStats)
+    const rate = totalLogged > 0
+      ? Math.round(((sCount + kCount) / totalLogged) * 100)
       : 100;
 
     return {
@@ -61,31 +67,37 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       remainingKeys: Math.max(0, keysPerMonth - kCount),
       streakCount: streak,
       daysInMonth: totalDays,
-      successPercentage: rate
+      successPercentage: rate,
+      loggedDays: totalLogged
     };
   }, [allLogs, displayYear, displayMonth, keysPerMonth]);
+
+  const now = new Date();
+  const isViewingCurrentMonth = displayYear === now.getFullYear() && displayMonth === now.getMonth();
 
   // Dettagli esplicativi pronunciati dal Gatto
   const tooltipDetails = {
     keys: {
-      text: `Chiavi Jolly: ne hai ${remainingKeys} su ${keysPerMonth} questo mese. Ti permettono uno sgarro senza penalizzare le statistiche!`
+      text: `Chiavi Jolly: ne hai ${remainingKeys} su ${keysPerMonth} questo mese. Ti permettono una pausa serena dal piano!`
     },
     success: {
-      text: `Dieta seguita: ${successCount} giorni rispettati con successo questo mese. Continua così!`
+      text: `Dieta seguita: ${successCount} giorni rispettati con cura questo mese.`
     },
     cheat: {
-      text: `Sgarri registrati: ${cheatCount} giorni con bottone nero cucito senza chiave jolly.`
+      text: `Sgarri registrati: ${cheatCount} giorni con bottone nero cucito.`
     },
     workout: {
       text: `Allenamento: ${workoutCount} giorni di attività completati con il Signor Bobinsky!`
     },
     streak: {
-      text: `Giorni di fila: ${streakCount} giorni consecutivi di dieta rispettata. Non spezzare la serie!`
+      text: isViewingCurrentMonth
+        ? `Giorni di fila: ${streakCount} giorni consecutivi di dieta rispettata.`
+        : `Record del mese: ${streakCount} giorni consecutivi di dieta rispettata raggiunti a ${MONTHS_IT[displayMonth]}.`
     },
     rate: {
-      text: cheatCount === 0
-        ? `Tasso di riuscita: 100% perfetto a ${MONTHS_IT[displayMonth]}, nessun giorno di sgarro!`
-        : `Tasso di riuscita: ${successPercentage}% di successo a ${MONTHS_IT[displayMonth]} (${cheatCount} sgarri).`
+      text: loggedDays === 0
+        ? `Tasso di riuscita: 100% (nessun giorno registrato a ${MONTHS_IT[displayMonth]}).`
+        : `Tasso di riuscita: ${successPercentage}% di aderenza a ${MONTHS_IT[displayMonth]} su ${loggedDays} giorni registrati (${cheatCount} sgarri).`
     }
   };
 
@@ -104,12 +116,12 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     }, 4500);
 
     const tagMap = {
-      rate: '[PIETRA FORATA]',
-      success: '[PALLINA CON LA STELLA]',
+      success: '[PIETRA FORATA]',
       cheat: '[IL BOTTONE]',
       keys: '[LE CHIAVI]',
       workout: '[PALLINA DEGLI ALLENAMENTI]',
-      streak: '[LA LIBELLULA]'
+      streak: '[PALLINA CON LA STELLA]',
+      rate: '[LA LIBELLULA]'
     };
 
     if (onCatSpeak && tagMap[type]) {

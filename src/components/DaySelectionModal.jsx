@@ -36,7 +36,9 @@ export default function DaySelectionModal({
     }
   }, [isOpen]);
 
-  if (!isOpen || !dateStr) return null;
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  if (!isOpen || !dateStr || dateStr > todayStr) return null;
 
   // Formattazione data in italiano senza anno (es. Lunedi 2 Novembre) con "i" normale al posto di "ì"
   const dateObj = new Date(dateStr + 'T00:00:00');

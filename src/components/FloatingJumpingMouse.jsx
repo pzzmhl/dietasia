@@ -220,34 +220,57 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
               }}
             >
               {missingCount === 1 ? (
-                <>Manca <strong>1 giorno</strong> da compilare</>
+                <>Manca il <strong>{formatDateLabel(firstMissingDate)}</strong></>
               ) : (
-                <>Mancano <strong>{missingCount} giorni</strong> da compilare</>
+                <>Mancano <strong>{missingCount} giorni</strong><br/><span style={{ fontSize: '10px', opacity: 0.8 }}>(il primo: {formatDateLabel(firstMissingDate)})</span></>
               )}
             </div>
 
-            {/* SOLO TASTO OK (ROSSO COME IL VESTITO DEL TOPO) */}
-            <button
-              type="button"
-              onClick={handleDismissToday}
-              title="Chiudi avviso"
-              style={{
-                background: '#c52222',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '3px 14px',
-                fontSize: '10.5px',
-                fontWeight: 700,
-                fontFamily: 'var(--font-gothic)',
-                cursor: 'pointer',
-                letterSpacing: '0.4px',
-                boxShadow: '0 2px 6px rgba(197, 34, 34, 0.45)',
-                touchAction: 'manipulation'
-              }}
-            >
-              OK
-            </button>
+            {/* PULSANTI: VAI AL GIORNO + OK */}
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={handleOpenDayModal}
+                title="Vai alla data mancante per compilarla"
+                style={{
+                  background: 'rgb(141, 109, 82)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '3px 10px',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-gothic)',
+                  cursor: 'pointer',
+                  letterSpacing: '0.4px',
+                  boxShadow: '0 2px 6px rgba(141, 109, 82, 0.45)',
+                  touchAction: 'manipulation'
+                }}
+              >
+                Vai
+              </button>
+              <button
+                type="button"
+                onClick={handleDismissToday}
+                title="Chiudi avviso per oggi"
+                style={{
+                  background: '#c52222',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '3px 10px',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-gothic)',
+                  cursor: 'pointer',
+                  letterSpacing: '0.4px',
+                  boxShadow: '0 2px 6px rgba(197, 34, 34, 0.45)',
+                  touchAction: 'manipulation'
+                }}
+              >
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -70,11 +70,13 @@ const DayCell = React.memo(function DayCell({
   day,
   dateStr,
   isToday,
+  isFuture = false,
   dietState,
   workoutState,
   calendarMode = 'diet',
   onSelectDate,
-  onOpenWorkoutModal
+  onOpenWorkoutModal,
+  onCatSpeak
 }) {
   const isWorkout = calendarMode === 'workout';
 
@@ -139,6 +141,13 @@ const DayCell = React.memo(function DayCell({
   const organicRotation = ((day * 7) % 5 - 2) * 1.2;
 
   const handleClick = () => {
+    if (isFuture) {
+      triggerHapticFeedback('selection');
+      if (onCatSpeak) {
+        onCatSpeak("Non puoi anticipare il tempo dell'Altro Mondo: registra solo oggi o i giorni passati.");
+      }
+      return;
+    }
     triggerHapticFeedback('selection');
     if (isWorkout) {
       onOpenWorkoutModal(dateStr);
@@ -154,6 +163,7 @@ const DayCell = React.memo(function DayCell({
   return (
     <button
       onClick={handleClick}
+      aria-label={isFuture ? `Giorno futuro non registrabile: ${day}` : `Giorno ${day}`}
       style={{
         aspectRatio: '1 / 1',
         width: '100%',
@@ -168,7 +178,7 @@ const DayCell = React.memo(function DayCell({
         fontFamily: 'var(--font-gothic)',
         fontSize: '14px',
         fontWeight: isToday ? 800 : 600,
-        cursor: 'pointer',
+        cursor: isFuture ? 'not-allowed' : 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -176,7 +186,7 @@ const DayCell = React.memo(function DayCell({
         lineHeight: 1,
         touchAction: 'pan-y',
         willChange: 'transform',
-        opacity: (isWorkout && workoutState === 'no') ? 0.45 : 1,
+        opacity: isFuture ? 0.35 : ((isWorkout && workoutState === 'no') ? 0.45 : 1),
         transform: 'translateZ(0)',
         transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease'
       }}
@@ -283,7 +293,8 @@ const CalendarGrid = React.memo(function CalendarGrid({
   displayMonth,
   onPrevMonth,
   onNextMonth,
-  onResetToCurrentMonth
+  onResetToCurrentMonth,
+  onCatSpeak
 }) {
   const touchStartRef = useRef(null);
   const [calendarMode, setCalendarMode] = useState('diet'); // 'diet' | 'workout'
@@ -618,6 +629,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
           const d = String(day).padStart(2, '0');
           const dateStr = `${displayYear}-${m}-${d}`;
           const isToday = dateStr === todayStr;
+          const isFuture = dateStr > todayStr;
           const log = (allLogs && allLogs[dateStr]) || {};
           const dietState = log.dietState;
           const workoutState = (workoutLogs && workoutLogs[dateStr]) || null;
@@ -628,11 +640,13 @@ const CalendarGrid = React.memo(function CalendarGrid({
               day={day}
               dateStr={dateStr}
               isToday={isToday}
+              isFuture={isFuture}
               dietState={dietState}
               workoutState={workoutState}
               calendarMode={calendarMode}
               onSelectDate={onSelectDate}
               onOpenWorkoutModal={(dStr) => setWorkoutModalState({ isOpen: true, dateStr: dStr })}
+              onCatSpeak={onCatSpeak}
             />
           );
         })}

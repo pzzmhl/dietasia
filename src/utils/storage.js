@@ -442,13 +442,16 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
       }
     }
 
-    // Scansione in avanti (per date già compilate o testate nel calendario)
+    // Scansione in avanti (fino ad un massimo di oggi - non conta mai giorni futuri)
     const futureDate = new Date(anchorDate);
     steps = 0;
-    while (steps < 3650) {
+    const nowLimit = new Date();
+    const todayLimitStr = formatYMD(nowLimit);
+    while (steps < 365) {
       steps++;
       futureDate.setDate(futureDate.getDate() + 1);
       const fStr = formatYMD(futureDate);
+      if (fStr > todayLimitStr) break;
       const state = allLogs[fStr]?.dietState;
       if (state === 'success') {
         streak++;
@@ -490,20 +493,14 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
   const todayState = allLogs[todayStr]?.dietState;
 
   if (todayState === 'cheat') {
-    // Se oggi ha registrato un Bottone Nero, lo streak attuale è interrotto (a meno che non stia testando date future)
-    const futureCheck = new Date(now);
-    futureCheck.setDate(futureCheck.getDate() + 1);
-    const tomorrowStr = formatYMD(futureCheck);
-    if (!allLogs[tomorrowStr] || allLogs[tomorrowStr].dietState === 'neutral') {
-      return 0;
-    }
+    return 0;
   }
 
   if (todayState === 'success' || todayState === 'cheat_key') {
     return computeChainAroundDate(todayStr);
   }
 
-  // Oggi non è ancora compilato: controlliamo ieri
+  // Oggi non è ancora compilato: controlliamo se ieri faceva parte di una serie attiva
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = formatYMD(yesterday);
@@ -513,22 +510,46 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
     return computeChainAroundDate(yesterdayStr);
   }
 
-  // 3. Fallback per test su altri giorni/mesi del calendario:
-  // Prende l'ultima data cronologicamente compilata. Se è un Bottone Nero ('cheat'), lo streak è 0.
-  const activeDates = Object.keys(allLogs)
-    .filter((dStr) => allLogs[dStr] && allLogs[dStr].dietState && allLogs[dStr].dietState !== 'neutral')
-    .sort();
+  // Se né oggi né ieri sono parte di una serie attiva (es. trascorsi 2 o più giorni vuoti),
+  // la serie attuale è 0 (elimina lo streak "zombie" dal passato remoto)
+  return 0;
+}
 
-  if (activeDates.length === 0) return 0;
+/**
+ * Calcola la serie migliore di giorni consecutivi di dieta rispettata all'interno di un mese specifico.
+ * Usata quando l'utente sfoglia mesi passati o futuri per mostrare il record di quel mese anziché lo streak odierno.
+ * @param {Record<string, any>} allLogs 
+ * @param {number} year 
+ * @param {number} month 0-indexed
+ * @returns {number}
+ */
+export function getMonthBestStreak(allLogs, year, month) {
+  if (!allLogs || typeof allLogs !== 'object') return 0;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const mStr = String(month + 1).padStart(2, '0');
 
-  const latestDateStr = activeDates[activeDates.length - 1];
-  const latestState = allLogs[latestDateStr]?.dietState;
+  let maxStreak = 0;
+  let currentStreak = 0;
 
-  if (latestState === 'cheat') {
-    return 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}-${mStr}-${String(d).padStart(2, '0')}`;
+    const state = allLogs[dStr]?.dietState;
+
+    if (state === 'success') {
+      currentStreak++;
+      if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+      }
+    } else if (state === 'cheat_key') {
+      // La chiave protegge la serie senza incrementarla
+      continue;
+    } else {
+      // Bottone nero o non segnato interrompe la serie
+      currentStreak = 0;
+    }
   }
 
-  return computeChainAroundDate(latestDateStr);
+  return maxStreak;
 }
 
 // =========================================================

@@ -147,9 +147,9 @@ export function calculateHistoricalComparison(allLogs = {}, workoutLogs = {}, di
   if (isFirstMonth) {
     catQuote = "Stai scrivendo l'inizio della tua storia: ogni giorno tracciato costruisce la tua media.";
   } else if (currentAdherence >= historicalAdherence) {
-    catQuote = "Stai tessendo una tela migliore del solito, Asia. L'Altra Madre perde terreno.";
+    catQuote = "Il cammino procede a passo sicuro, Asia. Il mondo vero ha sempre una bella luce.";
   } else {
-    catQuote = "Sei leggermente sotto il tuo ritmo abituale... ma il mese non è ancora cucito del tutto.";
+    catQuote = "Ogni mese ha il suo passo e la sua aria: ciò che conta è continuare con calma e gentilezza verso di te.";
   }
 
   return {

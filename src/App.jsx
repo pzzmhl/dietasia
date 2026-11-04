@@ -53,10 +53,16 @@ import {
   getWorkoutLogs,
   saveWorkoutLog,
   exportFullCloudBackupPayload,
+  restoreFullCloudBackupPayload,
   getCustomAvatar,
   saveCustomAvatar
 } from './utils/storage';
-import { triggerDebouncedCloudSync } from './services/supabase';
+import { 
+  isSupabaseConfigured,
+  getSupabaseUser,
+  downloadBackupFromSupabase,
+  triggerDebouncedCloudSync 
+} from './services/supabase';
 import { getRandomCatQuote, getSmartSituationalCatQuote } from './data/catQuotes';
 
 export default function App() {
@@ -240,6 +246,41 @@ export default function App() {
     setAllLogs(getAllLogs());
     initBackgroundMusic();
 
+    // Sincronizzazione automatica trasparente dal Cloud Supabase al primo avvio su nuovo dispositivo/browser
+    const checkCloudSyncOnStartup = async () => {
+      try {
+        if (!isSupabaseConfigured()) return;
+        const user = await getSupabaseUser();
+        if (!user) return;
+
+        const cloudRes = await downloadBackupFromSupabase();
+        if (cloudRes && cloudRes.data) {
+          const localLogs = getAllLogs();
+          const localCount = Object.keys(localLogs).length;
+          const cloudLogs = cloudRes.data.logs || {};
+          const cloudCount = Object.keys(cloudLogs).length;
+
+          const localLastTime = localStorage.getItem('coraline_last_cloud_backup_time') || '';
+          const shouldRestore = localCount === 0 || (cloudRes.updatedAt && cloudRes.updatedAt > localLastTime && cloudCount >= localCount);
+
+          if (shouldRestore) {
+            console.log('[Supabase] Ripristino automatico dal Cloud completato con successo!');
+            const restored = restoreFullCloudBackupPayload(cloudRes.data);
+            if (restored && restored.success) {
+              setAllLogs(restored.logs);
+              setWorkoutLogs(restored.workoutLogs);
+              if (restored.keysPerMonth) setKeysPerMonth(restored.keysPerMonth);
+              if (restored.profileAvatar) setCustomAvatar(restored.profileAvatar);
+            }
+          }
+        }
+      } catch (err) {
+        console.log('[Supabase] Sincronizzazione cloud in background completata:', err.message);
+      }
+    };
+
+    checkCloudSyncOnStartup();
+
     try {
       if (typeof document !== 'undefined') {
         const floatOff = localStorage.getItem('coraline_floating_fx') === 'false';
@@ -387,9 +428,10 @@ export default function App() {
     // 1. Chiude il modal di selezione del giorno se aperto
     setDayModalState({ isOpen: false, dateStr: null });
 
-    // Se l'aggiornamento proviene da un giorno passato della timeline demo, aggiorniamo solo i log senza sovrapporre i popup
-    const isTimelineEdit = optionalDateStr && optionalDateStr !== todayStr;
-    if (isTimelineEdit) {
+    // Se l'aggiornamento proviene da una data passata (sia calendario che topo saltatore),
+    // aggiorniamo i dati in silenzio senza inviare notifiche push intrusive né aprire popup a sorpresa
+    const isPastEdit = targetDate !== todayStr;
+    if (isPastEdit) {
       return;
     }
     if (newStatus === 'cheat_key') {
@@ -596,6 +638,7 @@ export default function App() {
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
           onResetToCurrentMonth={handleResetToCurrentMonth}
+          onCatSpeak={handleCatSpeak}
         />
 
         {/* SECONDA LINEA DI DEMARCAZIONE IN STILE CORALINE: SCARAFAGGIO-BOTTONE VIOLA */}
@@ -621,11 +664,11 @@ export default function App() {
           <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
         </div>
 
-        {/* 6. LUNGA DISCESA NELLA NOTTE STELLATA VERSO LA DEDICA NASCOSTA */}
+        {/* 6. DEDICA NELLA NOTTE STELLATA */}
         <div
           style={{
-            marginTop: '850px',
-            marginBottom: '30px',
+            marginTop: '56px',
+            marginBottom: '40px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -764,6 +807,9 @@ export default function App() {
 
             let consecutiveCheat = 0;
             let checkD = new Date(todayObj);
+            if (!todayStatus || todayStatus === 'neutral') {
+              checkD.setDate(checkD.getDate() - 1);
+            }
             for (let i = 0; i < 30; i++) {
               const cStr = `${checkD.getFullYear()}-${String(checkD.getMonth() + 1).padStart(2, '0')}-${String(checkD.getDate()).padStart(2, '0')}`;
               const state = (typeof allLogs[cStr] === 'object' ? allLogs[cStr]?.dietState : allLogs[cStr]) || null;

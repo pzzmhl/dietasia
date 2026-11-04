@@ -86,6 +86,14 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
   const [refY, refM, refD] = refDateStr.split('-').map(Number);
   const baseDate = new Date(refY, refM - 1, refD);
 
+  // Troviamo la prima data mai registrata nel database per non penalizzare giorni antecedenti all'installazione
+  const recordedDates = Object.keys(allLogs || {}).filter((dateKey) => {
+    const entry = allLogs[dateKey];
+    return entry && typeof entry === 'object' && entry.dietState && entry.dietState !== 'neutral';
+  });
+  recordedDates.sort();
+  const earliestDateStr = recordedDates.length > 0 ? recordedDates[0] : null;
+
   const daysBreakdown = [];
   let missedCount = 0;
 
@@ -111,8 +119,9 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
       isMissed = true;
       missedCount += 1;
     } else if (state === 'neutral') {
-      // Se è un giorno passato (i > 0) ed è rimasto non segnato, conta come non seguito
-      if (i > 0) {
+      // Un giorno passato conta come 'missed' SOLO se l'utente aveva già iniziato a usare l'app (post-earliestDate)
+      // I giorni precedenti all'installazione dell'app non vengono mai penalizzati
+      if (i > 0 && earliestDateStr && dateStr >= earliestDateStr) {
         isMissed = true;
         missedCount += 1;
       }

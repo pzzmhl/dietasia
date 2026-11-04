@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import secretDoorImg from '../assets/secret-door.webp';
 import { triggerHapticFeedback } from '../services/haptics';
 import { openCoralineSpotifyShuffle } from '../services/spotify';
+import { stopMusicWithFadeOut } from '../services/backgroundMusic';
 
 /**
  * La Porticina Segreta di Coraline (Portale Musicale dell'Altro Mondo)
@@ -77,6 +78,9 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
 
     triggerHapticFeedback('key');
     setIsUnlocking(true);
+
+    // Sfuma la musica d'atmosfera locale prima di aprire Spotify
+    stopMusicWithFadeOut();
 
     // Apre Spotify in shuffle mode con la playlist di Coraline direttamente (senza mostrare anteprime testo)
     openCoralineSpotifyShuffle();
