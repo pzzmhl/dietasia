@@ -139,6 +139,19 @@ export default function SecretSettingsModal({
   const prevInitialTabRef = useRef(initialTab);
   const modalScrollRef = useRef(null);
   const avatarFileInputRef = useRef(null);
+  const timersRef = useRef([]);
+
+  const addTimer = (id) => {
+    timersRef.current.push(id);
+    return id;
+  };
+
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
+    };
+  }, []);
 
   // Sincronizzazione sincrona durante il render per eliminare QUALSIASI ritardo o glitch di 1 frame
   if (isOpen && (!prevIsOpenRef.current || initialTab !== prevInitialTabRef.current)) {
@@ -229,7 +242,7 @@ export default function SecretSettingsModal({
         }
         triggerHapticFeedback('selection');
         setCloudMessage({ type: 'success', text: '✓ Foto profilo aggiornata! Sincronizzata su Cloud e Dashboard.' });
-        setTimeout(() => setCloudMessage(null), 4000);
+        addTimer(setTimeout(() => setCloudMessage(null), 4000));
       };
       img.src = event.target.result;
     };
@@ -355,7 +368,7 @@ export default function SecretSettingsModal({
     } else {
       setTestNotificationStatus('✕ Permesso notifiche non concesso. Abilitalo nelle impostazioni Android.');
     }
-    setTimeout(() => setTestNotificationStatus(null), 5000);
+    addTimer(setTimeout(() => setTestNotificationStatus(null), 5000));
   };
 
   // GESTIONE CHIAVI MENSILI
@@ -576,9 +589,9 @@ export default function SecretSettingsModal({
           type: 'success', 
           text: `✦ Nuova versione ${release.tag_name || ''} trovata! Download avviato...` 
         });
-        setTimeout(() => {
+        addTimer(setTimeout(() => {
           window.open(downloadUrl, '_system');
-        }, 400);
+        }, 400));
       } else {
         // Fallback diretto se l'endpoint API non è raggiungibile o rate-limited
         setUpdateStatus({ 
@@ -594,9 +607,9 @@ export default function SecretSettingsModal({
       });
       window.open(FALLBACK_APK_URL, '_system');
     } finally {
-      setTimeout(() => {
+      addTimer(setTimeout(() => {
         setUpdateLoading(false);
-      }, 1500);
+      }, 1500));
     }
   };
 
@@ -1231,7 +1244,7 @@ export default function SecretSettingsModal({
                       triggerHapticFeedback('selection');
                       if (onAvatarChange) onAvatarChange(null);
                       setCloudMessage({ type: 'success', text: '✓ Foto profilo ripristinata.' });
-                      setTimeout(() => setCloudMessage(null), 3000);
+                      addTimer(setTimeout(() => setCloudMessage(null), 3000));
                     }}
                     style={{
                       padding: '3px 8px',

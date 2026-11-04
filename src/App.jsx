@@ -22,7 +22,7 @@ import {
 } from './services/notifications';
 import { triggerHapticFeedback } from './services/haptics';
 import { smoothScrollToElement } from './utils/scrollAnimation';
-import { initBackgroundMusic } from './services/backgroundMusic';
+import { initBackgroundMusic, pauseMusicImmediately, playMusicWithFadeIn } from './services/backgroundMusic';
 import { playRandomCatSound } from './services/catAudio';
 
 // Immagini critiche per il rendering immediato e il preloading
@@ -164,6 +164,15 @@ export default function App() {
     }, 6000);
   }, []);
 
+  const modalOpenTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
+      if (catSpeechTimerRef.current) clearTimeout(catSpeechTimerRef.current);
+    };
+  }, []);
+
   // Modal Impostazioni / Profilo aperto dal tasto profilo in alto a destra
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('settings');
@@ -204,10 +213,12 @@ export default function App() {
     cat: catModalState.isOpen
   };
 
-  // Gestione nativa del tasto indietro Android (Hardware & Gesture navigation)
+  // Gestione nativa del tasto indietro Android e ciclo di vita app (Lifecycle & Batteria)
   useEffect(() => {
     let backListener = null;
-    const registerBackHandler = async () => {
+    let appStateListener = null;
+
+    const registerNativeHandlers = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
           const { settings, dailyGreeting, love, day, story, cat } = activeModalsRef.current;
@@ -228,15 +239,27 @@ export default function App() {
             CapApp.exitApp();
           }
         });
+
+        // Quando l'app va in background su Android, sospende l'audio per preservare la batteria
+        appStateListener = await CapApp.addListener('appStateChange', ({ isActive }) => {
+          if (!isActive) {
+            pauseMusicImmediately();
+          } else {
+            playMusicWithFadeIn();
+          }
+        });
       } catch (err) {
         // Ambiente web standard
       }
     };
-    registerBackHandler();
+    registerNativeHandlers();
 
     return () => {
       if (backListener && backListener.remove) {
         backListener.remove();
+      }
+      if (appStateListener && appStateListener.remove) {
+        appStateListener.remove();
       }
     };
   }, []);
@@ -440,7 +463,8 @@ export default function App() {
       if (isNowLastKey) {
         // NOTIFICA 2: Sgarri terminati! L'Altra Madre ingoia l'ultima chiave
         sendOtherMotherKeysDepletedNotification();
-        setTimeout(() => {
+        if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
+        modalOpenTimerRef.current = setTimeout(() => {
           setStoryModalState({
             isOpen: true,
             type: 'other_mother_keys',
@@ -455,7 +479,8 @@ export default function App() {
           localStorage.setItem('coraline_last_cat_context', 'key');
         } catch (e) {}
 
-        setTimeout(() => {
+        if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
+        modalOpenTimerRef.current = setTimeout(() => {
           setCatModalState({
             isOpen: true,
             quote,
@@ -479,7 +504,8 @@ export default function App() {
         } catch (e) {}
 
         sendWybieStreakNotification(newStreak);
-        setTimeout(() => {
+        if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
+        modalOpenTimerRef.current = setTimeout(() => {
           setStoryModalState({
             isOpen: true,
             type: 'wybie_streak',
@@ -493,7 +519,8 @@ export default function App() {
           localStorage.setItem('coraline_last_cat_context', 'success');
         } catch (e) {}
 
-        setTimeout(() => {
+        if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
+        modalOpenTimerRef.current = setTimeout(() => {
           setCatModalState({
             isOpen: true,
             quote,
@@ -513,7 +540,8 @@ export default function App() {
         localStorage.setItem('coraline_last_cat_context', 'cheat');
       } catch (e) {}
 
-      setTimeout(() => {
+      if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
+      modalOpenTimerRef.current = setTimeout(() => {
         setCatModalState({
           isOpen: true,
           quote,

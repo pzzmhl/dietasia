@@ -17,15 +17,8 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
   workoutLogs: propWorkoutLogs,
   onSaveWorkout
 }) {
-  // Mappa di allenamenti per data
-  const [localWorkoutLogs, setLocalWorkoutLogs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('coraline_workout_logs');
-      return saved ? JSON.parse(saved) : {};
-    } catch (e) {
-      return {};
-    }
-  });
+  // Mappa di allenamenti per data con fallback in memoria
+  const [localWorkoutLogs, setLocalWorkoutLogs] = useState(() => propWorkoutLogs || {});
 
   const workoutLogs = propWorkoutLogs || localWorkoutLogs;
   const todayStatus = workoutLogs[todayStr] || null;

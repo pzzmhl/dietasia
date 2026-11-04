@@ -207,6 +207,7 @@ export function restoreFullCloudBackupPayload(payload) {
   if (payload.workoutLogs && typeof payload.workoutLogs === 'object') {
     try {
       localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(payload.workoutLogs));
+      workoutLogsMemoryCache = payload.workoutLogs;
       importedWorkouts = payload.workoutLogs;
     } catch (e) {}
   }
@@ -556,22 +557,26 @@ export function getMonthBestStreak(allLogs, year, month) {
 // GESTIONE ALLENAMENTI ASIA (IL GRANDE BOBINSKY)
 // =========================================================
 const WORKOUT_STORAGE_KEY = 'coraline_workout_logs';
+let workoutLogsMemoryCache = null;
 
 /**
- * Ottiene tutti i log di allenamento registrati
+ * Ottiene tutti i log di allenamento registrati con cache in memoria RAM (zero blocco I/O)
  * @returns {Record<string, 'yes' | 'no'>}
  */
 export function getWorkoutLogs() {
+  if (workoutLogsMemoryCache !== null) return workoutLogsMemoryCache;
   try {
     const raw = localStorage.getItem(WORKOUT_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    workoutLogsMemoryCache = raw ? JSON.parse(raw) : {};
+    return workoutLogsMemoryCache;
   } catch (e) {
-    return {};
+    workoutLogsMemoryCache = {};
+    return workoutLogsMemoryCache;
   }
 }
 
 /**
- * Salva o aggiorna lo stato di allenamento per una data
+ * Salva o aggiorna lo stato di allenamento per una data con sincronizzazione cache atomica
  * @param {string} dateStr 'YYYY-MM-DD'
  * @param {'yes' | 'no' | null} status 
  * @returns {Record<string, 'yes' | 'no'>}
@@ -585,6 +590,7 @@ export function saveWorkoutLog(dateStr, status) {
     } else {
       updated[dateStr] = status;
     }
+    workoutLogsMemoryCache = updated;
     localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(updated));
     return updated;
   } catch (e) {

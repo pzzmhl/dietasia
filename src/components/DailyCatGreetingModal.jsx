@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import catStandingImg from '../assets/cat-standing.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 import { triggerHapticFeedback } from '../services/haptics';
@@ -17,6 +17,15 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
   const [visible, setVisible] = useState(false);
   const [greeting, setGreeting] = useState('');
   const [quote, setQuote] = useState('');
+  const dismissTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,7 +43,8 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
   const handleDismiss = () => {
     triggerHapticFeedback('selection');
     setVisible(false);
-    setTimeout(() => {
+    if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+    dismissTimerRef.current = setTimeout(() => {
       onClose();
     }, 240);
   };

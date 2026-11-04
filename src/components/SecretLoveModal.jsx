@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { triggerHapticFeedback } from '../services/haptics';
 
 /**
@@ -7,6 +7,15 @@ import { triggerHapticFeedback } from '../services/haptics';
  */
 export default function SecretLoveModal({ isOpen, onClose }) {
   const [visible, setVisible] = useState(false);
+  const closeTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -23,7 +32,8 @@ export default function SecretLoveModal({ isOpen, onClose }) {
   const handleClose = () => {
     triggerHapticFeedback('selection');
     setVisible(false);
-    setTimeout(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
       onClose();
     }, 200);
   };

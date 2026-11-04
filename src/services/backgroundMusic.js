@@ -159,6 +159,20 @@ export function stopMusicWithFadeOut() {
 }
 
 /**
+ * Mette in pausa immediata la musica quando l'app va in background su Android (risparmio CPU/batteria)
+ */
+export function pauseMusicImmediately() {
+  const audio = getOrCreateAudio();
+  if (audio && !audio.paused) {
+    if (fadeInterval) {
+      clearInterval(fadeInterval);
+      fadeInterval = null;
+    }
+    audio.pause();
+  }
+}
+
+/**
  * Sblocca l'audio al primo tocco o click dello schermo (risolve la restrizione Autoplay di Chrome/Android)
  */
 function setupAutoplayUnlock() {

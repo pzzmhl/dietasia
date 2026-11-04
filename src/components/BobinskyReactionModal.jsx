@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import bobinskyYesImg from '../assets/bobinsky-workout-yes.jpg';
 import bobinskyNoImg from '../assets/bobinsky-workout-no.jpg';
 
@@ -15,6 +15,19 @@ export default function BobinskyReactionModal({
   duration = 5000
 }) {
   const [visible, setVisible] = useState(false);
+  const timersRef = useRef([]);
+
+  const addTimer = (id) => {
+    timersRef.current.push(id);
+    return id;
+  };
+
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
+    };
+  }, []);
 
   useEffect(() => {
     if (!status) {
@@ -24,12 +37,12 @@ export default function BobinskyReactionModal({
 
     const raf = requestAnimationFrame(() => setVisible(true));
 
-    const timer = setTimeout(() => {
+    const timer = addTimer(setTimeout(() => {
       setVisible(false);
-      setTimeout(() => {
+      addTimer(setTimeout(() => {
         if (onClose) onClose();
-      }, 260);
-    }, duration);
+      }, 260));
+    }, duration));
 
     return () => {
       cancelAnimationFrame(raf);
@@ -44,9 +57,9 @@ export default function BobinskyReactionModal({
 
   const handleDismiss = () => {
     setVisible(false);
-    setTimeout(() => {
+    addTimer(setTimeout(() => {
       if (onClose) onClose();
-    }, 200);
+    }, 200));
   };
 
   return (

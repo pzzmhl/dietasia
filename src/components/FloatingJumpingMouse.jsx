@@ -39,6 +39,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
     return false;
   });
   const hasPlayedEntranceSoundRef = useRef(false);
+  const testTimerRef = useRef(null);
 
   // Ascolta l'evento di test manuale per provare l'animazione e la trombetta
   useEffect(() => {
@@ -49,7 +50,8 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
       setIsDismissed(false);
       setIsCloudOpen(true);
       setTestForced(true);
-      setTimeout(() => {
+      if (testTimerRef.current) clearTimeout(testTimerRef.current);
+      testTimerRef.current = setTimeout(() => {
         playTrumpetFanfare(0.85);
       }, 250);
     };
@@ -59,6 +61,9 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
 
     return () => {
       window.removeEventListener('test-coraline-mouse', handleTestEvent);
+      if (testTimerRef.current) {
+        clearTimeout(testTimerRef.current);
+      }
     };
   }, []);
 
