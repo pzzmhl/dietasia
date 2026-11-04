@@ -698,7 +698,7 @@ export default function App() {
       </div>
 
       <div style={{
-        minHeight: '100vh',
+        minHeight: '100%',
         width: '100%',
         maxWidth: '480px',
         margin: '0 auto',
@@ -706,8 +706,7 @@ export default function App() {
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        zIndex: 1,
-        touchAction: 'pan-y'
+        zIndex: 1
       }}>
         {/* 1. COMPONENTE PRINCIPALE DASHBOARD: BUTTON MOON ECLIPSE */}
         <div style={{ marginBottom: '16px' }}>

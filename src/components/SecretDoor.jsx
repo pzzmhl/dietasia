@@ -104,7 +104,7 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
         marginTop: '18px',
         marginBottom: '40px',
         position: 'relative',
-        touchAction: 'pan-y'
+        touchAction: 'manipulation'
       }}
     >
       {/* Bottone interattivo con la porticina */}

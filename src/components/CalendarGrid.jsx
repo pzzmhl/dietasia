@@ -185,7 +185,7 @@ const DayCell = React.memo(function DayCell({
         justifyContent: 'center',
         position: 'relative',
         lineHeight: 1,
-        touchAction: 'pan-y',
+        touchAction: 'manipulation',
         willChange: 'transform',
         opacity: isFuture ? 0.35 : ((isWorkout && workoutState === 'no') ? 0.45 : 1),
         transform: 'translateZ(0)',
@@ -384,7 +384,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
-        touchAction: 'pan-y',
+        touchAction: 'manipulation',
         transition: 'border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease'
       }}
     >
@@ -514,7 +514,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '14px',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'transform 0.1s ease, border-color 0.35s ease, background-color 0.35s ease'
           }}
         >
@@ -581,7 +581,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '14px',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'transform 0.1s ease, border-color 0.35s ease, background-color 0.35s ease'
           }}
         >

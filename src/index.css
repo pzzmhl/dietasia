@@ -45,28 +45,20 @@ html {
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
-  touch-action: pan-y;
   background-color: var(--bg-deep);
 }
 
 body {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
   background-color: var(--bg-deep);
   color: var(--coraline-parchment);
   font-family: var(--font-body);
   user-select: none;
   -webkit-user-select: none;
-  touch-action: pan-y; /* Permette lo scorrimento verticale naturale ovunque con il dito */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -76,13 +68,12 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  touch-action: pan-y;
 }
 
 button, a, input, [role="button"] {
   font-family: inherit;
   outline: none;
-  touch-action: pan-y; /* Permette il trascinamento verticale naturale anche quando il tocco inizia su un pulsante */
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;

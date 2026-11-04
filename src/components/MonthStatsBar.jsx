@@ -261,7 +261,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'all 0.18s ease',
             position: 'relative',
             overflow: 'hidden'
@@ -355,7 +355,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'all 0.18s ease',
             position: 'relative',
             overflow: 'hidden'
@@ -448,7 +448,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'all 0.18s ease',
             position: 'relative',
             overflow: 'hidden'
@@ -541,7 +541,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'all 0.18s ease',
             position: 'relative',
             overflow: 'hidden'
@@ -634,7 +634,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'all 0.18s ease',
             position: 'relative',
             overflow: 'hidden'
@@ -727,7 +727,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
               : '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             textAlign: 'center',
             cursor: 'pointer',
-            touchAction: 'pan-y',
+            touchAction: 'manipulation',
             transition: 'all 0.18s ease',
             position: 'relative',
             overflow: 'hidden'

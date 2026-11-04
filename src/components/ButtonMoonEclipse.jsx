@@ -154,7 +154,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     isHorizontalSwipe.current = null;
-    setIsDragging(true);
+    setIsDragging(false);
     setDragOffset(0);
   };
 
@@ -166,8 +166,13 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     const deltaY = currentY - touchStartY.current;
 
     if (isHorizontalSwipe.current === null) {
-      if (Math.abs(deltaX) > 6 || Math.abs(deltaY) > 6) {
-        isHorizontalSwipe.current = Math.abs(deltaX) > Math.abs(deltaY) * 1.1;
+      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
+          isHorizontalSwipe.current = true;
+          setIsDragging(true);
+        } else {
+          isHorizontalSwipe.current = false;
+        }
       }
     }
 
@@ -389,7 +394,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           maxHeight: '388px',
           position: 'relative',
           overflow: 'hidden',
-          touchAction: 'pan-y'
+          touchAction: 'manipulation'
         }}
       >
         {/* BINARIO ORIZZONTALE DEI DUE BOX CONCATENATI (200% LARGHEZZA) */}
