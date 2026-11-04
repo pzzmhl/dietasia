@@ -17,6 +17,17 @@ import {
   downloadBackupFromSupabase,
   saveCustomSupabaseConfig
 } from '../services/supabase';
+import {
+  getPendingSyncCount,
+  getSyncStatus,
+  subscribeSyncStatus,
+  flushSyncQueue
+} from '../utils/syncQueue.js';
+import {
+  checkForAppUpdates,
+  downloadAndInstallUpdate,
+  CURRENT_APP_VERSION
+} from '../utils/updateChecker.js';
 import { 
   scheduleDailyReminder, 
   cancelDailyReminder, 
@@ -140,6 +151,7 @@ export default function SecretSettingsModal({
   const prevInitialTabRef = useRef(initialTab);
   const modalScrollRef = useRef(null);
   const avatarFileInputRef = useRef(null);
+  const localBackupFileInputRef = useRef(null);
   const timersRef = useRef([]);
 
   const addTimer = (id) => {
@@ -291,6 +303,19 @@ export default function SecretSettingsModal({
   // STATI AGGIORNAMENTO APP
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(null);
+
+  // STATI SYNC QUEUE OFFLINE-FIRST
+  const [syncStatus, setSyncStatus] = useState(() => getSyncStatus());
+  const [pendingCount, setPendingCount] = useState(() => getPendingSyncCount());
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const unsub = subscribeSyncStatus((st) => {
+      setSyncStatus(st);
+      setPendingCount(getPendingSyncCount());
+    });
+    return unsub;
+  }, [isOpen]);
 
   useEffect(() => {
     return subscribeMusicState((enabled) => {
@@ -484,9 +509,9 @@ export default function SecretSettingsModal({
     triggerHapticFeedback('selection');
 
     try {
-      const payload = exportFullCloudBackupPayload();
-      const updatedTime = await uploadBackupToSupabase(payload);
-      setLastCloudBackup(updatedTime);
+      await flushSyncQueue();
+      const last = localStorage.getItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME);
+      if (last) setLastCloudBackup(last);
       setCloudMessage({ type: 'success', text: '✓ Dati salvati nel Cloud con successo!' });
     } catch (err) {
       console.error('Errore backup cloud:', err);
@@ -559,63 +584,108 @@ export default function SecretSettingsModal({
     } catch (e) {}
   };
 
+  // BACKUP LOCALE (.json) ZERO-CLOUD
+  const handleExportLocalBackup = () => {
+    triggerHapticFeedback('selection');
+    try {
+      const payload = exportFullCloudBackupPayload();
+      const jsonStr = JSON.stringify(payload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const fileName = `backup_dieta_coraline_${dateStr}.json`;
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setCloudMessage({ type: 'success', text: `✓ Backup esportato con successo (${fileName})!` });
+      addTimer(setTimeout(() => setCloudMessage(null), 4000));
+    } catch (err) {
+      console.error('Errore export backup locale:', err);
+      setCloudMessage({ type: 'error', text: '✕ Impossibile creare il file di backup.' });
+      addTimer(setTimeout(() => setCloudMessage(null), 4000));
+    }
+  };
+
+  const handleImportLocalBackupFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    triggerHapticFeedback('selection');
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result;
+        if (!text || typeof text !== 'string') {
+          throw new Error('Il file di backup è vuoto.');
+        }
+
+        const parsed = JSON.parse(text);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('Il file non contiene un formato JSON valido.');
+        }
+
+        restoreFullCloudBackupPayload(parsed);
+        if (onRestoreSuccess) {
+          onRestoreSuccess();
+        }
+
+        setCloudMessage({ 
+          type: 'success', 
+          text: '✓ Backup locale ripristinato con successo!' 
+        });
+        addTimer(setTimeout(() => setCloudMessage(null), 4000));
+      } catch (err) {
+        console.error('Errore ripristino backup locale:', err);
+        setCloudMessage({ 
+          type: 'error', 
+          text: `✕ Ripristino fallito: ${err.message || 'file non riconosciuto'}` 
+        });
+        addTimer(setTimeout(() => setCloudMessage(null), 5000));
+      }
+    };
+    reader.onerror = () => {
+      setCloudMessage({ type: 'error', text: '✕ Errore durante la lettura del file dal dispositivo.' });
+      addTimer(setTimeout(() => setCloudMessage(null), 4000));
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const handleUpdateApp = async () => {
     if (updateLoading) return;
     triggerHapticFeedback('selection');
     setUpdateLoading(true);
     setUpdateStatus(null);
-    const CURRENT_APP_VERSION = '2.7.0';
-    const GITHUB_REPO = 'pzzmhl/dietasia';
-    const FALLBACK_APK_URL = `https://github.com/${GITHUB_REPO}/releases/latest/download/Coraline-Tracker-Beta.apk`;
-
-    const controller = new AbortController();
-    const abortTimeout = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
-        signal: controller.signal,
-        headers: { Accept: 'application/vnd.github.v3+json' }
-      });
-      clearTimeout(abortTimeout);
-      if (res.ok) {
-        const release = await res.json();
-        const latestTag = (release.tag_name || '').replace(/^v/, '').trim();
-        
-        // Se la versione remota coincide con quella corrente installata
-        if (latestTag && latestTag === CURRENT_APP_VERSION) {
-          setUpdateStatus({ 
-            type: 'info', 
-            text: `✓ L'applicazione è già aggiornata all'ultima versione (v${CURRENT_APP_VERSION}).` 
-          });
-          setUpdateLoading(false);
-          return;
-        }
-
-        const apkAsset = release.assets && release.assets.find(a => a.name && a.name.endsWith('.apk'));
-        const downloadUrl = apkAsset ? apkAsset.browser_download_url : FALLBACK_APK_URL;
-
+      const res = await checkForAppUpdates({ force: true });
+      if (res.updateAvailable) {
         setUpdateStatus({ 
           type: 'success', 
-          text: `✦ Nuova versione ${release.tag_name || ''} trovata! Download avviato...` 
+          text: `✦ Nuova versione ${res.latestVersion} trovata! Download avviato...` 
         });
         addTimer(setTimeout(() => {
-          window.open(downloadUrl, '_system');
+          downloadAndInstallUpdate(res.apkUrl);
         }, 400));
       } else {
-        // Fallback diretto se l'endpoint API non è raggiungibile o rate-limited
         setUpdateStatus({ 
           type: 'info', 
-          text: "✦ Avvio del download dell'aggiornamento APK..." 
+          text: `✓ L'applicazione è già aggiornata all'ultima versione (v${CURRENT_APP_VERSION}).` 
         });
-        window.open(FALLBACK_APK_URL, '_system');
       }
     } catch (err) {
-      clearTimeout(abortTimeout);
       setUpdateStatus({ 
         type: 'info', 
         text: "✦ Avvio del download dell'aggiornamento APK..." 
       });
-      window.open(FALLBACK_APK_URL, '_system');
+      downloadAndInstallUpdate();
     } finally {
       addTimer(setTimeout(() => {
         setUpdateLoading(false);
@@ -670,9 +740,9 @@ export default function SecretSettingsModal({
         style={{
           width: '100%',
           maxWidth: '430px',
-          height: 'min(535px, 88vh)',
-          minHeight: 'min(535px, 88vh)',
-          maxHeight: '88vh',
+          maxHeight: 'min(580px, 90vh)',
+          height: 'auto',
+          minHeight: '280px',
           display: 'flex',
           flexDirection: 'column',
           background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.94) 0%, rgba(5, 17, 30, 0.97) 65%, rgba(3, 10, 18, 0.98) 100%)',
@@ -990,7 +1060,7 @@ export default function SecretSettingsModal({
               )}
             </div>
 
-            {/* 2. CHIAVI DI SGARRO MENSILI */}
+            {/* 2. CHIAVI DELLA FLESSIBILITÀ MENSILI */}
             <div style={{
               background: 'linear-gradient(180deg, rgba(8, 26, 44, 0.88) 0%, rgba(4, 16, 28, 0.94) 100%)',
               borderRadius: '16px',
@@ -1010,7 +1080,7 @@ export default function SecretSettingsModal({
                   color: '#f3f4f6',
                   letterSpacing: '0.4px'
                 }}>
-                  Chiavi Jolly per Mese
+                  Chiavi della Flessibilità per Mese
                 </div>
                 <div style={{ 
                   fontFamily: 'var(--font-body)',
@@ -1019,7 +1089,7 @@ export default function SecretSettingsModal({
                   opacity: 0.75,
                   marginTop: '2px'
                 }}>
-                  Sgarri speciali consentiti prima dell'Altra Madre
+                  Momenti di libertà mensili per mantenere l'equilibrio
                 </div>
               </div>
 
@@ -1316,13 +1386,15 @@ export default function SecretSettingsModal({
                     <div style={{
                       fontFamily: 'var(--font-body)',
                       fontSize: '10.5px',
-                      color: 'var(--coraline-parchment)',
-                      opacity: 0.75,
+                      color: pendingCount > 0 ? 'var(--coraline-yellow)' : 'var(--coraline-parchment)',
+                      opacity: 0.85,
                       marginTop: '3px'
                     }}>
-                      {lastCloudBackup 
-                        ? `Ultimo sync: ${formatCloudBackupDate(lastCloudBackup)}` 
-                        : 'Sincronizzato e protetto'}
+                      {pendingCount > 0 
+                        ? `⏳ ${pendingCount} ${pendingCount === 1 ? 'modifica in attesa' : 'modifiche in attesa'} (Offline)` 
+                        : (syncStatus === 'syncing' 
+                            ? '🔄 Sincronizzazione in corso...' 
+                            : (lastCloudBackup ? `Ultimo sync: ${formatCloudBackupDate(lastCloudBackup)}` : 'Sincronizzato e protetto'))}
                     </div>
                   </div>
                   <button
@@ -1450,6 +1522,7 @@ export default function SecretSettingsModal({
                       type="email"
                       value={cloudEmail}
                       onChange={(e) => setCloudEmail(e.target.value)}
+                      onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                       placeholder="Email (es. asia@email.com)"
                       required
                       autoCapitalize="none"
@@ -1471,6 +1544,7 @@ export default function SecretSettingsModal({
                       type="password"
                       value={cloudPassword}
                       onChange={(e) => setCloudPassword(e.target.value)}
+                      onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                       placeholder="Password"
                       required
                       minLength={6}
@@ -1544,11 +1618,21 @@ export default function SecretSettingsModal({
                       flexDirection: 'column',
                       gap: '6px'
                     }}>
+                      <div style={{
+                        fontFamily: 'var(--font-body)',
+                        fontSize: '10.5px',
+                        color: 'rgba(221, 202, 183, 0.75)',
+                        lineHeight: 1.35,
+                        marginBottom: '2px'
+                      }}>
+                        Inserisci le credenziali dal pannello di Supabase (Project Settings → API). I tuoi dati restano sul tuo database privato.
+                      </div>
                       <input
                         type="url"
                         value={customSupabaseUrl}
                         onChange={(e) => setCustomSupabaseUrl(e.target.value)}
-                        placeholder="Project URL"
+                        onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                        placeholder="Project URL (https://xyz.supabase.co)"
                         style={{
                           backgroundColor: 'rgba(6, 20, 34, 0.9)',
                           border: '1px solid rgba(107, 142, 85, 0.35)',
@@ -1563,7 +1647,8 @@ export default function SecretSettingsModal({
                         type="text"
                         value={customSupabaseKey}
                         onChange={(e) => setCustomSupabaseKey(e.target.value)}
-                        placeholder="Anon Public Key"
+                        onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                        placeholder="Anon Public Key (eyJ...)"
                         style={{
                           backgroundColor: 'rgba(6, 20, 34, 0.9)',
                           border: '1px solid rgba(107, 142, 85, 0.35)',
@@ -1635,6 +1720,96 @@ export default function SecretSettingsModal({
               </div>
             )}
 
+            {/* SEZIONE BACKUP LOCALE ZERO-CLOUD (.json) */}
+            <div style={{
+              background: 'linear-gradient(180deg, rgba(8, 26, 44, 0.88) 0%, rgba(4, 16, 28, 0.94) 100%)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              border: '1.2px solid rgba(139, 229, 116, 0.3)',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}>
+              <div>
+                <div style={{
+                  fontFamily: 'var(--font-gothic)',
+                  fontSize: '12.5px',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  letterSpacing: '0.4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <span>💾 Backup Locale (Zero-Cloud)</span>
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '11px',
+                  color: 'var(--coraline-parchment)',
+                  opacity: 0.8,
+                  marginTop: '3px',
+                  lineHeight: 1.35
+                }}>
+                  Esporta o ripristina tutti i tuoi dati (dieta, allenamenti e preferenze) in un file .json sul tuo dispositivo.
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleExportLocalBackup}
+                  style={{
+                    padding: '9px 8px',
+                    borderRadius: '10px',
+                    border: '1.2px solid rgba(139, 229, 116, 0.55)',
+                    backgroundColor: 'rgba(16, 60, 30, 0.8)',
+                    color: '#8be574',
+                    fontFamily: 'var(--font-gothic)',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    touchAction: 'manipulation',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+                  }}
+                >
+                  ✦ Esporta (.json)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback('selection');
+                    localBackupFileInputRef.current && localBackupFileInputRef.current.click();
+                  }}
+                  style={{
+                    padding: '9px 8px',
+                    borderRadius: '10px',
+                    border: '1.2px solid rgba(216, 198, 21, 0.55)',
+                    backgroundColor: 'rgba(60, 48, 12, 0.8)',
+                    color: 'var(--coraline-yellow)',
+                    fontFamily: 'var(--font-gothic)',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    touchAction: 'manipulation',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+                  }}
+                >
+                  ✦ Ripristina (.json)
+                </button>
+              </div>
+
+              <input
+                ref={localBackupFileInputRef}
+                type="file"
+                accept=".json,application/json"
+                style={{ display: 'none' }}
+                onChange={handleImportLocalBackupFile}
+              />
+            </div>
+
             {/* PULSANTE AGGIORNA L'APP */}
             <div style={{ marginTop: '8px' }}>
               <button
@@ -1662,7 +1837,7 @@ export default function SecretSettingsModal({
                   transition: 'all 0.15s ease'
                 }}
               >
-                {updateLoading ? 'Verifica aggiornamenti...' : "Aggiorna l'app"}
+                {updateLoading ? 'Verifica varchi in corso...' : "✦ Cerca nuove porte (Aggiorna l'app)"}
               </button>
 
               {updateStatus && (

@@ -1,32 +1,43 @@
 import { getConsecutiveDietStreak } from './storage';
 
+let cachedLogsRef = null;
+let cachedBestStreak = 0;
+
 /**
- * Calcola la serie record storica assoluta (All-Time Best Streak) di giorni consecutivi rispettati
+ * Calcola la serie record storica assoluta (All-Time Best Streak) di giorni consecutivi rispettati.
+ * Ottimizzato per alte prestazioni con calcolo numerico dei giorni (zero allocazioni Date nel loop)
+ * e cache in memoria RAM per azzerare il carico sulla CPU.
  * @param {Record<string, { dietState: string }>} allLogs 
  * @returns {number}
  */
 export function getAllTimeBestStreak(allLogs = {}) {
+  if (allLogs && allLogs === cachedLogsRef) {
+    return cachedBestStreak;
+  }
+
   const dates = Object.keys(allLogs || {})
     .filter((d) => allLogs[d] && (allLogs[d].dietState === 'success' || allLogs[d].dietState === 'cheat_key'))
     .sort();
 
-  if (dates.length === 0) return 0;
+  if (dates.length === 0) {
+    cachedLogsRef = allLogs;
+    cachedBestStreak = 0;
+    return 0;
+  }
 
   let maxStreak = 0;
   let currentStreak = 0;
-  let prevDate = null;
+  let prevDayEpoch = null;
 
   dates.forEach((dStr) => {
     const parts = (dStr && typeof dStr === 'string') ? dStr.split('-').map(Number) : [];
     if (parts.length !== 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return;
-    const currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
-    currentDate.setHours(12, 0, 0, 0);
+    const currentDayEpoch = Math.floor(Date.UTC(parts[0], parts[1] - 1, parts[2]) / 86400000);
 
-    if (!prevDate) {
+    if (prevDayEpoch === null) {
       currentStreak = 1;
     } else {
-      const diffMs = currentDate.getTime() - prevDate.getTime();
-      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      const diffDays = currentDayEpoch - prevDayEpoch;
       if (diffDays === 1) {
         currentStreak++;
       } else if (diffDays === 0) {
@@ -35,14 +46,17 @@ export function getAllTimeBestStreak(allLogs = {}) {
         currentStreak = 1;
       }
     }
-    prevDate = currentDate;
+    prevDayEpoch = currentDayEpoch;
     if (currentStreak > maxStreak) {
       maxStreak = currentStreak;
     }
   });
 
   const activeStreak = getConsecutiveDietStreak(allLogs);
-  return Math.max(maxStreak, activeStreak);
+  const result = Math.max(maxStreak, activeStreak);
+  cachedLogsRef = allLogs;
+  cachedBestStreak = result;
+  return result;
 }
 
 /**

@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
+import { enqueueSyncOperation } from './syncQueue.js';
 
 const STORAGE_KEY = STORAGE_KEYS.HABIT_TRACKER_LOGS;
 const BACKUP_SNAPSHOT_KEY = STORAGE_KEYS.BACKUP_SNAPSHOT;
@@ -16,6 +17,20 @@ export function getTodayDateString() {
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+export const formatYMD = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+export const parseYMD = (str) => {
+  if (!str || typeof str !== 'string') return null;
+  const parts = str.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return null;
+  return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+};
 
 /**
  * Carica l'intero database locale con cache in RAM e auto-ripristino da snapshot
@@ -109,6 +124,15 @@ export function saveDayLog(dateStr, updates) {
       console.error("Errore scrittura localStorage/snapshot:", writeErr);
     }
 
+    // Accoda l'operazione nella Coda Offline Persistente (Offline-First Sync)
+    try {
+      enqueueSyncOperation({
+        type: 'diet_log',
+        key: dateStr,
+        payload: updates
+      });
+    } catch (qErr) {}
+
     return nextAll[dateStr] || { dietState: 'neutral', updatedAt: new Date().toISOString() };
   } catch (err) {
     console.error("Errore salvataggio dati locali:", err);
@@ -146,6 +170,15 @@ export function saveCustomAvatar(base64Data) {
     } else {
       localStorage.removeItem(STORAGE_KEYS.CUSTOM_AVATAR);
     }
+
+    try {
+      enqueueSyncOperation({
+        type: 'profile_avatar',
+        key: 'custom_avatar',
+        payload: { hasAvatar: Boolean(base64Data) }
+      });
+    } catch (qErr) {}
+
     return true;
   } catch (e) {
     console.error('Errore salvataggio avatar:', e);
@@ -205,6 +238,14 @@ export function restoreFullCloudBackupPayload(payload) {
   if (payload.logs && typeof payload.logs === 'object') {
     const res = importBackupData(JSON.stringify({ logs: payload.logs }));
     importedLogs = res.logs || {};
+  } else {
+    // Prova se il payload è direttamente una mappa di date o contiene logs a livello radice
+    try {
+      const res = importBackupData(JSON.stringify(payload));
+      importedLogs = res.logs || {};
+    } catch (e) {
+      // Se non contiene logs validi, prosegue con gli altri campi
+    }
   }
 
   // 2. Ripristina log allenamento
@@ -285,6 +326,7 @@ export function importBackupData(jsonString) {
     if (dateRegex.test(dateStr) && entry && typeof entry === 'object') {
       if (validStates.includes(entry.dietState)) {
         sanitized[dateStr] = {
+          ...entry,
           dietState: entry.dietState,
           updatedAt: entry.updatedAt || new Date().toISOString()
         };
@@ -313,20 +355,25 @@ export function importBackupData(jsonString) {
 }
 
 /**
- * Cancella tutti i log registrati (Reset completo del diario)
+ * Cancella tutti i log registrati (Reset completo del diario di dieta e allenamento)
  */
 export function clearAllLogs() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
   localStorage.setItem(BACKUP_SNAPSHOT_KEY, JSON.stringify({}));
+  localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify({}));
+  try {
+    localStorage.removeItem(STORAGE_KEYS.PENDING_SYNC_QUEUE);
+  } catch (e) {}
   logsMemoryCache = {};
+  workoutLogsMemoryCache = {};
   return {};
 }
 
 /**
  * Trova i giorni passati non contrassegnati per l'avviso del Topo Saltatore.
- * Regola richiesta:
- * L'avviso NON deve apparire per oggi né per ieri (1 giorno fa).
- * Deve apparire SOLO quando c'è un giorno non segnato indietro di ALMENO 2 giorni (l'altro ieri o precedente).
+ * Regola:
+ * Include i giorni passati non compilati a partire da ieri (periodo di grazia visivo per la luna,
+ * ma segnalato con delicatezza dal Topo per ricordare di completare il diario).
  *
  * @param {Record<string, any>} allLogs
  * @returns {string[]} Elenco di date 'YYYY-MM-DD' non registrate
@@ -337,9 +384,9 @@ export function getUnmarkedPastDays(allLogs) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
-  // La soglia massima è 2 giorni fa (l'altro ieri): oggi e ieri NON attivano il topo
-  const twoDaysAgo = new Date(now);
-  twoDaysAgo.setDate(now.getDate() - 2);
+  // La soglia parte da ieri: include ieri se non ancora compilato
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
 
   // Verifica le date in cui l'utente ha effettivamente registrato qualcosa
   const recordedDates = Object.keys(allLogs).filter((dateKey) => {
@@ -356,8 +403,8 @@ export function getUnmarkedPastDays(allLogs) {
   const [ey, em, ed] = recordedDates[0].split('-').map(Number);
   const earliestRecordedDate = new Date(ey, em - 1, ed);
 
-  // Se 2 giorni fa è precedente alla prima data mai registrata, niente da allertare
-  if (twoDaysAgo < earliestRecordedDate) {
+  // Se ieri è precedente alla prima data mai registrata, niente da allertare
+  if (yesterday < earliestRecordedDate) {
     return [];
   }
 
@@ -368,8 +415,8 @@ export function getUnmarkedPastDays(allLogs) {
 
   const unmarked = [];
 
-  // Scansioniamo a ritroso da 2 giorni fa indietro fino a minDate
-  let cursor = new Date(twoDaysAgo);
+  // Scansioniamo a ritroso da ieri indietro fino a minDate
+  let cursor = new Date(yesterday);
   while (cursor >= minDate) {
     const y = cursor.getFullYear();
     const m = String(cursor.getMonth() + 1).padStart(2, '0');
@@ -386,7 +433,8 @@ export function getUnmarkedPastDays(allLogs) {
     cursor.setDate(cursor.getDate() - 1);
   }
 
-  return unmarked;
+  // Ordina cronologicamente dal giorno mancante più vecchio al più recente
+  return unmarked.sort();
 }
 
 /**
@@ -522,8 +570,12 @@ export function getConsecutiveDietStreak(allLogs, referenceDateStr) {
 }
 
 /**
- * Calcola la serie migliore di giorni consecutivi di dieta rispettata all'interno di un mese specifico.
- * Usata quando l'utente sfoglia mesi passati o futuri per mostrare il record di quel mese anziché lo streak odierno.
+ * Calcola la serie migliore di giorni consecutivi di dieta rispettata (Best Streak) all'interno di un mese specifico.
+ * Usata coerentemente sia per i mesi passati che per il mese corrente (pallina con la stella in MonthStatsBar).
+ * - Se la serie era attiva alla fine del mese precedente, viene ereditata all'inizio del mese.
+ * - L'uso di una chiave jolly (cheat_key) al giorno 1 o in qualunque giorno protegge la serie senza azzerarla.
+ * - Restituisce 0 se il mese non ha alcun giorno compilato.
+ * 
  * @param {Record<string, any>} allLogs 
  * @param {number} year 
  * @param {number} month 0-indexed
@@ -534,8 +586,49 @@ export function getMonthBestStreak(allLogs, year, month) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const mStr = String(month + 1).padStart(2, '0');
 
+  // Conta i giorni effettivamente registrati in questo mese
+  let loggedDaysInMonth = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}-${mStr}-${String(d).padStart(2, '0')}`;
+    const st = allLogs[dStr]?.dietState;
+    if (st && st !== 'neutral') {
+      loggedDaysInMonth++;
+    }
+  }
+
+  // Se il mese non ha alcun giorno compilato (es. mese futuro o completamente vuoto), il record del mese è 0
+  if (loggedDaysInMonth === 0) {
+    return 0;
+  }
+
+  // 1. Calcola l'eventuale serie attiva che entra dal mese precedente
+  let streakLeadingIn = 0;
+  try {
+    const lastDayPrevMonth = new Date(year, month, 0, 12, 0, 0);
+    const prevDateStr = formatYMD(lastDayPrevMonth);
+    const prevState = allLogs[prevDateStr]?.dietState;
+
+    if (prevState === 'success' || prevState === 'cheat_key') {
+      let checkDate = new Date(lastDayPrevMonth);
+      let steps = 0;
+      while (steps < 3650) {
+        const dStr = formatYMD(checkDate);
+        const st = allLogs[dStr]?.dietState;
+        if (st === 'success') {
+          streakLeadingIn++;
+        } else if (st === 'cheat_key') {
+          // La chiave jolly protegge la serie senza incrementarla
+        } else {
+          break;
+        }
+        steps++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+    }
+  } catch (e) {}
+
+  let currentStreak = streakLeadingIn;
   let maxStreak = 0;
-  let currentStreak = 0;
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dStr = `${year}-${mStr}-${String(d).padStart(2, '0')}`;
@@ -547,10 +640,14 @@ export function getMonthBestStreak(allLogs, year, month) {
         maxStreak = currentStreak;
       }
     } else if (state === 'cheat_key') {
-      // La chiave protegge la serie senza incrementarla
-      continue;
+      // La chiave jolly protegge la serie attiva senza azzerarla e senza incrementarla.
+      // Se la serie attuale era > 0 (es. ereditata dal mese precedente o iniziata prima),
+      // viene mantenuta e concorre al record del mese.
+      if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+      }
     } else {
-      // Bottone nero o non segnato interrompe la serie
+      // Giorno con bottone nero o giorno non segnato interrompe la serie attiva
       currentStreak = 0;
     }
   }
@@ -602,6 +699,15 @@ export function saveWorkoutLog(dateStr, status) {
     }
     workoutLogsMemoryCache = updated;
     localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(updated));
+
+    try {
+      enqueueSyncOperation({
+        type: 'workout_log',
+        key: dateStr,
+        payload: { status }
+      });
+    } catch (qErr) {}
+
     return updated;
   } catch (e) {
     console.error('Errore salvataggio workout:', e);

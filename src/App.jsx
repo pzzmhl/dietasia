@@ -13,14 +13,16 @@ import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
 import SecretLoveModal from './components/SecretLoveModal';
 import SecretSettingsModal from './components/SecretSettingsModal';
+import UpdateAvailableModal from './components/UpdateAvailableModal';
+import { checkForAppUpdates } from './utils/updateChecker';
 import { 
   requestNotificationPermission, 
   scheduleDailyReminder,
   sendWybieStreakNotification,
   sendOtherMotherKeysDepletedNotification,
   initNotificationChannels
-} from './services/notifications';
-import { triggerHapticFeedback } from './services/haptics';
+} from './utils/notifications';
+import { triggerHapticFeedback, hapticLight, hapticSuccess, hapticButtonStitch } from './utils/haptics';
 import { smoothScrollToElement } from './utils/scrollAnimation';
 import { initBackgroundMusic, pauseMusicImmediately, playMusicWithFadeIn } from './services/backgroundMusic';
 import { playRandomCatSound } from './services/catAudio';
@@ -63,12 +65,36 @@ import {
   downloadBackupFromSupabase,
   triggerDebouncedCloudSync 
 } from './services/supabase';
+import { 
+  initSyncQueueListeners, 
+  triggerQueueFlush, 
+  getPendingSyncCount 
+} from './utils/syncQueue.js';
 import { getRandomCatQuote, getSmartSituationalCatQuote } from './data/catQuotes';
 import { STORAGE_KEYS } from './constants/storageKeys.js';
 
 export default function App() {
   const [todayStr, setTodayStr] = useState(() => getTodayDateString());
-  const todayObj = useMemo(() => new Date(todayStr + 'T00:00:00'), [todayStr]);
+  const todayObj = useMemo(() => new Date(todayStr + 'T12:00:00'), [todayStr]);
+
+  // Heartbeat per il cambio di data a mezzanotte (anche ad app rimasta aperta in primo piano)
+  useEffect(() => {
+    const checkTransition = () => {
+      const freshToday = getTodayDateString();
+      setTodayStr((prev) => (prev !== freshToday ? freshToday : prev));
+    };
+
+    const interval = setInterval(checkTransition, 20000);
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+    const msToMidnight = Math.max(1000, midnight.getTime() - now.getTime());
+    const midnightTimeout = setTimeout(checkTransition, msToMidnight);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(midnightTimeout);
+    };
+  }, []);
 
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [displayYear, setDisplayYear] = useState(() => todayObj.getFullYear());
@@ -102,7 +128,16 @@ export default function App() {
     dateStr: null
   });
 
-  // Modal Eventi di Trama Speciali (Altra Madre sgarri esauriti & Wybie traguardo streak)
+  // Modal Selezione Allenamento per data (da Calendario)
+  const [workoutModalState, setWorkoutModalState] = useState({
+    isOpen: false,
+    dateStr: null
+  });
+
+  // Modal Reazione Bobinsky a schermo intero
+  const [bobinskyReactionStatus, setBobinskyReactionStatus] = useState(null);
+
+  // Modal Eventi di Trama Speciali (Altra Madre chiavi esaurite & Wybie traguardo streak)
   const [storyModalState, setStoryModalState] = useState({
     isOpen: false,
     type: 'wybie_streak',
@@ -153,7 +188,7 @@ export default function App() {
   const catSpeechTimerRef = useRef(null);
 
   const handleCatSpeak = useCallback((text) => {
-    triggerHapticFeedback('key');
+    hapticLight();
     playRandomCatSound();
     if (catSpeechTimerRef.current) {
       clearTimeout(catSpeechTimerRef.current);
@@ -178,6 +213,9 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('settings');
 
+  // Modal Notifica Aggiornamento Disponibile via GitHub Releases
+  const [updateAvailableInfo, setUpdateAvailableInfo] = useState(null);
+
   const handleChangeKeysPerMonth = useCallback((newCount) => {
     setKeysPerMonth(newCount);
     try {
@@ -197,6 +235,9 @@ export default function App() {
 
   // Riferimento sempre fresco per intercettare il tasto/gesto Indietro nativo di Android
   const activeModalsRef = useRef({
+    update: false,
+    workout: false,
+    bobinskyReaction: false,
     settings: false,
     dailyGreeting: false,
     love: false,
@@ -206,6 +247,9 @@ export default function App() {
   });
 
   activeModalsRef.current = {
+    update: !!updateAvailableInfo,
+    workout: workoutModalState.isOpen,
+    bobinskyReaction: !!bobinskyReactionStatus,
     settings: isSettingsOpen,
     dailyGreeting: isDailyGreetingOpen,
     love: isLoveModalOpen,
@@ -222,8 +266,14 @@ export default function App() {
     const registerNativeHandlers = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          const { settings, dailyGreeting, love, day, story, cat } = activeModalsRef.current;
-          if (settings) {
+          const { update, workout, bobinskyReaction, settings, dailyGreeting, love, day, story, cat } = activeModalsRef.current;
+          if (update) {
+            setUpdateAvailableInfo(null);
+          } else if (workout) {
+            setWorkoutModalState({ isOpen: false, dateStr: null });
+          } else if (bobinskyReaction) {
+            setBobinskyReactionStatus(null);
+          } else if (settings) {
             setIsSettingsOpen(false);
           } else if (dailyGreeting) {
             handleDismissDailyGreeting();
@@ -287,6 +337,8 @@ export default function App() {
   useEffect(() => {
     setAllLogs(getAllLogs());
     initBackgroundMusic();
+    initSyncQueueListeners();
+    triggerQueueFlush(1500);
 
     // Sincronizzazione automatica trasparente dal Cloud Supabase al primo avvio su nuovo dispositivo/browser
     const checkCloudSyncOnStartup = async () => {
@@ -303,7 +355,8 @@ export default function App() {
           const cloudCount = Object.keys(cloudLogs).length;
 
           const localLastTime = localStorage.getItem(STORAGE_KEYS.LAST_CLOUD_BACKUP_TIME) || '';
-          const shouldRestore = localCount === 0 || (cloudRes.updatedAt && cloudRes.updatedAt > localLastTime && cloudCount >= localCount);
+          const pendingCount = getPendingSyncCount();
+          const shouldRestore = pendingCount === 0 && (localCount === 0 || (cloudRes.updatedAt && cloudRes.updatedAt > localLastTime && cloudCount >= localCount));
 
           if (shouldRestore) {
             console.log('[Supabase] Ripristino automatico dal Cloud completato con successo!');
@@ -361,7 +414,19 @@ export default function App() {
       });
     });
 
+    // Controllo aggiornamenti non invasivo in background (rispetta la cache di 12 ore)
+    const updateCheckTimer = setTimeout(() => {
+      checkForAppUpdates({ force: false })
+        .then((res) => {
+          if (res && res.updateAvailable) {
+            setUpdateAvailableInfo(res);
+          }
+        })
+        .catch(() => {});
+    }, 2800);
+
     return () => {
+      clearTimeout(updateCheckTimer);
       if (window.cancelIdleCallback && typeof idleHandle === 'number') {
         window.cancelIdleCallback(idleHandle);
       }
@@ -480,7 +545,7 @@ export default function App() {
       const isNowLastKey = !wasAlreadyKey && (keysLeftInTargetMonth - 1 <= 0);
 
       if (isNowLastKey) {
-        // NOTIFICA 2: Sgarri terminati! L'Altra Madre ingoia l'ultima chiave
+        // NOTIFICA 2: Chiavi mensili esaurite (L'Altra Madre vorrebbe un copione perfetto)
         sendOtherMotherKeysDepletedNotification();
         if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
         modalOpenTimerRef.current = setTimeout(() => {
@@ -548,7 +613,7 @@ export default function App() {
         }, 120);
       }
     } else if (newStatus === 'cheat') {
-      // Se registra uno sgarro non autorizzato, resetta il tracker del traguardo streak
+      // Se registra un giorno fuori piano, resetta il tracker del traguardo streak locale
       try {
         localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, '0');
       } catch (e) {}
@@ -671,6 +736,8 @@ export default function App() {
           todayStr={todayStr} 
           workoutLogs={workoutLogs}
           onSaveWorkout={handleSaveWorkout}
+          reactionStatus={bobinskyReactionStatus}
+          onReactionStatusChange={setBobinskyReactionStatus}
         />
 
         {/* 3. IL CALENDARIO: GRIGLIA MENSILE */}
@@ -686,6 +753,8 @@ export default function App() {
           onNextMonth={handleNextMonth}
           onResetToCurrentMonth={handleResetToCurrentMonth}
           onCatSpeak={handleCatSpeak}
+          workoutModalState={workoutModalState}
+          onWorkoutModalStateChange={setWorkoutModalState}
         />
 
         {/* SECONDA LINEA DI DEMARCAZIONE IN STILE CORALINE: SCARAFAGGIO-BOTTONE VIOLA */}
@@ -750,7 +819,7 @@ export default function App() {
         style={{
           position: 'fixed',
           bottom: 'calc(env(safe-area-inset-bottom, 12px) + 12px)',
-          right: '12px',
+          right: '18px',
           zIndex: 9980,
           display: 'flex',
           flexDirection: 'column',
@@ -776,7 +845,7 @@ export default function App() {
               bottom: '122px',
               right: '2px',
               width: 'max-content',
-              maxWidth: '220px',
+              maxWidth: 'min(175px, 44vw)',
               padding: '10px 14px',
               borderRadius: '16px',
               backgroundColor: '#ffffff',
@@ -842,7 +911,7 @@ export default function App() {
 
         <button
           onClick={() => {
-            triggerHapticFeedback('selection');
+            hapticLight();
             const todayStatus = (typeof allLogs[todayStr] === 'object' ? allLogs[todayStr]?.dietState : allLogs[todayStr]) || null;
             
             const yesterdayDate = new Date(todayObj);
@@ -872,8 +941,9 @@ export default function App() {
 
             let openCount = 1;
             try {
-              const prev = Number(sessionStorage.getItem('cat_clicks_today') || 0) + 1;
-              sessionStorage.setItem('cat_clicks_today', String(prev));
+              const clickKey = `coraline_cat_clicks_${todayStr}`;
+              const prev = Number(localStorage.getItem(clickKey) || 0) + 1;
+              localStorage.setItem(clickKey, String(prev));
               openCount = prev;
             } catch (e) {}
 
@@ -1003,6 +1073,13 @@ export default function App() {
         isOpen={isDailyGreetingOpen}
         onClose={handleDismissDailyGreeting}
         dateStr={todayStr}
+      />
+
+      {/* MODAL NOTIFICA AGGIORNAMENTO DISPONIBILE (GITHUB RELEASES) */}
+      <UpdateAvailableModal
+        isOpen={!!updateAvailableInfo}
+        updateInfo={updateAvailableInfo}
+        onClose={() => setUpdateAvailableInfo(null)}
       />
       </div>
     </>

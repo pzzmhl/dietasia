@@ -6,7 +6,7 @@
  * - 7 Fasi esatte (0 a 6).
  * - Ogni giornata di dieta rispettata (success) o chiave (cheat_key) spinge il bottone
  *   indietro verso la Fase 0 (Luna libera).
- * - Ogni giornata di sgarro (cheat) spinge il bottone avanti di 1 posto verso la Fase 6 (Eclissi totale).
+ * - Ogni giornata fuori sentiero (cheat) spinge il bottone avanti di 1 posto verso la Fase 6 (Eclissi totale).
  * - I giorni passati non segnati contano come saltati (+1 passo).
  * - Se oggi non è ancora segnato, non penalizza anzitempo.
  */
@@ -63,7 +63,7 @@ export const PHASE_CONFIG_7 = [
     status: 'Fase 5 di 7',
     color: '#e66545',
     bgBadge: 'rgba(180, 55, 25, 0.25)',
-    description: 'L\'Altra Madre stringe la presa: quasi tutta la superficie è in ombra.'
+    description: 'Una densa coltre d\'ombra sfiora la luna. Basta un giorno limpido con la Pietra Verde per cominciare a dissiparla!'
   },
   {
     phaseIndex: 6,
@@ -71,12 +71,16 @@ export const PHASE_CONFIG_7 = [
     status: 'Fase 6 di 7 (Totale)',
     color: '#e64555',
     bgBadge: 'rgba(190, 25, 35, 0.35)',
-    description: 'Eclissi Totale! Il bottone copre tutta la luna: solo i 4 fori brillano!'
+    description: 'La luna attraversa il punto più buio. Ricorda che ogni nuovo giorno reale rinnova la luce della Pietra!'
   }
 ];
 
 /**
  * Calcola l'esatta fase (da 0 a 6) e i dettagli dei 7 giorni.
+ * Valutazione strettamente isolata agli ultimi 7 giorni solari [oggi - 6 ... oggi]:
+ * - Nessuna retroattività o dipendenza da date remote esterne alla settimana.
+ * - Ieri (i === 1) gode di un periodo di grazia e non penalizza la luna se non ancora compilato.
+ * - Oggi (i === 0) non penalizza anzitempo la giornata in corso.
  * 
  * @param {Record<string, any>} allLogs 
  * @param {string} [referenceDateStr] Data di riferimento (default: oggi)
@@ -85,16 +89,29 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
   const refDateStr = referenceDateStr || getTodayDateString();
   const dateParts = (refDateStr && typeof refDateStr === 'string') ? refDateStr.split('-').map(Number) : [];
   const baseDate = (dateParts.length === 3 && !isNaN(dateParts[0]) && !isNaN(dateParts[1]) && !isNaN(dateParts[2]))
-    ? new Date(dateParts[0], dateParts[1] - 1, dateParts[2])
+    ? new Date(dateParts[0], dateParts[1] - 1, dateParts[2], 12, 0, 0)
     : new Date();
+  baseDate.setHours(12, 0, 0, 0);
 
-  // Troviamo la prima data mai registrata nel database per non penalizzare giorni antecedenti all'installazione
-  const recordedDates = Object.keys(allLogs || {}).filter((dateKey) => {
-    const entry = allLogs[dateKey];
+  // Finestra mobile strettamente circoscritta agli ultimi 7 giorni solari
+  const windowDateStrings = [];
+  for (let i = WINDOW_DAYS - 1; i >= 0; i--) {
+    const d = new Date(baseDate);
+    d.setDate(baseDate.getDate() - i);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    windowDateStrings.push(`${year}-${month}-${day}`);
+  }
+
+  // Troviamo la prima data registrata concretamente all'interno di QUESTA specifica settimana
+  // (Isolamento anti-retroattività: nessuna data remota esterna può proiettare la luna a Fase 6)
+  const windowRecordedDates = windowDateStrings.filter((dStr) => {
+    const entry = allLogs[dStr];
     return entry && typeof entry === 'object' && entry.dietState && entry.dietState !== 'neutral';
   });
-  recordedDates.sort();
-  const earliestDateStr = recordedDates.length > 0 ? recordedDates[0] : null;
+  windowRecordedDates.sort();
+  const firstActiveInWindow = windowRecordedDates.length > 0 ? windowRecordedDates[0] : null;
 
   const daysBreakdown = [];
   let missedCount = 0;
@@ -121,9 +138,10 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
       isMissed = true;
       missedCount += 1;
     } else if (state === 'neutral') {
-      // Un giorno passato conta come 'missed' SOLO se l'utente aveva già iniziato a usare l'app (post-earliestDate)
-      // I giorni precedenti all'installazione dell'app non vengono mai penalizzati
-      if (i > 0 && earliestDateStr && dateStr >= earliestDateStr) {
+      // 1. Oggi (i === 0): giornata in corso, mai penalizzata
+      // 2. Ieri (i === 1): periodo di grazia (non oscura la luna la mattina prima della compilazione)
+      // 3. Da l'altro ieri in giù (i >= 2): conta come mancato solo se successivo all'inizio dell'attività settimanale
+      if (i >= 2 && firstActiveInWindow && dateStr > firstActiveInWindow) {
         isMissed = true;
         missedCount += 1;
       }
@@ -141,7 +159,7 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
     });
   }
 
-  // L'indice della fase corrisponde esattamente al numero di sgarri (0..6)
+  // L'indice della fase corrisponde esattamente al numero di giorni fuori rotta (0..6)
   const phaseIndex = Math.min(6, Math.max(0, missedCount));
   const phaseInfo = PHASE_CONFIG_7[phaseIndex];
   const eclipsePercentage = Math.round((phaseIndex / 6) * 100);

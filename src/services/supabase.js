@@ -212,38 +212,16 @@ export async function downloadBackupFromSupabase() {
   };
 }
 
-/**
- * Sincronizzazione automatica silenziosa protetta da race condition e debounce
- */
-let autoSyncTimeout = null;
-let isSyncingInProgress = false;
+import { triggerQueueFlush } from '../utils/syncQueue.js';
 
-export function triggerDebouncedCloudSync(getBackupFn, delayMs = 3000) {
+/**
+ * Sincronizzazione automatica unificata con la Coda Offline Persistente
+ */
+export function triggerDebouncedCloudSync(getBackupFn, delayMs = 1500) {
   try {
     const isAutoSyncEnabled = localStorage.getItem(STORAGE_KEYS.CLOUD_AUTOSYNC) !== 'false';
     if (!isAutoSyncEnabled || !isSupabaseConfigured()) return;
-
-    if (autoSyncTimeout) clearTimeout(autoSyncTimeout);
-
-    autoSyncTimeout = setTimeout(async () => {
-      if (isSyncingInProgress) {
-        triggerDebouncedCloudSync(getBackupFn, 2000);
-        return;
-      }
-      try {
-        isSyncingInProgress = true;
-        const user = await getSupabaseUser();
-        if (!user) return;
-        const payload = getBackupFn();
-        if (payload) {
-          await uploadBackupToSupabase(payload);
-        }
-      } catch (err) {
-        // Fallimento silenzioso di background
-      } finally {
-        isSyncingInProgress = false;
-      }
-    }, delayMs);
+    triggerQueueFlush(delayMs);
   } catch (e) {}
 }
 

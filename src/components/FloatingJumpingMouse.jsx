@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import jumpingMouseImg from '../assets/jumping-mouse.webp';
 import catCloudPattern from '../assets/cat-cloud-pattern.webp';
-import { triggerHapticFeedback } from '../services/haptics';
+import { hapticLight, hapticButtonStitch } from '../utils/haptics';
 import { playTrumpetFanfare } from '../services/trumpetAudio';
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
@@ -111,7 +111,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
 
   const handleDismissToday = (e) => {
     if (e) e.stopPropagation();
-    triggerHapticFeedback('selection');
+    hapticLight();
     setIsDismissed(true);
     setTestForced(false);
     try {
@@ -120,14 +120,14 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
   };
 
   const handleMouseClick = () => {
-    triggerHapticFeedback('key');
+    hapticLight();
     playTrumpetFanfare(0.85);
     setIsCloudOpen((prev) => !prev);
   };
 
   const handleOpenDayModal = (e) => {
     if (e) e.stopPropagation();
-    triggerHapticFeedback('selection');
+    hapticButtonStitch();
     if (firstMissingDate) {
       onSelectDay(firstMissingDate);
     }
@@ -139,7 +139,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
       style={{
         position: 'fixed',
         bottom: 'calc(env(safe-area-inset-bottom, 12px) + 12px)',
-        left: '12px',
+        left: '18px',
         zIndex: 9980,
         display: 'flex',
         flexDirection: 'column',
@@ -157,7 +157,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
             bottom: '108px',
             left: '2px',
             width: 'max-content',
-            maxWidth: '220px',
+            maxWidth: 'min(175px, 44vw)',
             padding: '10px 14px',
             borderRadius: '16px',
             backgroundColor: '#ffffff',
@@ -219,25 +219,25 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
           >
             <div
               style={{
-                fontSize: '11.5px',
+                fontSize: '11px',
                 fontWeight: 650,
                 lineHeight: 1.35,
                 color: '#0f172a'
               }}
             >
               {missingCount === 1 ? (
-                <>Manca il <strong>{formatDateLabel(firstMissingDate)}</strong></>
+                <>Pst! 🎺 C'è una pagina da sfogliare:<br/><strong>{formatDateLabel(firstMissingDate)}</strong></>
               ) : (
-                <>Mancano <strong>{missingCount} giorni</strong><br/><span style={{ fontSize: '10px', opacity: 0.8 }}>(il primo: {formatDateLabel(firstMissingDate)})</span></>
+                <>Pst! 🎺 Ci sono <strong>{missingCount} pagine</strong> da sfogliare<br/><span style={{ fontSize: '10px', opacity: 0.8 }}>(la prima: {formatDateLabel(firstMissingDate)})</span></>
               )}
             </div>
 
-            {/* PULSANTI: VAI AL GIORNO + OK */}
+            {/* PULSANTI: VAI AL GIORNO + PIÙ TARDI */}
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               <button
                 type="button"
                 onClick={handleOpenDayModal}
-                title="Vai alla data mancante per compilarla"
+                title="Apri il diario per questa data"
                 style={{
                   background: 'rgb(141, 109, 82)',
                   color: '#ffffff',
@@ -253,14 +253,14 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
                   touchAction: 'manipulation'
                 }}
               >
-                Vai
+                Mostrami
               </button>
               <button
                 type="button"
                 onClick={handleDismissToday}
-                title="Chiudi avviso per oggi"
+                title="Rimanda a più tardi"
                 style={{
-                  background: '#c52222',
+                  background: 'rgba(30, 41, 59, 0.85)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '12px',
@@ -270,11 +270,11 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
                   fontFamily: 'var(--font-gothic)',
                   cursor: 'pointer',
                   letterSpacing: '0.4px',
-                  boxShadow: '0 2px 6px rgba(197, 34, 34, 0.45)',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.35)',
                   touchAction: 'manipulation'
                 }}
               >
-                OK
+                Più tardi
               </button>
             </div>
           </div>

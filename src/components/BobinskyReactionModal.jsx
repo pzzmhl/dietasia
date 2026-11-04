@@ -141,7 +141,7 @@ export default function BobinskyReactionModal({
         }}>
           <img
             src={imgSource}
-            alt={isYes ? "Il Grande Bobinsky approva l'allenamento" : "Il Grande Bobinsky a testa in giù"}
+            alt={isYes ? "Il Grande Bobinsky approva l'allenamento!" : "Il Grande Bobinsky e lo stretching acrobatico di riposo"}
             style={{
               width: '100%',
               height: 'auto',
@@ -167,7 +167,7 @@ export default function BobinskyReactionModal({
             marginBottom: '4px',
             textShadow: '0 2px 8px rgba(0, 0, 0, 0.9)'
           }}>
-            {isYes ? '✦ Il Grande Bobinsky approva!' : '✦ A testa in giù...'}
+            {isYes ? '✦ Il Grande Bobinsky approva!' : '✦ Riposo Strategico della Brigata!'}
           </div>
 
           <div style={{
@@ -179,7 +179,7 @@ export default function BobinskyReactionModal({
           }}>
             {isYes 
               ? 'Ottimo lavoro per il circo dei topi saltatori!' 
-              : 'I topi saltatori riposeranno per oggi...'}
+              : 'Anche i topolini della brigata ricaricano le molle! Il vero atleta sa quando riposare, Boiarski!'}
           </div>
         </div>
       </div>

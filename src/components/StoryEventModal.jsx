@@ -6,7 +6,7 @@ import { triggerHapticFeedback } from '../services/haptics';
 
 /**
  * Modal Eventi Speciali della Storia di Coraline:
- * - 'other_mother_keys': L'Altra Madre ingoia l'ultima chiave (sgarri mensili esauriti)
+ * - 'other_mother_keys': L'Altra Madre vorrebbe un copione rigido (chiavi mensili esaurite)
  * - 'wybie_streak': Wybie si congratula per il traguardo di giorni di dieta consecutivi
  */
 export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak = 0, onClose }) {
@@ -27,12 +27,12 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
 
   // Configurazione contenuti e stile
   const config = isOtherMother ? {
-    title: "L'Altra Madre ha preso l'ultima chiave!",
+    title: "L'Altra Madre vorrebbe un copione perfetto...",
     image: otherMotherImg,
-    imageAlt: "L'Altra Madre che ingoia la chiave",
+    imageAlt: "L'Altra Madre che custodisce l'ultima chiave",
     imageHeight: '220px',
-    quote: "Hai esaurito tutti i tuoi sgarri del mese, Asia! L'Altra Madre ha appena ingoiato l'ultima Chiave Nera... Da adesso in poi, niente più passi falsi, o vorrà cucirti i bottoni sugli occhi!",
-    buttonLabel: "Resisterò all'Altra Madre ✦",
+    quote: "Le quattro chiavi di scorta hanno fatto il loro lavoro questo mese, Asia. L'Altra Madre vorrebbe che tutto fosse rigido, immutabile e finto, ma la tua forza vive nel mondo reale. Da qui in avanti non servono magie: basta la tua bussola quotidiana.",
+    buttonLabel: "Il mondo reale appartiene a me ✦",
     borderColor: '#ef4444',
     glowColor: 'rgba(239, 68, 68, 0.5)',
     stitchColor: '#f87171',
@@ -44,8 +44,8 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
     image: wybieImg,
     imageAlt: "Wybie Lovat sorridente e fiero",
     imageHeight: '235px',
-    quote: `Ehi Asia, persino la nonna non ci crederebbe! Sono già ben ${streak} giorni di fila che segui la dieta alla perfezione! Continua così a cucire il tuo destino, stai battendo l'Altro Mondo!`,
-    buttonLabel: "Grazie Wybie, andiamo avanti! ✦",
+    quote: `Ehi Asia, persino la nonna sarebbe a bocca aperta! Sono già ben ${streak} giorni che tieni saldo il timone con una costanza incredibile! Guarda che mappa limpida che stai disegnando nel mondo reale!`,
+    buttonLabel: "Grazie Wybie, un giorno alla volta! ✦",
     borderColor: 'var(--coraline-yellow)',
     glowColor: 'rgba(216, 198, 21, 0.45)',
     stitchColor: 'var(--coraline-yellow)',

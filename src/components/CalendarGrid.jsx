@@ -8,7 +8,8 @@ import starryBg from '../assets/coraline-starry-bg.webp';
 import coralineDollBg from '../assets/coraline-doll-bg.webp';
 import bobinskyWorkoutBg from '../assets/bobinsky-circus-calendar-bg.webp';
 import DayWorkoutModal from './DayWorkoutModal';
-import { triggerHapticFeedback } from '../services/haptics';
+import { triggerHapticFeedback, hapticButtonStitch, hapticLight } from '../utils/haptics';
+import { getUIElementExplanation } from '../data/catQuotes';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -142,13 +143,13 @@ const DayCell = React.memo(function DayCell({
 
   const handleClick = () => {
     if (isFuture) {
-      triggerHapticFeedback('selection');
+      hapticLight();
       if (onCatSpeak) {
-        onCatSpeak("Non puoi anticipare il tempo dell'Altro Mondo: registra solo oggi o i giorni passati.");
+        onCatSpeak(getUIElementExplanation('calendar_future_day'));
       }
       return;
     }
-    triggerHapticFeedback('selection');
+    hapticButtonStitch();
     if (isWorkout) {
       onOpenWorkoutModal(dateStr);
     } else {
@@ -195,7 +196,7 @@ const DayCell = React.memo(function DayCell({
         workoutState === 'yes' ? (
           <img
             src={gearBallImg}
-            alt="Allenamento Fatto"
+            alt="Allenamento della Brigata"
             loading="eager"
             decoding="async"
             className="stop-motion-icon"
@@ -227,7 +228,7 @@ const DayCell = React.memo(function DayCell({
         dietState === 'success' ? (
           <img
             src={seeingStoneImg}
-            alt="Dieta Rispettata"
+            alt="Rotta Mantenuta (Pietra Verde)"
             loading="eager"
             decoding="async"
             className="stop-motion-icon"
@@ -243,7 +244,7 @@ const DayCell = React.memo(function DayCell({
         ) : dietState === 'cheat' ? (
           <img
             src={blackButtonImg}
-            alt="Sgarrato"
+            alt="Giorno Fuori Sentiero (Bottone Nero)"
             loading="eager"
             decoding="async"
             className="stop-motion-icon"
@@ -259,7 +260,7 @@ const DayCell = React.memo(function DayCell({
         ) : dietState === 'cheat_key' ? (
           <img
             src={keyImg}
-            alt="Chiave Jolly Usata"
+            alt="Giorno di Libertà (Chiave Nera)"
             loading="eager"
             decoding="async"
             className="stop-motion-icon"
@@ -294,11 +295,16 @@ const CalendarGrid = React.memo(function CalendarGrid({
   onPrevMonth,
   onNextMonth,
   onResetToCurrentMonth,
-  onCatSpeak
+  onCatSpeak,
+  workoutModalState: propWorkoutModalState,
+  onWorkoutModalStateChange
 }) {
   const touchStartRef = useRef(null);
   const [calendarMode, setCalendarMode] = useState('diet'); // 'diet' | 'workout'
-  const [workoutModalState, setWorkoutModalState] = useState({ isOpen: false, dateStr: null });
+  const [internalWorkoutModalState, setInternalWorkoutModalState] = useState({ isOpen: false, dateStr: null });
+
+  const workoutModalState = propWorkoutModalState !== undefined ? propWorkoutModalState : internalWorkoutModalState;
+  const setWorkoutModalState = onWorkoutModalStateChange || setInternalWorkoutModalState;
 
   const { firstDayColumn, daysArray, todayStr, leadingDaysCount, trailingDaysCount } = useMemo(() => {
     const safeYear = typeof displayYear === 'number' ? displayYear : new Date().getFullYear();
@@ -490,8 +496,10 @@ const CalendarGrid = React.memo(function CalendarGrid({
           }}
           aria-label="Mese precedente"
           style={{
-            width: '36px',
-            height: '36px',
+            width: '44px',
+            height: '44px',
+            minWidth: '44px',
+            minHeight: '44px',
             borderRadius: '12px',
             backgroundColor: calendarMode === 'workout' ? 'rgba(38, 16, 12, 0.88)' : 'rgba(13, 44, 73, 0.85)',
             border: calendarMode === 'workout' 
@@ -505,7 +513,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '13px',
+            fontSize: '14px',
             touchAction: 'pan-y',
             transition: 'transform 0.1s ease, border-color 0.35s ease, background-color 0.35s ease'
           }}
@@ -555,8 +563,10 @@ const CalendarGrid = React.memo(function CalendarGrid({
           }}
           aria-label="Mese successivo"
           style={{
-            width: '36px',
-            height: '36px',
+            width: '44px',
+            height: '44px',
+            minWidth: '44px',
+            minHeight: '44px',
             borderRadius: '12px',
             backgroundColor: calendarMode === 'workout' ? 'rgba(38, 16, 12, 0.88)' : 'rgba(13, 44, 73, 0.85)',
             border: calendarMode === 'workout' 
@@ -570,7 +580,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '13px',
+            fontSize: '14px',
             touchAction: 'pan-y',
             transition: 'transform 0.1s ease, border-color 0.35s ease, background-color 0.35s ease'
           }}
@@ -666,16 +676,16 @@ const CalendarGrid = React.memo(function CalendarGrid({
         style={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: '144px',
+          maxWidth: '164px',
           margin: '12px auto 2px auto',
-          padding: '2px',
+          padding: '3px',
           backgroundColor: 'rgba(10, 14, 24, 0.85)',
-          borderRadius: '12px',
+          borderRadius: '14px',
           border: '1px solid rgba(226, 232, 240, 0.18)',
           boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35)',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: '3px',
+          gap: '4px',
           boxSizing: 'border-box'
         }}
       >
@@ -690,8 +700,9 @@ const CalendarGrid = React.memo(function CalendarGrid({
             }
           }}
           style={{
-            padding: '5px 8px',
-            borderRadius: '10px',
+            minHeight: '38px',
+            padding: '8px 12px',
+            borderRadius: '11px',
             border: calendarMode === 'diet'
               ? '1px solid rgba(226, 232, 240, 0.9)'
               : '1px solid transparent',
@@ -708,6 +719,9 @@ const CalendarGrid = React.memo(function CalendarGrid({
             letterSpacing: '0.4px',
             cursor: 'pointer',
             textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             lineHeight: 1.2,
             transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
             touchAction: 'manipulation'
@@ -727,8 +741,9 @@ const CalendarGrid = React.memo(function CalendarGrid({
             }
           }}
           style={{
-            padding: '5px 8px',
-            borderRadius: '10px',
+            minHeight: '38px',
+            padding: '8px 12px',
+            borderRadius: '11px',
             border: calendarMode === 'workout'
               ? '1px solid rgba(226, 232, 240, 0.9)'
               : '1px solid transparent',
@@ -745,6 +760,9 @@ const CalendarGrid = React.memo(function CalendarGrid({
             letterSpacing: '0.4px',
             cursor: 'pointer',
             textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             lineHeight: 1.2,
             transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
             touchAction: 'manipulation'

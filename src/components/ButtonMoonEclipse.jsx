@@ -19,7 +19,7 @@ import catCloudPattern from '../assets/cat-cloud-pattern.webp';
 
 // Oggetti grafici reali di Coraline per gli esiti dei 7 giorni e le statistiche
 import seeingStoneImg from '../assets/seeing-stone.webp'; // Pietra verde (dieta seguita)
-import blackButtonImg from '../assets/black-button.webp'; // Bottone nero (sgarro)
+import blackButtonImg from '../assets/black-button.webp'; // Bottone nero (giorno fuori sentiero)
 import keyImg from '../assets/key.webp';                 // Chiave nera (chiave jolly)
 import gearBallImg from '../assets/gear-ball.webp';       // Palla cambio allenamento Bobinsky
 
@@ -65,6 +65,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
 
   const handleScrollToDashboard = () => {
     triggerHapticFeedback('selection');
+    if (onCatSpeak) {
+      onCatSpeak(getUIElementExplanation('dashboard_streak_badge'));
+    }
     if (onScrollToDashboard) {
       onScrollToDashboard();
     } else {
@@ -72,7 +75,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     }
   };
 
-  // Calcolo matematico a 7 giorni: ogni giorno seguito sposta il bottone indietro, ogni sgarro avanti
+  // Calcolo matematico a 7 giorni: ogni giorno seguito sposta il bottone indietro, ogni imprevisto avanti
   const eclipse = useMemo(() => {
     return calculateEclipseState(allLogs, todayStr);
   }, [allLogs, todayStr]);
@@ -107,7 +110,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     const succSign = succPct > 0 ? `+${succPct}%` : succPct < 0 ? `${succPct}%` : '0%';
     const succColor = succPct > 0 ? '#4ade80' : succPct < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
 
-    // 3. Sgarri: MENO sgarri è miglioramento (verde), PIÙ sgarri è peggioramento (rosso)
+    // 3. Imprevisti: MENO imprevisti è miglioramento (verde), PIÙ imprevisti è deviazione (rosso)
     const avgCheat = parseFloat(stats.avgMonthlyCheats) || 0;
     let cheatPct = 0;
     if (avgCheat > 0) {
@@ -527,18 +530,30 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
         {/* =========================================================
             LA LUNA CINEMATOGRAFICA A 7 FASI FLUTTUANTE (HERO SCURITA)
             ========================================================= */}
-        <div style={{
-          position: 'relative',
-          zIndex: 1,
-          width: '185px',
-          height: '185px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '2px 0 16px 0',
-          animation: 'moonFloatingBreathe 3.6s ease-in-out infinite',
-          willChange: 'transform'
-        }}>
+        <div 
+          role="button"
+          tabIndex={0}
+          aria-label="Luna dell'Eclissi: tocca per ascoltare la spiegazione del Gatto"
+          onClick={() => {
+            triggerHapticFeedback('selection');
+            if (onCatSpeak) {
+              onCatSpeak(getUIElementExplanation('dashboard_moon_eclipse'));
+            }
+          }}
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '185px',
+            height: '185px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '2px 0 16px 0',
+            animation: 'moonFloatingBreathe 3.6s ease-in-out infinite',
+            willChange: 'transform',
+            cursor: 'pointer',
+            touchAction: 'manipulation'
+          }}>
           {/* 1. Ampia foschia eterea lunare ultra-sfumata (bianco prevalente con accenno verde morbidissimo) */}
           <div style={{
             position: 'absolute',
@@ -599,21 +614,33 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             (Da sinistra [t-6] a destra [Oggi])
             Oggetti: Pietra Verde, Bottone Nero, Chiave Nera
             ========================================================= */}
-        <div style={{
-          position: 'relative',
-          zIndex: 1,
-          width: '100%',
-          maxWidth: '350px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '4px',
-          padding: '8px 6px',
-          borderRadius: '16px',
-          background: 'linear-gradient(180deg, rgba(8, 12, 18, 0.95) 0%, rgba(4, 7, 11, 0.98) 100%)',
-          border: '1px solid rgba(47, 77, 108, 0.35)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(47, 77, 108, 0.15)',
-          overflow: 'hidden'
-        }}>
+        <div 
+          role="button"
+          tabIndex={0}
+          aria-label="Striscia dei 7 giorni della settimana: tocca per ascoltare la spiegazione del Gatto"
+          onClick={() => {
+            triggerHapticFeedback('selection');
+            if (onCatSpeak) {
+              onCatSpeak(getUIElementExplanation('dashboard_seven_days'));
+            }
+          }}
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            maxWidth: '350px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '4px',
+            padding: '8px 6px',
+            borderRadius: '16px',
+            background: 'linear-gradient(180deg, rgba(8, 12, 18, 0.95) 0%, rgba(4, 7, 11, 0.98) 100%)',
+            border: '1px solid rgba(47, 77, 108, 0.35)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(47, 77, 108, 0.15)',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            touchAction: 'manipulation'
+          }}>
           {/* Livello 1: Texture cielo stellato molto sfocata e scurita */}
           <div
             style={{
@@ -748,8 +775,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   {state === 'cheat' && (
                     <img
                       src={blackButtonImg}
-                      alt="Bottone Nero (Sgarro)"
-                      title="Sgarro: Bottone Nero"
+                      alt="Bottone Nero (Giorno Fuori Sentiero)"
+                      title="Giorno Fuori Sentiero: Bottone Nero"
                       style={{
                         width: '17px',
                         height: '17px',
@@ -762,8 +789,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   {state === 'cheat_key' && (
                     <img
                       src={keyImg}
-                      alt="Chiave Nera (Jolly)"
-                      title="Sgarro Autorizzato: Chiave Nera"
+                      alt="Chiave Nera (Giorno di Libertà)"
+                      title="Giorno di Libertà: Chiave Nera"
                       style={{
                         width: '19px',
                         height: '19px',
@@ -907,7 +934,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('[PIETRA FORATA]'));
+                    onCatSpeak(getUIElementExplanation('dashboard_card_adherence'));
                   }
                 }}
                 style={{
@@ -999,7 +1026,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('[PALLINA CON LA STELLA]'));
+                    onCatSpeak(getUIElementExplanation('dashboard_card_success'));
                   }
                 }}
                 style={{
@@ -1091,7 +1118,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('[IL BOTTONE]'));
+                    onCatSpeak(getUIElementExplanation('dashboard_card_cheats'));
                   }
                 }}
                 style={{
@@ -1159,7 +1186,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   position: 'relative',
                   zIndex: 1
                 }}>
-                  {stats.currentCheatCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>sgarri</span>
+                  {stats.currentCheatCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>imprevisti</span>
                 </div>
 
                 <div style={{
@@ -1183,7 +1210,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 onClick={() => {
                   triggerHapticFeedback('selection');
                   if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('[PALLINA DEGLI ALLENAMENTI]'));
+                    onCatSpeak(getUIElementExplanation('dashboard_card_workouts'));
                   }
                 }}
                 style={{

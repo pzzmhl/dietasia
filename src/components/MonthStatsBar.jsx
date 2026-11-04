@@ -59,18 +59,14 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
       }
     });
 
-    const now = new Date();
-    const isViewingCurrentMonth = safeYear === now.getFullYear() && safeMonth === now.getMonth();
-    const streak = isViewingCurrentMonth
-      ? getConsecutiveDietStreak(allLogs)
-      : getMonthBestStreak(allLogs, safeYear, safeMonth);
+    const streak = getMonthBestStreak(allLogs, safeYear, safeMonth);
 
     const totalDays = new Date(safeYear, safeMonth + 1, 0).getDate();
     const totalLogged = sCount + cCount + kCount;
-    // Calcolo corretto dell'aderenza basato sui giorni registrati (allineato ad historicalStats)
+    // Calcolo corretto dell'aderenza basato sui giorni registrati (null se 0 giorni compilati)
     const rate = totalLogged > 0
       ? Math.round(((sCount + kCount) / totalLogged) * 100)
-      : 100;
+      : null;
 
     return {
       successCount: sCount,
@@ -89,26 +85,26 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
   // Dettagli esplicativi pronunciati dal Gatto
   const tooltipDetails = {
     keys: {
-      text: `Chiavi Jolly: ne hai ${remainingKeys} su ${keysPerMonth} questo mese. Ti permettono una pausa serena dal piano!`
+      text: `Chiavi della Flessibilità: ne hai ${remainingKeys} su ${keysPerMonth} questo mese. Ti permettono una pausa serena dal piano!`
     },
     success: {
-      text: `Dieta seguita: ${successCount} giorni rispettati con cura questo mese.`
+      text: `Rotta mantenuta: ${successCount} giorni affrontati con cura questo mese.`
     },
     cheat: {
-      text: `Sgarri registrati: ${cheatCount} giorni con bottone nero cucito.`
+      text: `Imprevisti affrontati: ${cheatCount} giorni fuori sentiero annotati con onestà.`
     },
     workout: {
       text: `Allenamento: ${workoutCount} giorni di attività completati con il Signor Bobinsky!`
     },
     streak: {
       text: isViewingCurrentMonth
-        ? `Giorni di fila: ${streakCount} giorni consecutivi di dieta rispettata.`
-        : `Record del mese: ${streakCount} giorni consecutivi di dieta rispettata raggiunti a ${MONTHS_IT[displayMonth]}.`
+        ? `Miglior serie del mese: record di ${streakCount} giorni consecutivi di costanza a ${MONTHS_IT[safeMonth]}.`
+        : `Record del mese: ${streakCount} giorni consecutivi di costanza raggiunti a ${MONTHS_IT[safeMonth]}.`
     },
     rate: {
       text: loggedDays === 0
-        ? `Tasso di riuscita: 100% (nessun giorno registrato a ${MONTHS_IT[displayMonth]}).`
-        : `Tasso di riuscita: ${successPercentage}% di aderenza a ${MONTHS_IT[displayMonth]} su ${loggedDays} giorni registrati (${cheatCount} sgarri).`
+        ? `Nessun giorno ancora registrato a ${MONTHS_IT[displayMonth]}: apri il tuo diario segreto!`
+        : `Tasso di riuscita: ${successPercentage}% di aderenza a ${MONTHS_IT[displayMonth]} su ${loggedDays} giorni registrati (${cheatCount} imprevisti).`
     }
   };
 
@@ -127,12 +123,12 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
     }, 4500);
 
     const tagMap = {
-      success: '[PIETRA FORATA]',
-      cheat: '[IL BOTTONE]',
-      keys: '[LE CHIAVI]',
-      workout: '[PALLINA DEGLI ALLENAMENTI]',
-      streak: '[PALLINA CON LA STELLA]',
-      rate: '[LA LIBELLULA]'
+      keys: 'stat_keys',
+      success: 'stat_success_days',
+      cheat: 'stat_cheat_days',
+      workout: 'stat_workout_days',
+      streak: 'stat_streak_record',
+      rate: 'stat_adherence_rate'
     };
 
     if (onCatSpeak && tagMap[type]) {
@@ -241,12 +237,12 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         gap: '10px',
         alignItems: 'stretch'
       }}>
-        {/* SCHEDA 1: CHIAVI JOLLY SGARRO (SINGOLA CHIAVE FLUTTUANTE + 4/4) */}
+        {/* SCHEDA 1: CHIAVI DELLA FLESSIBILITÀ (SINGOLA CHIAVE FLUTTUANTE + 4/4) */}
         <div 
           onClick={() => toggleTooltip('keys')}
           role="button"
           tabIndex={0}
-          aria-label="Chiavi Jolly Sgarro"
+          aria-label="Chiavi della Flessibilità"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -331,7 +327,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             position: 'relative',
             zIndex: 1
           }}>
-            Chiavi Jolly Sgarro
+            Chiavi della Flessibilità
           </div>
         </div>
 
@@ -428,12 +424,12 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
           </div>
         </div>
 
-        {/* SCHEDA 3: SGARRATI (BOTTONE NERO) */}
+        {/* SCHEDA 3: IMPREVISTI (BOTTONE NERO) */}
         <div 
           onClick={() => toggleTooltip('cheat')}
           role="button"
           tabIndex={0}
-          aria-label="Bottone Nero: Sgarri Registrati"
+          aria-label="Bottone Nero: Imprevisti Registrati"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -517,7 +513,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             position: 'relative',
             zIndex: 1
           }}>
-            Sgarri Registrati
+            Imprevisti Registrati
           </div>
         </div>
 
@@ -784,7 +780,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             position: 'relative',
             zIndex: 1
           }}>
-            {successPercentage}%
+            {successPercentage !== null ? `${successPercentage}%` : '—'}
           </div>
           <div style={{
             fontSize: '11px',

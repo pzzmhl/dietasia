@@ -22,5 +22,9 @@ export const STORAGE_KEYS = {
   LAST_DAILY_GREETING_DATE: 'coraline_last_daily_greeting_date',
   MOUSE_NOTICE_DISMISSED_DATE: 'coraline_mouse_notice_dismissed_date',
   FLOATING_FX: 'coraline_floating_fx',
-  VORTEX_ENABLED: 'coraline_vortex_enabled'
+  VORTEX_ENABLED: 'coraline_vortex_enabled',
+  PENDING_SYNC_QUEUE: 'coraline_pending_sync_queue',
+  LAST_UPDATE_CHECK: 'coraline_last_update_check',
+  IGNORED_UPDATE_VERSION: 'coraline_ignored_update_version'
 };
+

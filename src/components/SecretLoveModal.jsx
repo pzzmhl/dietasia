@@ -144,12 +144,22 @@ export default function SecretLoveModal({ isOpen, onClose }) {
             fontFamily: 'var(--font-body)',
             fontSize: '13px',
             color: 'var(--coraline-parchment)',
-            opacity: 0.9,
-            margin: '0 0 22px 0',
+            opacity: 0.92,
+            margin: '0 0 20px 0',
             lineHeight: 1.45
           }}
         >
           ✦ Più di ogni stella nel cielo notturno, in questo mondo e nell'Altro Mondo. ✦
+          <span style={{ 
+            display: 'block', 
+            marginTop: '10px', 
+            fontSize: '11.5px', 
+            color: 'var(--coraline-yellow)', 
+            opacity: 0.9, 
+            lineHeight: 1.4 
+          }}>
+            Questo diario non misura quanto vali: valevi già tutto prima di aprirlo, e vali tutto stasera. Sei meravigliosa.
+          </span>
         </p>
 
         {/* Pulsante per chiudere */}

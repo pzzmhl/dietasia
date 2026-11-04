@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import catStandingImg from '../assets/cat-standing.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
-import { triggerHapticFeedback } from '../services/haptics';
+import { hapticButtonStitch } from '../utils/haptics';
 import { getTimeOfDayGreeting, getDailyCatQuoteForDate } from '../data/dailyCatQuotes';
 
 /**
@@ -41,7 +41,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
   if (!isOpen) return null;
 
   const handleDismiss = () => {
-    triggerHapticFeedback('selection');
+    hapticButtonStitch();
     setVisible(false);
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
     dismissTimerRef.current = setTimeout(() => {

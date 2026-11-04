@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import catSuccessImg from '../assets/cat-success.webp';     // Dieta Corretta / Rispettata (Pietra Verde) -> Gatto con occhioni azzurri
 import catFailImg from '../assets/cat-fail.webp';           // Dieta Scorretta / Non Seguita (Bottone Nero) -> Gatto scettico
-import catCheatKeyImg from '../assets/cat-cheat-key.webp';  // Sgarro con Chiave Jolly -> Gatto con topolino circense in bocca
+import catCheatKeyImg from '../assets/cat-cheat-key.webp';  // Giorno di Libertà (Chiave Nera) -> Gatto con topolino circense in bocca
 import catModalBg from '../assets/cat-modal-bg.webp';
 import CoralineCatCloud from './CoralineCatCloud';
-import { triggerHapticFeedback } from '../services/haptics';
+import { hapticLight } from '../utils/haptics';
 
 /**
  * Modal Overlay del Tutor Virtuale (Il Gatto Nero di Coraline):
  * - Dieta Corretta (Pietra Verde): Gatto con occhioni azzurri (success)
  * - Dieta Scorretta / Non Seguita (Bottone Nero): Gatto scettico con occhi socchiusi (cheat)
- * - Sgarro Programmato (Chiave Nera Jolly): Gatto con topolino in bocca (key / last_key)
+ * - Giorno di Libertà (Chiave Nera Jolly): Gatto con topolino in bocca (key / last_key)
  */
 export default function CatModal({ isOpen, quote, context, onClose }) {
   const [visible, setVisible] = useState(false);
@@ -55,9 +55,9 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
   if (isLastKey) {
     buttonLabel = "Messaggio ricevuto";
   } else if (isKey) {
-    buttonLabel = "Sgarro registrato ✦";
+    buttonLabel = "Giorno di libertà segnato ✦";
   } else if (isCheat) {
-    buttonLabel = "Ricevuto, domani niente scuse";
+    buttonLabel = "Ricevuto, domani si riparte da qui ✦";
   } else if (isSuccess) {
     buttonLabel = "Continua così ✦";
   }
@@ -205,7 +205,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         <button
           type="button"
           onClick={() => {
-            triggerHapticFeedback('selection');
+            hapticLight();
             if (onClose) onClose();
           }}
           style={{

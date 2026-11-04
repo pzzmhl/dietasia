@@ -1080,159 +1080,8 @@ export const CAT_QUOTES = {
       "Tutto è andato secondo i piani, Asia: riposati con serenità."
     ],
 
-  // Categoria 8: Click sugli elementi UI (150: 25 per ciascuno dei 6 elementi)
-  ui_elements: [
-      "[PIETRA FORATA] Come la pietra che usava Coraline, svela le cose per quello che sono: indica le giornate di dieta rispettata e apre il quadro degli andamenti.",
-      "[PIETRA FORATA] Guarda attraverso il foro verde: vedrai come sono andate le giornate senza trucchi, senza verdetti e senza colpe.",
-      "[PIETRA FORATA] Rappresenta la dieta rispettata e la visione chiara delle statistiche. I fatti sono semplici fatti, non un tribunale.",
-      "[PIETRA FORATA] La pietra forata svela le illusioni. Mostra una giornata in cui hai seguito il piano con cura e lucidità.",
-      "[PIETRA FORATA] Toccala per guardare la realtà con serenità. Non è una lente per trovare difetti, ma una finestra limpida sulle tue scelte.",
-      "[PIETRA FORATA] Serve a vedere il quadro d'insieme. Un giorno isolato sembra enorme, ma attraverso la pietra verde si ridimensiona all'istante.",
-      "[PIETRA FORATA] Guardare attraverso la pietra aiuta a non confondere la nebbia con la realtà. Registra le giornate buone con pacata trasparenza.",
-      "[PIETRA FORATA] Ti mostra le giornate di equilibrio e apre i riepiloghi. Ricordati che i numeri raccontano abitudini, non la tua persona.",
-      "[PIETRA FORATA] Te lo spiego una volta sola: la pietra mostra la verità senza fronzoli. Usala quando vuoi fare il punto con serenità.",
-      "[PIETRA FORATA] Un foro nella pietra verde per scorgere ciò che conta davvero: un pasto consumato con cura e la calma nel tempo.",
-      "[PIETRA FORATA] Clicca qui per consultare gli andamenti o vedere i giorni rispettati. Uno strumento pratico, non una pagella scolastica.",
-      "[PIETRA FORATA] La pietra forata non mente e non giudica: riflette le tue scelte passate per aiutarti a capire come muoverti.",
-      "[PIETRA FORATA] Serve a guardare la luna e i giorni trascorsi. Nessuna trappola dell'Altra Madre qui dentro, solo la realtà delle cose.",
-      "[PIETRA FORATA] Guarda il panorama delle tue settimane senza ansia. Ciò che è passato è passato, serve solo come promemoria.",
-      "[PIETRA FORATA] Attraverso questo buco vedi l'equilibrio dei tuoi giorni. Non cercare la perfezione: cerca solo la tua serenità quotidiana.",
-      "[PIETRA FORATA] È la chiave visiva per entrare nei riepiloghi. Ti offre una prospettiva calma e oggettiva, lontana da ogni dramma.",
-      "[PIETRA FORATA] Guarda con i tuoi occhi: le statistiche sono solo annotazioni sul diario del mondo vero. Nessun tribunale ti aspetta.",
-      "[PIETRA FORATA] Ti apre la vista sui giorni andati. Guardali come guarderesti le foglie cadute in giardino: con pacata neutralità.",
-      "[PIETRA FORATA] La pietra forata serve a non perdersi nella nebbia dei ricordi. Mostra i dati con semplicità e discrezione.",
-      "[PIETRA FORATA] Toccala per consultare la panoramica. È solo uno strumento di bordo: il capitano del tuo benessere resti sempre tu.",
-      "[PIETRA FORATA] Nessun inganno ottico: la pietra ti mostra come sono stati distribuiti i tuoi pasti nel tempo, senza commentarli.",
-      "[PIETRA FORATA] Guardare nel buco della pietra serve a ridimensionare le paure: il tempo scorre e ogni giorno trova il suo posto.",
-      "[PIETRA FORATA] Serve ad accedere agli andamenti e a confermare una giornata equilibrata. Guardali se ti va, con serenità e calma.",
-      "[PIETRA FORATA] La pietra rivela la trama dei tuoi giorni. Una vista pulita, sobria, priva di qualunque pretesa moralistica.",
-      "[PIETRA FORATA] Uno strumento antico per vedere chiaro. Usalo per guardare la strada fatta, con la serenità di chi cammina al suo passo.",
-      "[PALLINA CON LA STELLA] Simboleggia i giorni di fila in cui hai curato i tuoi pasti con regolarità. Un passo dopo l'altro, senza fretta né medaglie.",
-      "[PALLINA CON LA STELLA] Conta la serie dei tuoi giorni consecutivi di benessere. Non è una sfida contro il tempo: è solo il ritmo tranquillo dei tuoi passi.",
-      "[PALLINA CON LA STELLA] La stella brilla sulla pallina del circo per ricordarti che la costanza è una melodia calma, non un'ansia da record.",
-      "[PALLINA CON LA STELLA] Indica i giorni consecutivi di dieta rispettata. Il gatto osserva la serie con un cenno sobrio: un buon ritmo quotidiano.",
-      "[PALLINA CON LA STELLA] Registra il filo ininterrotto delle tue buone abitudini. Non accumulare giorni come trofei: la vera forza è restare sereni.",
-      "[PALLINA CON LA STELLA] Mostra quanti giorni di fila hai nutrito il corpo con riguardo. La costanza gentile vince sempre sulle imposizioni.",
-      "[PALLINA CON LA STELLA] Una stella che scandisce i giorni consecutivi di equilibrio. Se la serie si ferma non succede nulla: si ricomincia con calma.",
-      "[PALLINA CON LA STELLA] Conta le giornate lineari una dietro l'altra. Niente squilli di tromba: la salute quotidiana cammina a passi silenziosi.",
-      "[PALLINA CON LA STELLA] Simbolo del circo e del ritmo consecutivo. Tieni il tempo con naturalezza, senza trasformare la serie in un'ossessione.",
-      "[PALLINA CON LA STELLA] Indica quanti giorni di fila hai seguito il tuo piano. Un piccolo segno per ricordarti che sai prenderti cura di te.",
-      "[PALLINA CON LA STELLA] La palla con la stella rotola di giorno in giorno: tiene il conto dei tuoi passi regolari, senza pretese di perfezione.",
-      "[PALLINA CON LA STELLA] Misura la serie attiva di giornate serene. Uno strumento pratico per vedere la continuità del tuo cammino.",
-      "[PALLINA CON LA STELLA] Registra la sequenza dei pasti equilibrati. Ricorda che il valore personale non dipende mai dalla lunghezza della serie.",
-      "[PALLINA CON LA STELLA] Toccala per verificare i giorni di fila. Un promemoria discreto: la regolarità dona forza, la rigidità toglie il fiato.",
-      "[PALLINA CON LA STELLA] Rappresenta il filo dei giorni ordinati nel mondo vero. Segna il cammino compiuto senza pretendere di essere invincibili.",
-      "[PALLINA CON LA STELLA] Indica i giorni consecutivi in cui hai dato al corpo la giusta cura. Un fatto concreto, senza bisogno di celebrazioni solenni.",
-      "[PALLINA CON LA STELLA] La stella segna un patto rispettato con la salute giorno dopo giorno. Nulla di magico, solo buon senso e regolarità.",
-      "[PALLINA CON LA STELLA] Serve a ricordarti la costanza dei tuoi gesti. Ogni giorno di fila è un tassello di benessere, niente di più e niente di meno.",
-      "[PALLINA CON LA STELLA] Conta le giornate consecutive di armonia a tavola. Il gatto la guarda di sbieco: buon lavoro, continua al tuo ritmo.",
-      "[PALLINA CON LA STELLA] Simbolo di regolarità serena. Non farti prendere dall'ansia di proteggere la serie: ciò che conta è come vivi ogni oggi.",
-      "[PALLINA CON LA STELLA] La pallina con la stella è un promemoria di costanza: testimonia che sai camminare con ordine quando decidi di farlo.",
-      "[PALLINA CON LA STELLA] Misura i passi consecutivi nel giardino della realtà. Quando mangi con cura a orari regolari, il ritmo si fa naturale.",
-      "[PALLINA CON LA STELLA] Segna la serie di giornate lineari. Uno strumento pulito per ricordarti che hai già le risorse per mantenere l'equilibrio.",
-      "[PALLINA CON LA STELLA] La stella sulla pallina ricorda che un giorno dopo l'altro si costruisce la calma interiore, senza trucchi né scorciatoie.",
-      "[PALLINA CON LA STELLA] Registra la successione dei giorni curati con amorevole buonsenso. Continua a camminare, un passo alla volta.",
-      "[IL BOTTONE] Nel film i bottoni cuciono gli occhi, ma qui serve solo a registrare un giorno storto senza farne una tragedia.",
-      "[IL BOTTONE] Toccalo per segnare che oggi la dieta non è andata come previsto. Nessun senso di colpa: voltiamo pagina insieme.",
-      "[IL BOTTONE] Serve ad archiviare una giornata difficile con onestà. Non è una punizione né una macchia sul tuo valore personale.",
-      "[IL BOTTONE] Clicca qui se i piani sono saltati. Succede a chiunque: un bottone nero non cancella le giornate buone.",
-      "[IL BOTTONE] Registra un pasto o un giorno fuori rotta. Il gatto lo guarda senza battere ciglio: domani è un altro giorno.",
-      "[IL BOTTONE] Simboleggia le imperfezioni della vita vera. Toccalo per chiudere oggi senza portare rancore verso te stesso.",
-      "[IL BOTTONE] Non temere questo simbolo: serve solo a dire le cose come stanno, senza drammi da teatro e senza debiti.",
-      "[IL BOTTONE] Usalo per archiviare un giorno storto. L'Altra Madre vorrebbe farti sentire in colpa, ma qui siamo nel mondo libero.",
-      "[IL BOTTONE] Indica che oggi qualcosa non è andato secondo i piani. Nessun tribunale: bevi un bicchier d'acqua e riposati.",
-      "[IL BOTTONE] Un bottone nero registra un dato, non un difetto. Sei un essere umano che vive, non un manichino di sartoria.",
-      "[IL BOTTONE] Toccalo per annotare con trasparenza la giornata. La sincerità verso sé stessi è la base di ogni vero equilibrio.",
-      "[IL BOTTONE] Serve a mettere un punto fermo a una serata faticosa. Si chiude il diario di oggi e si va a dormire.",
-      "[IL BOTTONE] Clicca se i pasti hanno preso una piega imprevista. Non devi scusarti con nessuno, meno che mai con questo schermo.",
-      "[IL BOTTONE] Questo pulsante non toglie nulla al tuo cammino: dice solo che oggi il vento soffiava da un'altra parte.",
-      "[IL BOTTONE] Registra la realtà nuda e cruda, senza addolcirla ma anche senza renderla amara. Fa parte dell'esperienza umana.",
-      "[IL BOTTONE] Un tocco sul bottone per dire che oggi è andata così. Il gatto approva la tua onestà e resta al tuo fianco.",
-      "[IL BOTTONE] Serve a non nascondere i momenti complicati. Guardarli in faccia senza paura è il modo migliore per lasciarli andare.",
-      "[IL BOTTONE] Il bottone nero non cuce nulla stasera: lascia gli occhi aperti sulla realtà, con quieta lucidità e pazienza.",
-      "[IL BOTTONE] Toccalo quando serve. Non c'è vergogna e non c'è sconfitta: c'è solo un giorno che chiede di essere archiviato.",
-      "[IL BOTTONE] Simbolo di una giornata no. Prendine atto, concediti una serata calda e dimentica i rimproveri.",
-      "[IL BOTTONE] Serve a ricordare che l'equilibrio non è rigidità: include anche i giorni in cui si perde il passo.",
-      "[IL BOTTONE] Clicca per chiudere la registrazione di oggi. Nessuna penitenza per domani, solo il normale cammino di sempre.",
-      "[IL BOTTONE] Un bottone è solo un pezzo di plastica scura: non ha nessun potere di dirti chi sei o cosa vali.",
-      "[IL BOTTONE] Usalo per depositare il peso di oggi. Una volta segnato, il carico resta qui e tu puoi camminare leggero.",
-      "[IL BOTTONE] Segna la giornata storta senza drammi. Il mondo vero ha le sue crepe, ed è bello proprio per questo.",
-      "[LE CHIAVI] Rappresentano il momento libero programmato. Sono le chiavi che aprono uno spazio legittimo di festa, senza alcun debito.",
-      "[LE CHIAVI] Tocca questo pulsante per usare una chiave. Il piacere fa parte della vita e non richiede alcun permesso speciale.",
-      "[LE CHIAVI] Indicano le pause previste dal piano. Usale a testa alta: godersi un pasto speciale è parte integrante dell'equilibrio.",
-      "[LE CHIAVI] La chiave nera apre la porta a un momento di libertà concordato. Nessun rimorso e nessun conto da saldare domani.",
-      "[LE CHIAVI] Servono a ricordare che la flessibilità è fondamentale. Una dieta senza pause è solo un'altra trappola dell'Altro Mondo.",
-      "[LE CHIAVI] Clicca qui quando ti godi una serata speciale programmata. Il gatto fa un cenno d'intesa: tutto calcolato.",
-      "[LE CHIAVI] Mostrano quante chiavi hai ancora a disposizione per il mese. Usale con criterio e soprattutto con assoluta serenità.",
-      "[LE CHIAVI] La chiave gira nella toppa e apre una bella parentesi di gusto. Nessun bottone cucito quando si usa una chiave.",
-      "[LE CHIAVI] Usale per segnare un'eccezione intelligente. Non è un errore: è una scelta autonoma e pienamente consapevole.",
-      "[LE CHIAVI] Questo pulsante tutela i tuoi momenti di festa. Registra la chiave e goditi il tempo con gli amici o con te.",
-      "[LE CHIAVI] Rappresentano la libertà di scegliere. Apri la porta, vivi il momento e richiudila con la massima tranquillità.",
-      "[LE CHIAVI] Servono a ricordarti che le regole rigide soffocano. Le chiavi lasciano entrare aria fresca e sapori autentici.",
-      "[LE CHIAVI] Tocca per registrare un pasto libero previsto. Il gatto non fa domande: tra intenditori della vita ci si capisce.",
-      "[LE CHIAVI] Le chiavi nere proteggono la tua serenità: dimostrano che il piacere pianificato non è mai un errore.",
-      "[LE CHIAVI] Mostrano il tuo spazio di manovra mensile. Usale quando ne vale davvero la pena, senza timori né ansie.",
-      "[LE CHIAVI] Clicca per confermare l'uso della chiave. Tutto alla luce del sole: la clandestinità lasciala ai topi saltatori.",
-      "[LE CHIAVI] Simbolo di autonomia e buon senso. Il cibo sa essere gioia, e questa chiave è il tuo passaporto personale.",
-      "[LE CHIAVI] Serve ad aprire lo scrigno delle serate speciali. Assapora ogni boccone senza pensare al domani.",
-      "[LE CHIAVI] La chiave ti ricorda che comandi tu sul tuo piano, e non viceversa. Usala con la fierezza di chi sa vivere.",
-      "[LE CHIAVI] Registra un momento speciale con piena serenità. Nessun obbligo di compensare nulla nei giorni successivi.",
-      "[LE CHIAVI] Toccala per sbloccare la tua pausa. Fa parte dell'armonia complessiva del mese: goditela fino in fondo.",
-      "[LE CHIAVI] Rappresentano le porte che decidi di aprire tu. Nessuna costrizione, solo il piacere genuino della libertà.",
-      "[LE CHIAVI] Servono ad armonizzare la settimana. Un piano che prevede la libertà è un piano fatto per durare nel tempo.",
-      "[LE CHIAVI] Clicca per registrare la tua chiave mensile. Il gatto socchiude gli occhi: scelta eccellente e ben goduta.",
-      "[LE CHIAVI] La chiave nera è il simbolo del patto con la tua serenità: il gusto è sacro quando viene vissuto con lucidità.",
-      "[PALLINA DEGLI ALLENAMENTI] Serve a registrare quando fai movimento per sentirti vitale e sciogliere le tensioni. Vietato usarla come moneta di scambio.",
-      "[PALLINA DEGLI ALLENAMENTI] Toccala se ti sei mossa oggi. Il movimento serve a dare energia e benessere, non a pagare debiti col cibo.",
-      "[PALLINA DEGLI ALLENAMENTI] Registra l'attività fisica vissuta come piacere e vitalità. Niente obblighi da caserma, solo cura per il corpo.",
-      "[PALLINA DEGLI ALLENAMENTI] Indica che hai sciolto i muscoli e riattivato la circolazione. Un gatto si stira ogni giorno per piacere, non per dovere.",
-      "[PALLINA DEGLI ALLENAMENTI] Clicca qui per annotare il tuo allenamento. Fallo per la gioia di sentirti sveglio e forte, mai per punirti.",
-      "[PALLINA DEGLI ALLENAMENTI] Simboleggia il gioco e l'energia fisica. Come i topi del circo, muoviti con leggerezza e divertimento.",
-      "[PALLINA DEGLI ALLENAMENTI] Serve a tenere traccia di quando ti prendi cura del corpo attraverso il movimento. Nessuna tabella militaresca.",
-      "[PALLINA DEGLI ALLENAMENTI] Tocca questo pulsante per confermare che hai fatto sport o una bella camminata. Una buona energia fa bene alla mente.",
-      "[PALLINA DEGLI ALLENAMENTI] Non serve a contare fatiche estreme. Serve solo a ricordare che muoversi aiuta a scrollarsi di dosso i pensieri.",
-      "[PALLINA DEGLI ALLENAMENTI] Registra un momento di vitalità. Se ti alleni per sentirti vivo, hai capito tutto; se lo fai per dovere, fermati.",
-      "[PALLINA DEGLI ALLENAMENTI] Il movimento fisico è ossigeno per la testa. Tocca la pallina e goditi la sensazione di aver sciolto la ruggine.",
-      "[PALLINA DEGLI ALLENAMENTI] Serve a segnare la tua attività senza pretese né gare. Conta la sensazione di benessere che lascia addosso.",
-      "[PALLINA DEGLI ALLENAMENTI] Clicca quando hai fatto muovere le gambe o il cuore. È un tributo alla tua vitalità, niente di contabile.",
-      "[PALLINA DEGLI ALLENAMENTI] Questa pallina non si baratta con i piatti di pasta. Si muove per il gusto di sentirsi agili e presenti.",
-      "[PALLINA DEGLI ALLENAMENTI] Simbolo di forza serena. Usala per registrare il tempo dedicato al tuo corpo, senza ansie da prestazione.",
-      "[PALLINA DEGLI ALLENAMENTI] Tocca se hai fatto sport oggi. Il gatto apprezza l'agilità: saltare da un ramo all'altro mantiene giovani.",
-      "[PALLINA DEGLI ALLENAMENTI] Indica che hai dato spazio al corpo per respirare e muoversi. Nessun calcolo, solo pura sensazione di vitalità.",
-      "[PALLINA DEGLI ALLENAMENTI] Serve ad annotare il movimento quotidiano. Fai quello che ti fa stare bene, senza farti ossessionare dai numeri.",
-      "[PALLINA DEGLI ALLENAMENTI] Clicca qui per segnare la sessione di oggi. Una bella doccia dopo essersi mossi rimette in sesto il mondo.",
-      "[PALLINA DEGLI ALLENAMENTI] Registra la tua costanza nel muoverti con piacere. Il corpo è fatto per camminare, correre e rilassarsi a fondo.",
-      "[PALLINA DEGLI ALLENAMENTI] Usala per confermare che hai dedicato del tempo al tuo benessere muscolare. Ottima abitudine per dormire bene.",
-      "[PALLINA DEGLI ALLENAMENTI] Non è un misuratore di fatica obbligatoria. È solo un testimone discreto della tua voglia di sentirti in moto.",
-      "[PALLINA DEGLI ALLENAMENTI] Toccala se ti sei stiracchiata per bene oggi. Il movimento alleggerisce il cuore e cancella le brutte ombre.",
-      "[PALLINA DEGLI ALLENAMENTI] Simboleggia l'agilità felina nel mondo reale. Muoviti quando ne senti il bisogno, con il tuo ritmo naturale.",
-      "[PALLINA DEGLI ALLENAMENTI] La pallina dell'allenamento chiude il cerchio della cura quotidiana: respiro, movimento e tanta serenità.",
-      "[LA LIBELLULA] Leggera come il fermaglio di Coraline, indica il tasso di riuscita del mese: vola alto per mostrarti il quadro generale senza farti pesare un singolo passo.",
-      "[LA LIBELLULA] Rappresenta la percentuale del tuo percorso mensile. Guardala per ricordarti che una giornata storta non cancella l'intero cammino.",
-      "[LA LIBELLULA] Simbolo di leggerezza e visione d'insieme. Ti mostra come sono andate le cose nel complesso, con la calma di chi sa volare oltre i dettagli.",
-      "[LA LIBELLULA] Vola sopra il calendario per ricordarti il tasso di riuscita: il benessere è una mappa intera, non un solo punto sulla strada.",
-      "[LA LIBELLULA] Indica la percentuale di aderenza ai tuoi piani. Ti offre uno sguardo sereno e panoramico, lontano da ogni ansia di perfezione.",
-      "[LA LIBELLULA] Serve a misurare il ritmo del mese nel suo insieme. Se la percentuale scende, si continua con calma: il mese non è una gabbia.",
-      "[LA LIBELLULA] Il fermaglio a libellula posa uno sguardo gentile sulle tue percentuali. La costanza vera è fatta di armonia, non di rigidità.",
-      "[LA LIBELLULA] Mostra la proporzione delle giornate in cui ti sei presa cura di te. Un promemoria visivo per apprezzare la strada fatta.",
-      "[LA LIBELLULA] Questa libellula misura l'andamento generale del mese: guardala per orientarti con serenità, senza dare troppo peso a un intoppo.",
-      "[LA LIBELLULA] Vola alta sulle statistiche per farti vedere la proporzione reale: un intoppo isolato non compromette il tuo equilibrio complessivo.",
-      "[LA LIBELLULA] Indica il tasso di riuscita globale: non serve il cento per cento per stare bene, basta una buona rotta mantenuta nel tempo.",
-      "[LA LIBELLULA] Simboleggia la grazia di saper osservare il mese dall'alto. Le percentuali sono solo uno strumento per orientarsi, non una pagella.",
-      "[LA LIBELLULA] Mostra quanto hai rispettato i tuoi accordi con la serenità. Prendine atto con distacco felino: i numeri non definiscono chi sei.",
-      "[LA LIBELLULA] Serve a visualizzare la percentuale del mese. Guardala come guarderesti il meteo: una semplice informazione sul vento di questi giorni.",
-      "[LA LIBELLULA] Il fermaglio di Coraline teneva in ordine i capelli, questa icona tiene in ordine la visione complessiva delle tue settimane.",
-      "[LA LIBELLULA] Ti ricorda che il valore del tuo percorso si misura nella totalità. Una libellula non smette di volare se incontra una folata contraria.",
-      "[LA LIBELLULA] Segna la percentuale di equilibrio mensile. Uno strumento pulito e sobrio per apprezzare i tuoi progressi senza pressioni.",
-      "[LA LIBELLULA] Vola leggera sui numeri: ti ricorda che la regolarità è una tendenza naturale nel tempo, mai un obbligo da caserma.",
-      "[LA LIBELLULA] Indica la percentuale di riuscita complessiva. Usala per guardare lontano e ritrovare la fiducia nella tua direzione.",
-      "[LA LIBELLULA] La libellula si libra sul diario per darti una prospettiva ampia: da quassù si vede che stai costruendo buone abitudini con pazienza.",
-      "[LA LIBELLULA] Mostra il tasso di successo del mese: la serenità sta nel guardare il totale senza farsi ipnotizzare dal singolo dettaglio.",
-      "[LA LIBELLULA] Simbolo di visione d'insieme. Ricorda che anche con qualche giorno fuori traccia, il quadro d'insieme può restare splendido.",
-      "[LA LIBELLULA] Un tocco leggero per consultare la riuscita del mese. Il gatto osserva e approva: la rotta si mantiene guardando avanti.",
-      "[LA LIBELLULA] Serve a dirti a che punto sei con il mese. Niente allarmismi se la cifra cambia: ogni giorno nuovo è una ventata fresca.",
-      "[LA LIBELLULA] La percentuale non è un giudizio morale. La libellula vola sopra le illusioni e ti mostra la realtà con pacata grazia."
-    ],
+  // Categoria 8: Obsoleta (sostituita da CAT_EXPLANATIONS_MAP deterministica 1:1)
+  ui_elements: [],
 
   // Categoria 9: Situazionale - click dopo 3+ giorni non rispettati consecutivi (150)
   difficult_streak: [
@@ -2720,13 +2569,51 @@ export function getSmartSituationalCatQuote(state = {}) {
 export const getContextualCatQuote = getSmartSituationalCatQuote;
 
 /**
- * Restituisce una spiegazione del Gatto per uno dei 6 elementi UI (Categoria 8)
- * @param {'[PIETRA FORATA]' | '[PALLINA CON LA STELLA]' | '[IL BOTTONE]' | '[LE CHIAVI]' | '[PALLINA DEGLI ALLENAMENTI]' | '[LA LIBELLULA]'} tag
- * @returns {string} Frase esplicativa del gatto
+ * Mappa Deterministica 1:1 delle Spiegazioni del Gatto per gli Elementi UI.
+ * Ogni elemento cliccabile della Dashboard e degli Slot Statistiche possiede
+ * una singola spiegazione puntuale, funzionale e immutabile (Zero Random).
  */
-export function getUIElementExplanation(tag) {
-  const pool = CAT_QUOTES.ui_elements.filter(q => q.startsWith(tag));
-  if (!pool || pool.length === 0) return CAT_QUOTES.ui_elements[0];
-  const randomIndex = Math.floor(Math.random() * pool.length);
-  return pool[randomIndex];
+export const CAT_EXPLANATIONS_MAP = {
+  // --- DASHBOARD PRINCIPALE ---
+  dashboard_moon_eclipse: "È la Luna dell'Eclissi: osserva il ritmo dei tuoi ultimi 7 giorni solari. Se mantieni la rotta risplende limpida come la Pietra di Giada; ogni giornata fuori sentiero fa avanzare un bottone nero che ne oscura la superficie. Basta un solo giorno con la Pietra Verde per far arretrare l'ombra e far tornare la luce.",
+  dashboard_seven_days: "È la mappa degli ultimi sette giorni, da sei giorni fa fino a oggi. Ogni casella mostra l'esito reale: la Pietra Verde per la rotta seguita, la Chiave Nera per un giorno di libertà, il Bottone Nero per un imprevisto e il trattino per i giorni che attendono ancora la tua annotazione.",
+  dashboard_streak_badge: "È il contatore della tua serie attiva: indica da quanti giorni consecutivi stai tenendo salda la rotta senza interruzioni. I giorni con la Pietra Verde e le Chiavi della Libertà mantengono viva la serie; toccalo per scendere direttamente al taccuino delle statistiche del mese.",
+  dashboard_card_adherence: "Questa è la percentuale di aderenza del mese visualizzato: calcola il rapporto tra i giorni in cui hai rispettato il piano (inclusi i giorni con Chiave) e il totale dei giorni registrati. Sotto vedi il confronto diretto con la tua media storica di tutti i mesi precedenti.",
+  dashboard_card_success: "Conta il numero esatto di giorni in cui hai seguito la dieta con la Pietra Verde durante il mese. La cifra sottostante mostra se sei sopra o sotto rispetto alla tua media abituale nei mesi passati.",
+  dashboard_card_cheats: "Mostra quante giornate fuori programma hai archiviato con il Bottone Nero nel mese corrente. La percentuale sotto indica la variazione rispetto alla tua media abituale: meno imprevisti significa una linea più stabile, ma senza drammi.",
+  dashboard_card_workouts: "Indica quante sessioni di allenamento hai completato questo mese per la brigata dei topi di Bobinsky. Ti mostra a colpo d'occhio se ti sei mossa di più o di meno rispetto alla tua media mensile.",
+
+  // --- SLOT DELLE STATISTICHE (MonthStatsBar) ---
+  stat_keys: "È la riserva delle tue Chiavi Nere: indica quante chiavi hai ancora a disposizione su quelle totali del mese. Ciascuna chiave ti consente di goderti una serata o un pasto libero speciale senza interrompere la serie e senza farti cucire alcun bottone.",
+  stat_success_days: "Rappresenta il totale dei giorni in cui hai seguito il piano alimentare nel mese visualizzato. Si incrementa ogni volta che assegni la Pietra Verde a una data: misura la tua costanza concreta passo dopo passo.",
+  stat_cheat_days: "Raccoglie i giorni in cui la vita ha preso una deviazione imprevista e hai registrato il Bottone Nero. Non è una punizione: testimonia l'onestà di aver annotato la realtà senza nasconderla, mantenendo pulito il diario.",
+  stat_workout_days: "Conta le giornate del mese in cui hai risposto 'SÌ' all'allenamento del signor Bobinsky. Registra l'energia dedicata a sciogliere i muscoli e mantenere agili le molle del corpo per lo spettacolo.",
+  stat_streak_record: "Mostra il record assoluto di giorni consecutivi di dieta rispettata raggiunto all'interno di questo mese. Se la serie positiva è iniziata alla fine del mese precedente, viene ereditata qui per darti la misura esatta della tua continuità reale.",
+  stat_adherence_rate: "È la percentuale di aderenza mensile calcolata dividendo la somma dei giorni con Pietra Verde e delle Chiavi per il totale dei giorni finora registrati. Come la libellula, osserva il quadro d'insieme dall'alto: ti ricorda che non serve il cento per cento per raggiungere un equilibrio autentico.",
+
+  // --- ELEMENTI ACCESSORI ---
+  calendar_future_day: "Non puoi anticipare il tempo dell'Altro Mondo, Asia: il diario accetta solo oggi o i giorni già trascorsi nel mondo reale."
+};
+
+// Mappa di retrocompatibilità trasparente per i vecchi tag
+const LEGACY_TAG_FALLBACK = {
+  '[PIETRA FORATA]': 'dashboard_card_adherence',
+  '[PALLINA CON LA STELLA]': 'stat_streak_record',
+  '[IL BOTTONE]': 'stat_cheat_days',
+  '[LE CHIAVI]': 'stat_keys',
+  '[PALLINA DEGLI ALLENAMENTI]': 'stat_workout_days',
+  '[LA LIBELLULA]': 'stat_adherence_rate'
+};
+
+/**
+ * Restituisce l'unica spiegazione fissa, puntuale e funzionale del Gatto (Determinismo 1:1)
+ * @param {string} key ID univoco UI o tag legacy
+ * @returns {string} Spiegazione immutabile
+ */
+export function getUIElementExplanation(key) {
+  if (!key) return CAT_EXPLANATIONS_MAP.dashboard_moon_eclipse;
+  if (CAT_EXPLANATIONS_MAP[key]) return CAT_EXPLANATIONS_MAP[key];
+  const legacyKey = LEGACY_TAG_FALLBACK[key];
+  if (legacyKey && CAT_EXPLANATIONS_MAP[legacyKey]) return CAT_EXPLANATIONS_MAP[legacyKey];
+  return CAT_EXPLANATIONS_MAP.dashboard_moon_eclipse;
 }

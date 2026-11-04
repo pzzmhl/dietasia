@@ -3,7 +3,13 @@ import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
-import { triggerHapticFeedback } from '../services/haptics';
+import { 
+  triggerHapticFeedback, 
+  hapticButtonStitch, 
+  hapticSuccess, 
+  hapticLight, 
+  hapticWarning 
+} from '../utils/haptics';
 
 /**
  * Modal Compatto e Iconico per la Registrazione Esito Giornaliero:
@@ -14,7 +20,7 @@ import { triggerHapticFeedback } from '../services/haptics';
  * - 4 Riquadri in griglia 2x2 con i simboli:
  *   1. In alto a sinistra: Dieta Rispettata (Pietra verde)
  *   2. In alto a destra: Dieta Non Rispettata (Bottone nero)
- *   3. In basso a sinistra: Sgarro con Chiave (Chiave jolly)
+ *   3. In basso a sinistra: Giorno di Libertà con Chiave (Chiave jolly)
  *   4. In basso a destra: X per chiudere la finestra
  */
 export default function DaySelectionModal({ 
@@ -26,9 +32,13 @@ export default function DaySelectionModal({
   onClose 
 }) {
   const [visible, setVisible] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const isSubmittingRef = useRef(false);
+  const resetTimerRef = useRef(null);
 
   useEffect(() => {
+    setConfirmReset(false);
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     if (isOpen) {
       isSubmittingRef.current = false;
       const raf = requestAnimationFrame(() => setVisible(true));
@@ -36,7 +46,13 @@ export default function DaySelectionModal({
     } else {
       setVisible(false);
     }
-  }, [isOpen]);
+  }, [isOpen, dateStr]);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
 
   const handleSelect = (status) => {
     if (isSubmittingRef.current) return;
@@ -47,7 +63,7 @@ export default function DaySelectionModal({
   const handleClose = () => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
-    triggerHapticFeedback('selection');
+    hapticLight();
     onClose();
   };
 
@@ -56,7 +72,7 @@ export default function DaySelectionModal({
   if (!isOpen || !dateStr || dateStr > todayStr) return null;
 
   // Formattazione data in italiano senza anno (es. Lunedi 2 Novembre) con "i" normale al posto di "ì"
-  const dateObj = new Date(dateStr + 'T00:00:00');
+  const dateObj = new Date(dateStr + 'T12:00:00');
   const options = { weekday: 'long', day: 'numeric', month: 'long' };
   const rawDate = dateObj.toLocaleDateString('it-IT', options)
     .replace(/ì/g, 'i')
@@ -198,15 +214,15 @@ export default function DaySelectionModal({
           position: 'relative',
           zIndex: 1
         }}>
-          {/* 1. IN ALTO A SINISTRA: DIETA RISPETTATA (PIETRA VERDE CON AURA VERDE) */}
+          {/* 1. IN ALTO A SINISTRA: PIETRA VERDE (ROTTA MANTENUTA) */}
           <button
             type="button"
             onClick={() => {
-              triggerHapticFeedback('success');
+              hapticSuccess();
               handleSelect(currentStatus === 'success' ? 'neutral' : 'success');
             }}
-            aria-label="Dieta Rispettata"
-            title="Dieta Rispettata"
+            aria-label="Pietra Verde: Rotta Mantenuta"
+            title="Pietra Verde: Rotta Mantenuta"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -261,15 +277,15 @@ export default function DaySelectionModal({
             )}
           </button>
 
-          {/* 2. IN ALTO A DESTRA: DIETA NON RISPETTATA (BOTTONE NERO CON AURA ROSSA) */}
+          {/* 2. IN ALTO A DESTRA: BOTTONE NERO (GIORNO FUORI SENTIERO) */}
           <button
             type="button"
             onClick={() => {
-              triggerHapticFeedback('cheat');
+              hapticButtonStitch();
               handleSelect(currentStatus === 'cheat' ? 'neutral' : 'cheat');
             }}
-            aria-label="Dieta Non Rispettata"
-            title="Dieta Non Rispettata"
+            aria-label="Bottone Nero: Fuori Sentiero"
+            title="Bottone Nero: Fuori Sentiero"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -323,17 +339,17 @@ export default function DaySelectionModal({
             )}
           </button>
 
-          {/* 3. IN BASSO A SINISTRA: SGARRO CON CHIAVE (CHIAVE CON AURA ORO) */}
+          {/* 3. IN BASSO A SINISTRA: CHIAVE DELLA LIBERTÀ (AURA ORO) */}
           <button
             type="button"
             onClick={() => {
               if (!canUseKey) return;
-              triggerHapticFeedback('key');
+              hapticSuccess();
               handleSelect(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key');
             }}
             disabled={!canUseKey}
-            aria-label="Sgarro Jolly con Chiave"
-            title={canUseKey ? "Sgarro con Chiave" : "Nessuna chiave disponibile"}
+            aria-label="Chiave della Libertà"
+            title={canUseKey ? "Giorno di Libertà (Chiave Nera)" : "Nessuna chiave disponibile"}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -394,11 +410,22 @@ export default function DaySelectionModal({
             <button
               type="button"
               onClick={() => {
-                triggerHapticFeedback('selection');
-                handleSelect('neutral');
+                if (!confirmReset) {
+                  hapticLight();
+                  setConfirmReset(true);
+                  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+                  resetTimerRef.current = setTimeout(() => {
+                    setConfirmReset(false);
+                  }, 3500);
+                } else {
+                  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+                  setConfirmReset(false);
+                  hapticWarning();
+                  handleSelect('neutral');
+                }
               }}
-              aria-label="Azzera esito registrato"
-              title="Azzera esito"
+              aria-label={confirmReset ? 'Conferma azzeramento esito' : 'Azzera esito registrato'}
+              title={confirmReset ? 'Tocca di nuovo per confermare' : 'Azzera esito'}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -406,9 +433,11 @@ export default function DaySelectionModal({
                 justifyContent: 'center',
                 height: '90px',
                 borderRadius: '18px',
-                backgroundColor: 'rgba(26, 32, 44, 0.75)',
-                border: '1.5px solid rgba(221, 202, 183, 0.35)',
-                boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.45)',
+                backgroundColor: confirmReset ? 'rgba(50, 18, 22, 0.94)' : 'rgba(26, 32, 44, 0.75)',
+                border: confirmReset ? '2px solid #ef4444' : '1.5px solid rgba(221, 202, 183, 0.35)',
+                boxShadow: confirmReset
+                  ? '0 0 16px rgba(239, 68, 68, 0.5), inset 0 0 10px rgba(185, 28, 28, 0.3)'
+                  : 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.45)',
                 cursor: 'pointer',
                 touchAction: 'manipulation',
                 transition: 'all 0.15s ease',
@@ -419,12 +448,12 @@ export default function DaySelectionModal({
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(6, 20, 34, 0.85)',
-                border: '1px solid rgba(221, 202, 183, 0.3)',
+                backgroundColor: confirmReset ? 'rgba(239, 68, 68, 0.2)' : 'rgba(6, 20, 34, 0.85)',
+                border: confirmReset ? '1.5px solid #ef4444' : '1px solid rgba(221, 202, 183, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--coraline-parchment)',
+                color: confirmReset ? '#ef4444' : 'var(--coraline-parchment)',
                 fontSize: '17px',
                 lineHeight: 1
               }}>
@@ -433,18 +462,18 @@ export default function DaySelectionModal({
               <span style={{
                 fontSize: '11px',
                 fontFamily: 'var(--font-gothic)',
-                fontWeight: 700,
-                color: 'var(--coraline-parchment)',
+                fontWeight: confirmReset ? 800 : 700,
+                color: confirmReset ? '#fca5a5' : 'var(--coraline-parchment)',
                 letterSpacing: '0.4px'
               }}>
-                Azzera
+                {confirmReset ? 'Confermi?' : 'Azzera'}
               </span>
             </button>
           ) : (
             <button
               type="button"
               onClick={() => {
-                triggerHapticFeedback('selection');
+                hapticLight();
                 onClose();
               }}
               aria-label="Chiudi finestra"
