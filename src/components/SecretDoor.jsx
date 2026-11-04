@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import secretDoorImg from '../assets/secret-door.webp';
-import { triggerHapticFeedback } from '../services/haptics';
-import { openCoralineSpotifyShuffle } from '../services/spotify';
+import { triggerHapticFeedback } from '../utils/haptics';
+import { openNextDoorPortal } from '../utils/doorPortalLogic';
 import { stopMusicWithFadeOut } from '../services/backgroundMusic';
 
 /**
- * La Porticina Segreta di Coraline (Portale Musicale dell'Altro Mondo)
- * - Tocco singolo: Apre Spotify e avvia immediatamente in modalità shuffle
- *   un brano dalla Colonna Sonora ufficiale di Coraline.
+ * La Porticina Segreta di Coraline (Portale Musicale e Video dell'Altro Mondo)
+ * - Tocco singolo: Estrae dal mazzo pesato 6:3 e apre la Colonna Sonora su Spotify o uno dei 3 video a tema Coraline.
  * - Pressione prolungata (Long-press): Attiva il riquadro segreto speciale per Asia.
  */
 export default function SecretDoor({ onLongPress, onOpenSettings }) {
@@ -81,11 +80,11 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
     triggerHapticFeedback('key');
     setIsUnlocking(true);
 
-    // Sfuma la musica d'atmosfera locale prima di aprire Spotify
+    // Sfuma la musica d'atmosfera locale prima di aprire il portale esterno
     stopMusicWithFadeOut();
 
-    // Apre Spotify in shuffle mode con la playlist di Coraline direttamente (senza mostrare anteprime testo)
-    openCoralineSpotifyShuffle();
+    // Estrae dalla Weighted Shuffle Bag (6:3) e apre direttamente Playlist o Video YouTube
+    openNextDoorPortal();
 
     if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current);
     unlockTimerRef.current = setTimeout(() => {
@@ -147,45 +146,37 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
           }}
         />
 
-        {/* L'Immagine della Porticina Segreta: NON FLUTTUA, È SOLIDA E FERMA, PULSA SOLO LA LUCE VERDE */}
+        {/* L'Immagine della Porticina Segreta: NON FLUTTUA, È SOLIDA E FERMA, PULSA L'AURA VERDE GPU RETROSTANTE */}
         <img
           src={secretDoorImg}
           alt="Porticina Segreta di Coraline"
-          loading="eager"
+          width={115}
+          height={158}
+          loading="lazy"
           decoding="async"
+          draggable={false}
           style={{
             width: '115px',
             height: 'auto',
             objectFit: 'contain',
             borderRadius: '4px',
             pointerEvents: 'none',
-            transform: 'none',
-            animation: 'secretDoorGlowPulse 3.2s ease-in-out infinite',
-            willChange: 'filter'
+            transform: 'translateZ(0)',
+            filter: 'drop-shadow(0 0 14px rgba(74, 222, 128, 0.72)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9))'
           }}
         />
       </button>
 
       <style>{`
-        /* PULSAZIONE PURA DELLA LUCE: LA PORTA NON SI MUOVE E NON FLUTTUA */
-        @keyframes secretDoorGlowPulse {
-          0%, 100% {
-            filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.55)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
-          }
-          50% {
-            filter: drop-shadow(0 0 28px rgba(74, 222, 128, 0.98)) drop-shadow(0 0 16px rgba(139, 229, 116, 0.75)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
-          }
-        }
-
-        /* PULSAZIONE DEL BAGLIORE / ALONE SMERALDO RETROSTANTE */
+        /* PULSAZIONE GPU DELL'ALONE SMERALDO RETROSTANTE (transform + opacity: zero repaint software) */
         @keyframes secretDoorAuraPulse {
           0%, 100% {
             transform: scale(0.92);
             opacity: 0.45;
           }
           50% {
-            transform: scale(1.24);
-            opacity: 0.95;
+            transform: scale(1.26);
+            opacity: 0.98;
           }
         }
       `}</style>

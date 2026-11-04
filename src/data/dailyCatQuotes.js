@@ -10,7 +10,7 @@
  * - Tono felino: asciutto, enigmatico, protettivo
  */
 
-export const DAILY_CAT_QUOTES = [
+const DAILY_CAT_QUOTES = [
   "Un pasto tranquillo è come una porta socchiusa verso il mondo reale. Lascia entrare la luce e scaccia le ombre.",
   "Il corpo conosce la strada prima ancora che la mente decida di mettersi in cammino. Basta ascoltarne il battito calmo.",
   "La nebbia densa nasconde solo ciò che ha fretta di mostrarsi. La cura di sé ha radici lente e profonde.",
@@ -145,7 +145,7 @@ export const DAILY_CAT_QUOTES = [
   "La luce filtra tra le persiane. È il momento di sostenere il corpo con qualcosa di buono e genuino.",
   "I topi del circo sanno che ogni salto richiede energia costante. Non saltare i pasti se vuoi camminare con agilità.",
   "La quiete mattutina è un tesoro fragile. Custodiscila mangiando senza guardare schermi e senza farti distrarre.",
-  "Non c'è magia più grande del sapersi ascoltare con sincerità. Se hai fame, mangia; se sei sazio, fermati in pace.",
+  "Non c'è magia più grande del sapersi ascoltare con sincerità. Se hai fame, mangia; se sei sazia, fermati in pace.",
   "Un gatto randagio attraversa la nebbia senza paura perché sa dove trovare riparo. Trova il tuo riparo nelle buone abitudini.",
   "Le cose semplici sono quelle che ci salvano sempre. Un bicchier d'acqua, un piatto nutriente, un respiro profondo.",
   "L'Altro Mondo era una gabbia dorata senza uscita. Il mondo vero ha porte aperte e sentieri che puoi scegliere liberamente.",
@@ -160,7 +160,7 @@ export const DAILY_CAT_QUOTES = [
   "Non farti prendere dalla fretta di arrivare chissà dove. Il momento presente è l'unico pasto che puoi gustare davvero.",
   "Le buone scelte a tavola sono come passi morbidi nella neve: lasciano un segno chiaro senza fare alcun rumore.",
   "La salute è un'alleanza fedele tra mente e stomaco. Tratta entrambi con il massimo riguardo durante l'intera giornata.",
-  "Apri gli occhi sul mondo vero, con tutta la sua imperfetta bellezza. Nutri le tue forze e cammina sereno.",
+  "Apri gli occhi sul mondo vero, con tutta la sua imperfetta bellezza. Nutri le tue forze e cammina serena.",
   "Chi sa prendersi cura del proprio piatto impara a navigare a vista anche nelle tempeste più dense. La calma parte da dentro.",
   "L'Altra Madre offriva specchi che riflettevano solo ciò che lei voleva. I tuoi occhi invece sanno riconoscere il buon nutrimento.",
   "Un pasto tranquillo è la miglior risposta alle provocazioni della giornata. Mettiti al riparo con una buona abitudine.",
@@ -185,7 +185,7 @@ export const DAILY_CAT_QUOTES = [
   "Le porte segrete non servono a chi sta bene a casa propria. Costruisci il tuo benessere giorno dopo giorno, piatto dopo piatto.",
   "La serenità è un patto silenzioso rinnovato a ogni pasto. Mantienilo con garbo, senza imposizioni e senza rimproveri.",
   "I sentieri del giardino reale sono aperti per te. Nutri le tue gambe e il tuo cuore con la solita saggia misura.",
-  "Un passo verso il mondo reale. Ricordati che la cura per te stesso è l'unica bussola che non sbaglia mai rotta.",
+  "Un passo verso il mondo reale. Ricordati che la cura per te stessa è l'unica bussola che non sbaglia mai rotta.",
   "Non c'è niente di più saggio che concedersi un pasto tranquillo prima che il rumore del mondo prenda il sopravvento.",
   "L'Altra Madre voleva che Coraline perdesse i suoi occhi per non vedere la verità. Tu tieni gli occhi ben aperti sulla tua salute.",
   "Chi sa rispettare i propri pasti impara a non farsi calpestare dalle urgenze altrui. La salute è la tua prima priorità.",
@@ -432,20 +432,37 @@ const DAILY_PERMUTATION = generateDailyPermutation(1337);
  * @returns {string} Frase del gatto
  */
 export function getDailyCatQuoteForDate(dateStr) {
-  let targetDate;
+  let y;
+  let m;
+  let d;
   if (dateStr && typeof dateStr === 'string' && dateStr.includes('-')) {
-    const parts = dateStr.split('-');
-    targetDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-  } else {
-    targetDate = new Date();
+    const parts = dateStr.split('-').map(Number);
+    y = parts[0];
+    m = parts[1];
+    d = parts[2];
+  }
+  if (!y || !m || !d) {
+    const now = new Date();
+    y = now.getFullYear();
+    m = now.getMonth() + 1;
+    d = now.getDate();
   }
 
-  // Calcola il giorno dell'anno (0..364)
-  const startOfYear = new Date(targetDate.getFullYear(), 0, 1);
-  const diffMs = targetDate - startOfYear;
-  const dayOfYear = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+  // Calcolo immune al cambio Ora Legale / Ora Solare tramite mezzanotte UTC pura
+  const targetUtc = Date.UTC(y, m - 1, d);
+  const startOfYearUtc = Date.UTC(y, 0, 1);
+  const dayOfYear = Math.max(0, Math.round((targetUtc - startOfYearUtc) / 86400000));
 
   const permIndex = dayOfYear % DAILY_PERMUTATION.length;
   const quoteIndex = DAILY_PERMUTATION[permIndex];
   return DAILY_CAT_QUOTES[quoteIndex % DAILY_CAT_QUOTES.length];
+}
+
+/**
+ * Restituisce una massima casuale tra le 365 frasi quotidiane (ideale per test e rotazione)
+ * @returns {string} Frase casuale del gatto
+ */
+export function getRandomDailyCatQuote() {
+  const randomIndex = Math.floor(Math.random() * DAILY_CAT_QUOTES.length);
+  return DAILY_CAT_QUOTES[randomIndex];
 }

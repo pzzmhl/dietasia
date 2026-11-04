@@ -21,6 +21,7 @@ import { App as CapApp } from '@capacitor/app';
 
 let memoryQueue = null;
 let isFlushing = false;
+let needsReflush = false;
 let flushTimeout = null;
 let currentSyncStatus = 'synced'; // 'synced' | 'pending' | 'syncing' | 'offline' | 'error'
 const listeners = new Set();
@@ -29,6 +30,7 @@ const listeners = new Set();
  * Notifica tutti i listener registrati del cambio di stato di sincronizzazione
  */
 function notifyStatusChange(status) {
+  if (currentSyncStatus === status) return;
   currentSyncStatus = status;
   listeners.forEach((fn) => {
     try {
@@ -41,7 +43,7 @@ function notifyStatusChange(status) {
  * Ottiene la coda persistente delle modifiche pendenti
  * @returns {Array<{ id: string, type: string, key: string, payload: any, updatedAt: string }>}
  */
-export function getPendingQueue() {
+function getPendingQueue() {
   if (memoryQueue !== null) return memoryQueue;
 
   try {
@@ -81,6 +83,12 @@ function persistQueue(queue) {
  * @param {{ type: string, key: string, payload: any }} item
  */
 export function enqueueSyncOperation({ type, key, payload }) {
+  // Se Supabase non è configurato affatto, il salvataggio è puramente locale (istantaneo)
+  if (!isSupabaseConfigured()) {
+    notifyStatusChange('synced');
+    return;
+  }
+
   const queue = [...getPendingQueue()];
   const now = new Date().toISOString();
   const existingIndex = queue.findIndex((q) => q.type === type && q.key === key);
@@ -102,6 +110,11 @@ export function enqueueSyncOperation({ type, key, payload }) {
 
   persistQueue(queue);
 
+  if (isFlushing) {
+    needsReflush = true;
+    return;
+  }
+
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     notifyStatusChange('offline');
   } else {
@@ -118,12 +131,7 @@ function removeSyncedItems(syncedIds) {
   const idSet = new Set(syncedIds);
   const remaining = current.filter((item) => !idSet.has(item.id));
   persistQueue(remaining);
-
-  if (remaining.length === 0) {
-    notifyStatusChange('synced');
-  } else {
-    notifyStatusChange('pending');
-  }
+  return remaining.length;
 }
 
 /**
@@ -137,7 +145,7 @@ export function getPendingSyncCount() {
  * Restituisce lo stato attuale della sincronizzazione
  */
 export function getSyncStatus() {
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+  if (typeof navigator !== 'undefined' && !navigator.onLine && isSupabaseConfigured() && getPendingQueue().length > 0) {
     return 'offline';
   }
   return currentSyncStatus;
@@ -153,30 +161,51 @@ export function subscribeSyncStatus(callback) {
 }
 
 /**
- * Esegue il flush della coda verso Supabase con protezione da race condition
+ * Esegue il flush della coda verso Supabase con protezione atomica da race condition
+ * e ri-accodamento automatico nel blocco finally.
  */
 export async function flushSyncQueue() {
-  if (isFlushing) return;
+  if (isFlushing) {
+    needsReflush = true;
+    return;
+  }
 
-  // 1. Controllo connettività
+  const initialQueue = getPendingQueue();
+
+  // 1. Se Supabase non è configurato, siamo in modalità locale pura: stato 'synced'
+  if (!isSupabaseConfigured()) {
+    if (initialQueue.length > 0) {
+      persistQueue([]);
+    }
+    notifyStatusChange('synced');
+    return;
+  }
+
+  // 2. Se la coda è già vuota, siamo allineati
+  if (initialQueue.length === 0) {
+    notifyStatusChange('synced');
+    return;
+  }
+
+  // 3. Controllo connettività
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     notifyStatusChange('offline');
     return;
   }
 
-  // 2. Controllo configurazione Supabase
-  if (!isSupabaseConfigured()) {
-    return;
-  }
-
-  // 3. Controllo autenticazione utente
+  // 4. Controllo autenticazione utente: se non c'è account Cloud attivo,
+  // i dati sono già salvati in sicurezza nel dispositivo locale -> stato 'synced'
   let user = null;
   try {
     user = await getSupabaseUser();
   } catch (e) {
+    notifyStatusChange('synced');
     return;
   }
-  if (!user) return;
+  if (!user) {
+    notifyStatusChange('synced');
+    return;
+  }
 
   const queue = getPendingQueue();
   if (queue.length === 0) {
@@ -187,9 +216,11 @@ export async function flushSyncQueue() {
   // Snapshot atomico degli ID in elaborazione per non perdere
   // eventuali nuove modifiche arrivate mentre il flush è in corso
   const processingIds = queue.map((item) => item.id);
+  let flushSucceeded = false;
 
   try {
     isFlushing = true;
+    needsReflush = false;
     notifyStatusChange('syncing');
 
     // Genera il payload consolidato aggiornato
@@ -202,8 +233,14 @@ export async function flushSyncQueue() {
     await uploadBackupToSupabase(fullPayload);
 
     // Rimozione atomica degli elementi inviati
-    removeSyncedItems(processingIds);
-    notifyStatusChange('synced');
+    const remainingCount = removeSyncedItems(processingIds);
+    flushSucceeded = true;
+
+    if (remainingCount === 0 && !needsReflush) {
+      notifyStatusChange('synced');
+    } else {
+      notifyStatusChange('pending');
+    }
   } catch (err) {
     console.warn('[SyncQueue] Invio a Supabase non riuscito (retry al prossimo ciclo):', err);
     // Gli elementi restano al sicuro nella coda locale
@@ -214,6 +251,12 @@ export async function flushSyncQueue() {
     }
   } finally {
     isFlushing = false;
+    // Se durante l'upload sono arrivate nuove modifiche dall'utente, pianifica il ciclo successivo
+    if (flushSucceeded && (needsReflush || getPendingQueue().length > 0)) {
+      needsReflush = false;
+      notifyStatusChange('pending');
+      triggerQueueFlush(600);
+    }
   }
 }
 
@@ -223,30 +266,49 @@ export async function flushSyncQueue() {
 export function triggerQueueFlush(delayMs = 1500) {
   if (flushTimeout) clearTimeout(flushTimeout);
   flushTimeout = setTimeout(() => {
+    flushTimeout = null;
     flushSyncQueue();
   }, delayMs);
 }
 
+let isSyncListenersInitialized = false;
+
 /**
  * Inizializza i listener automatici per il recupero della connessione
- * e il ritorno in primo piano dell'app
+ * e il ritorno in primo piano dell'app (idempotente: evita duplicazioni)
  */
 export function initSyncQueueListeners() {
+  if (isSyncListenersInitialized) return;
+  isSyncListenersInitialized = true;
+
+  // Allinea lo stato iniziale se erano rimasti elementi dalla sessione precedente
+  if (isSupabaseConfigured() && getPendingQueue().length > 0) {
+    currentSyncStatus = (typeof navigator !== 'undefined' && !navigator.onLine) ? 'offline' : 'pending';
+  } else {
+    currentSyncStatus = 'synced';
+  }
+
   if (typeof window !== 'undefined') {
     window.addEventListener('online', () => {
-      notifyStatusChange('pending');
-      triggerQueueFlush(500);
+      if (isSupabaseConfigured() && getPendingQueue().length > 0) {
+        notifyStatusChange('pending');
+        triggerQueueFlush(500);
+      } else {
+        notifyStatusChange('synced');
+      }
     });
 
     window.addEventListener('offline', () => {
-      notifyStatusChange('offline');
+      if (isSupabaseConfigured() && getPendingQueue().length > 0) {
+        notifyStatusChange('offline');
+      }
     });
   }
 
   if (Capacitor.isNativePlatform()) {
     try {
       CapApp.addListener('appStateChange', ({ isActive }) => {
-        if (isActive) {
+        if (isActive && isSupabaseConfigured() && getPendingQueue().length > 0) {
           triggerQueueFlush(800);
         }
       });

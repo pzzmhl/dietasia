@@ -1,4 +1,5 @@
 import React from 'react';
+import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -17,11 +18,7 @@ export default class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     try {
-      localStorage.removeItem('coraline_deck_key');
-      localStorage.removeItem('coraline_deck_success');
-      localStorage.removeItem('coraline_deck_cheat');
-      localStorage.removeItem('coraline_deck_all');
-      localStorage.removeItem('coraline_last_gif_id');
+      STORAGE_KEYS.LEGACY_OBSOLETE_KEYS.forEach((key) => localStorage.removeItem(key));
     } catch (e) {}
     window.location.reload();
   };

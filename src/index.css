@@ -30,7 +30,6 @@
   --font-coraline: 'CoralinesCat', 'Cinzel', cursive, serif;
   --font-gothic: 'Cinzel', Georgia, serif;
   --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-spooky: 'Creepster', cursive;
 }
 
 * {
@@ -151,19 +150,10 @@ button:active:not(:disabled),
   z-index: 0;
 }
 
-/* Preferenze Utente: disattiva trama vortice se scelto nelle impostazioni */
-body.no-vortex-bg .vortex-card::after {
+/* Preferenze Utente: disattiva trama vortice ovunque se scelto nelle impostazioni */
+body.no-vortex-bg .vortex-card::after,
+body.no-vortex-bg .vortex-bg-layer {
   display: none !important;
-}
-
-/* =========================================================
-   ELEMENTI CARICATI ISTANTANEAMENTE (Zero Lag / Zero Scomparsa allo Scroll)
-   ========================================================= */
-.scroll-reveal-container {
-  opacity: 1;
-  transform: none;
-  filter: none;
-  position: relative;
 }
 
 /* Micro-animazioni Stop-Motion organiche per gli elementi tattili */
@@ -183,29 +173,8 @@ body.no-vortex-bg .vortex-card::after {
   will-change: transform;
 }
 
-/* Bagliore giallo impermeabile */
-.glow-yellow {
-  box-shadow: 0 0 20px rgba(216, 198, 21, 0.45);
-}
-
-.text-gold {
-  color: var(--coraline-gold);
-}
-
-.text-yellow {
-  color: var(--coraline-yellow);
-}
-
-.text-parchment {
-  color: var(--coraline-parchment);
-}
-
 .font-gothic {
   font-family: var(--font-gothic);
-}
-
-.font-spooky {
-  font-family: var(--font-spooky);
 }
 
 /* Rimozione globale della barra di scorrimento (nessuna scrollbar visibile a destra) */
@@ -229,38 +198,11 @@ body.no-vortex-bg .vortex-card::after {
   display: none !important;
 }
 
-/* Pulsazione del bottone */
-@keyframes buttonPulse {
-  0%, 100% {
-    transform: scale(1);
+@keyframes spinSync {
+  0% {
+    transform: rotate(0deg);
   }
-  50% {
-    transform: scale(1.03);
+  100% {
+    transform: rotate(360deg);
   }
-}
-
-.animate-subtle-pulse {
-  animation: buttonPulse 3s infinite ease-in-out;
-}
-
-/* Nuvoletta di dialogo con bordo Blu Scuro */
-.speech-bubble {
-  position: relative;
-  background: rgba(13, 44, 73, 0.95);
-  border: 1.5px solid var(--border-dark-blue-light);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-}
-
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -12px;
-  left: 45px;
-  border-width: 12px 10px 0;
-  border-style: solid;
-  border-color: rgba(13, 44, 73, 0.95) transparent;
-  display: block;
-  width: 0;
 }

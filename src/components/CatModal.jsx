@@ -3,7 +3,7 @@ import catSuccessImg from '../assets/cat-success.webp';     // Dieta Corretta / 
 import catFailImg from '../assets/cat-fail.webp';           // Dieta Scorretta / Non Seguita (Bottone Nero) -> Gatto scettico
 import catCheatKeyImg from '../assets/cat-cheat-key.webp';  // Giorno di Libertà (Chiave Nera) -> Gatto con topolino circense in bocca
 import catModalBg from '../assets/cat-modal-bg.webp';
-import CoralineCatCloud from './CoralineCatCloud';
+import catCloudPattern from '../assets/cat-cloud-pattern.webp';
 import { hapticLight } from '../utils/haptics';
 
 /**
@@ -30,7 +30,6 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
   const isLastKey = context === 'last_key';
   const isKey = context === 'key';
   const isCheatKey = isKey || isLastKey;
-  const isSuccess = !isCheat && !isCheatKey;
 
   // Immagine del gatto contestuale
   let currentCatImg = catSuccessImg;
@@ -50,43 +49,30 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
     catHeight = '235px';
   }
 
-  // Pulsante personalizzato
-  let buttonLabel = "Ho capito, Gatto";
-  if (isLastKey) {
-    buttonLabel = "Messaggio ricevuto";
-  } else if (isKey) {
-    buttonLabel = "Giorno di libertà segnato ✦";
-  } else if (isCheat) {
-    buttonLabel = "Ricevuto, domani si riparte da qui ✦";
-  } else if (isSuccess) {
-    buttonLabel = "Continua così ✦";
-  }
+  // Pulsante standard di chiusura
+  const buttonLabel = "Ok";
 
   // Palette dinamica contestuale con note soffuse e vellutate
   let borderColor = 'rgba(74, 222, 128, 0.45)';
   let glowColor = 'rgba(0, 0, 0, 0.5)';
   let buttonBg = 'rgba(18, 48, 35, 0.85)';
   let buttonTextColor = 'var(--coraline-parchment)';
-  let bubbleStitchColor = 'rgba(74, 222, 128, 0.6)';
 
   if (isLastKey) {
     borderColor = 'rgba(216, 198, 21, 0.45)';
     glowColor = 'rgba(0, 0, 0, 0.5)';
     buttonBg = 'rgba(48, 38, 22, 0.85)';
     buttonTextColor = 'var(--coraline-parchment)';
-    bubbleStitchColor = 'rgba(216, 198, 21, 0.6)';
   } else if (isCheat) {
     borderColor = 'rgba(239, 68, 68, 0.45)';
     glowColor = 'rgba(0, 0, 0, 0.5)';
     buttonBg = 'rgba(48, 18, 22, 0.85)';
     buttonTextColor = 'var(--coraline-parchment)';
-    bubbleStitchColor = 'rgba(239, 68, 68, 0.6)';
   } else if (isKey) {
     borderColor = 'rgba(216, 198, 21, 0.45)';
     glowColor = 'rgba(0, 0, 0, 0.5)';
     buttonBg = 'rgba(48, 38, 22, 0.85)';
     buttonTextColor = 'var(--coraline-parchment)';
-    bubbleStitchColor = 'rgba(216, 198, 21, 0.6)';
   }
 
   return (
@@ -95,7 +81,7 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 9999,
+        zIndex: 10002, // In primo piano anche sopra Impostazioni per i test continui
         backgroundColor: 'rgba(4, 14, 24, 0.9)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
@@ -131,45 +117,73 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Pulsante chiusura rapida ✕ */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Chiudi"
+        {/* NUVOLETTA STANDARD DEL GATTO: FUMETTO BIANCO PULITO CON TRAMA STELLATA DISSOLTA E PUNTA */}
+        <div
           style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(3, 10, 18, 0.65)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: 'var(--coraline-parchment)',
-            fontSize: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 10,
-            lineHeight: 1,
-            touchAction: 'manipulation',
-            padding: 0
+            width: '100%',
+            maxWidth: '280px',
+            margin: '6px auto 14px auto',
+            padding: '12px 16px',
+            borderRadius: '16px',
+            backgroundColor: '#ffffff',
+            border: '1.5px solid #0f172a',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35)',
+            color: '#0f172a',
+            fontFamily: 'var(--font-body)',
+            fontSize: '12.5px',
+            lineHeight: 1.45,
+            fontWeight: 650,
+            textAlign: 'center',
+            position: 'relative',
+            userSelect: 'none',
+            boxSizing: 'border-box',
+            animation: 'coralineBubblePop 0.26s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards'
           }}
         >
-          ✕
-        </button>
+          {/* Texture Coraline dissolta nel riempimento (opacità 10%) */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: '1.5px',
+              borderRadius: '14.5px',
+              backgroundImage: `url(${catCloudPattern})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.10,
+              mixBlendMode: 'multiply',
+              pointerEvents: 'none',
+              zIndex: 1
+            }}
+          />
 
-        {/* NUVOLETTA A FORMA DI NUVOLA REALE GRIGIETTA IN STILE CORALINE */}
-        <CoralineCatCloud
-          quote={quote}
-          context={context}
-          stitchColor={bubbleStitchColor}
-          style={{
-            marginTop: '12px',
-            marginBottom: '16px'
-          }}
-        />
+          {/* Puntatore / coda del fumetto in basso rivolta verso la testa del Gatto */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-6px',
+              left: '50%',
+              transform: 'translateX(-50%) rotate(45deg)',
+              width: '10px',
+              height: '10px',
+              background: '#ffffff',
+              borderRight: '1.5px solid #0f172a',
+              borderBottom: '1.5px solid #0f172a',
+              zIndex: 1
+            }}
+          />
+
+          {/* Testo del gatto - autentico e chiaro */}
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 2,
+              color: '#0f172a'
+            }}
+          >
+            {quote}
+          </div>
+        </div>
 
         {/* IMMAGINE DEL GATTO NERO */}
         <div
@@ -185,8 +199,11 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
           <img
             src={currentCatImg}
             alt="Il Gatto Nero di Coraline"
-            loading="eager"
+            width={isCheat ? 235 : (isCheatKey ? 230 : 147)}
+            height={isCheat ? 235 : (isCheatKey ? 230 : 260)}
+            loading="lazy"
             decoding="async"
+            draggable={false}
             style={{
               maxHeight: catHeight,
               width: 'auto',
@@ -213,9 +230,9 @@ export default function CatModal({ isOpen, quote, context, onClose }) {
             backgroundColor: buttonBg,
             color: buttonTextColor,
             fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            fontSize: '13.5px',
-            letterSpacing: '0.4px',
+            fontWeight: 700,
+            fontSize: '14.5px',
+            letterSpacing: '0.6px',
             padding: '11px 16px',
             borderRadius: '14px',
             border: `1.5px solid ${borderColor}`,

@@ -49,6 +49,9 @@ jobs:
         run: npm install
 
       - name: 🛠️ Build Web Application
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://pcsdihhbctvdtrolojmd.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjc2RpaGhiY3R2ZHRyb2xvam1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTY3MjUsImV4cCI6MjEwOTE5MjcyNX0.3MFtRWCScum4i94eFWipIR9F3okTPHV7l_NW4kaXixo' }}
         run: npm run build
 
       - name: 🤖 Sync Android Platform

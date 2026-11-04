@@ -4,7 +4,7 @@
  * - Eseguito all'apparizione del topo a sinistra e al tocco
  */
 
-export const TRUMPET_AUDIO_SRC = '/audio/trumpet.wav';
+const TRUMPET_AUDIO_SRC = '/audio/trumpet.m4a';
 
 let trumpetAudioInstance = null;
 

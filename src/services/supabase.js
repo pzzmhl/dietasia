@@ -1,7 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
+import { triggerQueueFlush } from '../utils/syncQueue.js';
 
-// Chiavi da variabili d'ambiente Vite o da configurazione dinamica in localStorage
+// Fallback pubblico client-side (protetto da policy RLS su Supabase) per garantire
+// il funzionamento del Cloud Sync anche negli APK compilati da GitHub Actions (dove .env non è tracciato)
+const DEFAULT_SUPABASE_URL = 'https://pcsdihhbctvdtrolojmd.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjc2RpaGhiY3R2ZHRyb2xvam1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTY3MjUsImV4cCI6MjEwOTE5MjcyNX0.3MFtRWCScum4i94eFWipIR9F3okTPHV7l_NW4kaXixo';
+
+// Chiavi da variabili d'ambiente Vite, configurazione dinamica in localStorage o fallback predefinito
 const getSupabaseConfig = () => {
   const envUrl = import.meta.env.VITE_SUPABASE_URL;
   const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -13,8 +19,8 @@ const getSupabaseConfig = () => {
     localKey = localStorage.getItem(STORAGE_KEYS.SUPABASE_ANON_KEY) || '';
   } catch (e) {}
 
-  const url = (envUrl && envUrl.trim()) || localUrl.trim();
-  const anonKey = (envKey && envKey.trim()) || localKey.trim();
+  const url = (envUrl && envUrl.trim()) || localUrl.trim() || DEFAULT_SUPABASE_URL;
+  const anonKey = (envKey && envKey.trim()) || localKey.trim() || DEFAULT_SUPABASE_ANON_KEY;
 
   return { url, anonKey };
 };
@@ -211,8 +217,6 @@ export async function downloadBackupFromSupabase() {
     updatedAt: data.updated_at
   };
 }
-
-import { triggerQueueFlush } from '../utils/syncQueue.js';
 
 /**
  * Sincronizzazione automatica unificata con la Coda Offline Persistente

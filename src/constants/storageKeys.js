@@ -25,6 +25,18 @@ export const STORAGE_KEYS = {
   VORTEX_ENABLED: 'coraline_vortex_enabled',
   PENDING_SYNC_QUEUE: 'coraline_pending_sync_queue',
   LAST_UPDATE_CHECK: 'coraline_last_update_check',
-  IGNORED_UPDATE_VERSION: 'coraline_ignored_update_version'
+  IGNORED_UPDATE_VERSION: 'coraline_ignored_update_version',
+  WYBIE_LAST_SPOKEN_DATE: 'wybie_last_spoken_date',
+  CAT_DAILY_CLICKS: 'coraline_cat_daily_clicks',
+  CAT_CLICKS_LEGACY_PREFIX: 'coraline_cat_clicks_',
+  DOOR_PORTAL_SHUFFLE_BAG: 'coraline_door_portal_shuffle_bag',
+  TEST_MOUSE_SESSION: 'test_coraline_mouse',
+  LEGACY_OBSOLETE_KEYS: [
+    'coraline_deck_key',
+    'coraline_deck_success',
+    'coraline_deck_cheat',
+    'coraline_deck_all',
+    'coraline_last_gif_id'
+  ]
 };
 

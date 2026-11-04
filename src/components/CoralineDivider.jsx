@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import otherMotherHandImg from '../assets/other-mother-hand.webp';
 import coralineBeetleImg from '../assets/coraline-beetle.webp';
 import coralineWardrobeImg from '../assets/coraline-wardrobe.webp';
-import { triggerHapticFeedback } from '../services/haptics';
+import { triggerHapticFeedback } from '../utils/haptics';
 
 /**
  * Linea di demarcazione orizzontale in puro stile Coraline con Easter Eggs Interattivi:
@@ -32,6 +32,7 @@ const CoralineDivider = React.memo(function CoralineDivider({
 
   const iconRef = useRef(null);
   const timersRef = useRef([]);
+  const wardrobeTimerRef = useRef(null);
 
   const addTimer = (timer) => {
     timersRef.current.push(timer);
@@ -41,6 +42,9 @@ const CoralineDivider = React.memo(function CoralineDivider({
   useEffect(() => {
     return () => {
       timersRef.current.forEach(clearTimeout);
+      if (wardrobeTimerRef.current) {
+        clearTimeout(wardrobeTimerRef.current);
+      }
     };
   }, []);
 
@@ -102,6 +106,11 @@ const CoralineDivider = React.memo(function CoralineDivider({
   // 3. EASTER EGG INSETTO-ARMADIO: SCENDE PIÙ IN BASSO SOPRA LA PORTA E PIÙ GRANDE
   const handleWardrobeClick = (e) => {
     e.stopPropagation();
+    if (wardrobeTimerRef.current) {
+      clearTimeout(wardrobeTimerRef.current);
+      wardrobeTimerRef.current = null;
+    }
+
     if (isWardrobeGuarding) {
       setIsWardrobeGuarding(false);
       triggerHapticFeedback('selection');
@@ -112,9 +121,10 @@ const CoralineDivider = React.memo(function CoralineDivider({
     triggerHapticFeedback('key');
 
     // Ritorna al suo posto dopo 4.5 secondi (o al tocco manuale)
-    addTimer(setTimeout(() => {
+    wardrobeTimerRef.current = setTimeout(() => {
       setIsWardrobeGuarding(false);
-    }, 4500));
+      wardrobeTimerRef.current = null;
+    }, 4500);
   };
 
   // CONFIGURAZIONE CROMATICA
@@ -215,9 +225,9 @@ const CoralineDivider = React.memo(function CoralineDivider({
             outline: 'none',
             pointerEvents: 'auto',
             transition: 'transform 0.65s cubic-bezier(0.34, 1.35, 0.64, 1), filter 0.4s ease, opacity 0.4s ease',
-            /* L'insetto va SOPRA la porta (in cima allo stipite) e non sotto */
+            /* L'insetto scende a guardia della porta fino a coprirla completamente e ingrandendosi */
             transform: isWardrobeGuarding 
-              ? 'translate3d(0, 44px, 0) scale(2.2)' 
+              ? 'translate3d(0, 92px, 0) scale(3.15)' 
               : isHand && isHandShaking 
               ? 'scale(1.1)' 
               : 'scale(1)',
@@ -228,8 +238,11 @@ const CoralineDivider = React.memo(function CoralineDivider({
           <img
             src={imageSrc}
             alt=""
+            width={parseInt(imageWidth, 10)}
+            height={parseInt(imageHeight, 10)}
             loading="eager"
             decoding="async"
+            draggable={false}
             style={{
               width: '100%',
               height: '100%',
@@ -291,6 +304,10 @@ const CoralineDivider = React.memo(function CoralineDivider({
             <img
               src={coralineBeetleImg}
               alt=""
+              width={42}
+              height={42}
+              decoding="async"
+              draggable={false}
               style={{
                 width: '100%',
                 height: '100%',

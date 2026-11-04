@@ -50,8 +50,11 @@ export function subscribeMusicState(cb) {
   return () => listeners.delete(cb);
 }
 
+let isVisibilityListenerBound = false;
+let isUnlockListenersBound = false;
+
 /**
- * Inizializza l'elemento audio (singola istanza riutilizzabile)
+ * Inizializza l'elemento audio (singola istanza riutilizzabile, lazy)
  */
 function getOrCreateAudio() {
   if (!audioElement && typeof window !== 'undefined') {
@@ -60,18 +63,21 @@ function getOrCreateAudio() {
     audioElement.volume = 0;
     audioElement.preload = 'auto';
 
-    // Gestione cambio visibilità scheda/app: pausa in background e ripresa in primo piano
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (audioElement && !audioElement.paused) {
-          audioElement.pause();
+    if (!isVisibilityListenerBound) {
+      isVisibilityListenerBound = true;
+      // Gestione cambio visibilità scheda/app: pausa in background e ripresa in primo piano solo se abilitata
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (audioElement && !audioElement.paused) {
+            audioElement.pause();
+          }
+        } else {
+          if (isMusicEnabled() && audioElement && audioElement.paused && hasUserInteracted) {
+            playMusicWithFadeIn();
+          }
         }
-      } else {
-        if (isMusicEnabled() && audioElement && audioElement.paused && hasUserInteracted) {
-          playMusicWithFadeIn();
-        }
-      }
-    });
+      });
+    }
   }
   return audioElement;
 }
@@ -120,8 +126,10 @@ function fadeVolumeTo(targetVol, durationMs, onComplete) {
 
 /**
  * Avvia la riproduzione con dissolvenza in entrata (fade-in)
+ * Rispetta rigorosamente lo stato muto salvato dall'utente.
  */
 export function playMusicWithFadeIn() {
+  if (!isMusicEnabled()) return;
   const audio = getOrCreateAudio();
   if (!audio) return;
 
@@ -134,7 +142,7 @@ export function playMusicWithFadeIn() {
           hasUserInteracted = true;
           fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
         })
-        .catch((err) => {
+        .catch(() => {
           // Autoplay bloccato dal browser: aspetta la prima interazione
           setupAutoplayUnlock();
         });
@@ -149,8 +157,8 @@ export function playMusicWithFadeIn() {
  * Ferma la riproduzione con dissolvenza in uscita (fade-out)
  */
 export function stopMusicWithFadeOut() {
-  const audio = getOrCreateAudio();
-  if (!audio || audio.paused) return;
+  if (!audioElement || audioElement.paused) return;
+  const audio = audioElement;
 
   fadeVolumeTo(0, 1800, () => {
     try {
@@ -164,13 +172,12 @@ export function stopMusicWithFadeOut() {
  * Mette in pausa immediata la musica quando l'app va in background su Android (risparmio CPU/batteria)
  */
 export function pauseMusicImmediately() {
-  const audio = getOrCreateAudio();
-  if (audio && !audio.paused) {
+  if (audioElement && !audioElement.paused) {
     if (fadeInterval) {
       clearInterval(fadeInterval);
       fadeInterval = null;
     }
-    audio.pause();
+    audioElement.pause();
   }
 }
 
@@ -178,10 +185,12 @@ export function pauseMusicImmediately() {
  * Sblocca l'audio al primo tocco o click dello schermo (risolve la restrizione Autoplay di Chrome/Android)
  */
 function setupAutoplayUnlock() {
-  if (hasUserInteracted) return;
+  if (hasUserInteracted || isUnlockListenersBound) return;
+  isUnlockListenersBound = true;
 
   const unlockHandler = () => {
     hasUserInteracted = true;
+    isUnlockListenersBound = false;
     ['pointerdown', 'touchstart', 'click', 'keydown'].forEach((evt) => {
       window.removeEventListener(evt, unlockHandler, { capture: true });
     });
@@ -197,29 +206,29 @@ function setupAutoplayUnlock() {
 }
 
 /**
- * Inizializza il sistema di musica di sottofondo all'avvio dell'applicazione
+ * Inizializza il sistema di musica di sottofondo all'avvio dell'applicazione.
+ * Se la musica è disattivata dall'utente, non precarica l'audio da 1.45 MB in RAM.
  */
 export function initBackgroundMusic() {
   if (typeof window === 'undefined') return;
+  if (!isMusicEnabled()) return;
 
   const audio = getOrCreateAudio();
   if (!audio) return;
 
-  if (isMusicEnabled()) {
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          hasUserInteracted = true;
-          fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
-        })
-        .catch(() => {
-          // Autoplay richiede interazione
-          setupAutoplayUnlock();
-        });
-    } else {
-      setupAutoplayUnlock();
-    }
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        hasUserInteracted = true;
+        fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+      })
+      .catch(() => {
+        // Autoplay richiede interazione
+        setupAutoplayUnlock();
+      });
+  } else {
+    setupAutoplayUnlock();
   }
 }
 

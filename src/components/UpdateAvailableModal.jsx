@@ -20,6 +20,15 @@ export default function UpdateAvailableModal({
 }) {
   const [visible, setVisible] = useState(false);
   const isSubmittingRef = useRef(false);
+  const closeTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,7 +49,8 @@ export default function UpdateAvailableModal({
     isSubmittingRef.current = true;
     hapticSuccess();
     downloadAndInstallUpdate(apkUrl);
-    setTimeout(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
       onClose();
     }, 400);
   };
@@ -78,7 +88,7 @@ export default function UpdateAvailableModal({
       onClick={handleDismiss}
     >
       <div
-        className="stitched-card vortex-card"
+        className="stitched-card"
         style={{
           width: '100%',
           maxWidth: '340px',
@@ -101,6 +111,7 @@ export default function UpdateAvailableModal({
       >
         {/* TRAMA VORTICE DI CORALINE SULLO SFONDO */}
         <div
+          className="vortex-bg-layer"
           aria-hidden="true"
           style={{
             position: 'absolute',
@@ -163,6 +174,11 @@ export default function UpdateAvailableModal({
           <img
             src={secretDoorImg}
             alt="Porticina Segreta"
+            width={74}
+            height={74}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
             style={{
               width: '100%',
               height: '100%',
@@ -174,6 +190,11 @@ export default function UpdateAvailableModal({
             src={keyImg}
             alt=""
             aria-hidden="true"
+            width={32}
+            height={32}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
             style={{
               position: 'absolute',
               bottom: '-4px',

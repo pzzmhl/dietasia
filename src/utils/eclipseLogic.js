@@ -104,8 +104,14 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
     windowDateStrings.push(`${year}-${month}-${day}`);
   }
 
+  // Identifica tutte le date attive nel diario (per distinguere nuovi utenti da utenti pregressi)
+  const allRecordedDates = Object.keys(allLogs || {}).filter((dStr) => {
+    const entry = allLogs[dStr];
+    return entry && typeof entry === 'object' && entry.dietState && entry.dietState !== 'neutral';
+  }).sort();
+  const earliestEverDate = allRecordedDates.length > 0 ? allRecordedDates[0] : null;
+
   // Troviamo la prima data registrata concretamente all'interno di QUESTA specifica settimana
-  // (Isolamento anti-retroattività: nessuna data remota esterna può proiettare la luna a Fase 6)
   const windowRecordedDates = windowDateStrings.filter((dStr) => {
     const entry = allLogs[dStr];
     return entry && typeof entry === 'object' && entry.dietState && entry.dietState !== 'neutral';
@@ -140,10 +146,20 @@ export function calculateEclipseState(allLogs = {}, referenceDateStr = null) {
     } else if (state === 'neutral') {
       // 1. Oggi (i === 0): giornata in corso, mai penalizzata
       // 2. Ieri (i === 1): periodo di grazia (non oscura la luna la mattina prima della compilazione)
-      // 3. Da l'altro ieri in giù (i >= 2): conta come mancato solo se successivo all'inizio dell'attività settimanale
-      if (i >= 2 && firstActiveInWindow && dateStr > firstActiveInWindow) {
-        isMissed = true;
-        missedCount += 1;
+      // 3. Da l'altro ieri in giù (i >= 2):
+      //    Un giorno neutro conta come mancato solo se cade dopo la data in cui l'utente ha iniziato ad usare l'app.
+      //    Se nella settimana c'è attività, parte dalla prima data registrata nella settimana.
+      //    Se l'utente era già attivo prima della settimana, i giorni non compilati contano gradualmente senza salti bruschi.
+      if (i >= 2) {
+        if (firstActiveInWindow) {
+          if (dateStr > firstActiveInWindow) {
+            isMissed = true;
+            missedCount += 1;
+          }
+        } else if (earliestEverDate && dateStr >= earliestEverDate) {
+          isMissed = true;
+          missedCount += 1;
+        }
       }
     }
 

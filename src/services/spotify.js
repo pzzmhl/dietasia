@@ -6,9 +6,10 @@
  * dell'app nativa Spotify (Android/iOS) o web player di fallback.
  */
 
-export const CORALINE_PLAYLIST_ID = '5BjQJoPU0S0RiMNUro26kF';
+const CORALINE_PLAYLIST_ID = '5BjQJoPU0S0RiMNUro26kF';
+export const CORALINE_PLAYLIST_URL = `https://open.spotify.com/playlist/${CORALINE_PLAYLIST_ID}`;
 
-export const CORALINE_SOUNDTRACK_TRACKS = [
+const CORALINE_SOUNDTRACK_TRACKS = [
   { id: '24AX9XecMUvVKzQjir6Xpl', title: 'Exploration (Coraline) [feat. Julia K]' },
   { id: '2hlEY1tXhAUqFeboU54j5A', title: 'Coraline - Other Father Song' },
   { id: '2VAAmaEqL1xCvsWV03zJqn', title: 'End Credits (Piano Version)' },

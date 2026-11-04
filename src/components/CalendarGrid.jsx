@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
@@ -9,7 +9,7 @@ import coralineDollBg from '../assets/coraline-doll-bg.webp';
 import bobinskyWorkoutBg from '../assets/bobinsky-circus-calendar-bg.webp';
 import DayWorkoutModal from './DayWorkoutModal';
 import { triggerHapticFeedback, hapticButtonStitch, hapticLight } from '../utils/haptics';
-import { getUIElementExplanation } from '../data/catQuotes';
+import { getUIElementExplanation } from '../data/catExplanations';
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -186,7 +186,6 @@ const DayCell = React.memo(function DayCell({
         position: 'relative',
         lineHeight: 1,
         touchAction: 'manipulation',
-        willChange: 'transform',
         opacity: isFuture ? 0.35 : ((isWorkout && workoutState === 'no') ? 0.45 : 1),
         transform: 'translateZ(0)',
         transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease'
@@ -197,8 +196,11 @@ const DayCell = React.memo(function DayCell({
           <img
             src={gearBallImg}
             alt="Allenamento della Brigata"
+            width={36}
+            height={36}
             loading="eager"
             decoding="async"
+            draggable={false}
             className="stop-motion-icon"
             style={{
               width: '84%',
@@ -229,8 +231,11 @@ const DayCell = React.memo(function DayCell({
           <img
             src={seeingStoneImg}
             alt="Rotta Mantenuta (Pietra Verde)"
+            width={36}
+            height={36}
             loading="eager"
             decoding="async"
+            draggable={false}
             className="stop-motion-icon"
             style={{
               width: '84%',
@@ -245,8 +250,11 @@ const DayCell = React.memo(function DayCell({
           <img
             src={blackButtonImg}
             alt="Giorno Fuori Sentiero (Bottone Nero)"
+            width={36}
+            height={36}
             loading="eager"
             decoding="async"
+            draggable={false}
             className="stop-motion-icon"
             style={{
               width: '84%',
@@ -261,8 +269,11 @@ const DayCell = React.memo(function DayCell({
           <img
             src={keyImg}
             alt="Giorno di Libertà (Chiave Nera)"
+            width={36}
+            height={36}
             loading="eager"
             decoding="async"
+            draggable={false}
             className="stop-motion-icon"
             style={{
               width: '86%',
@@ -285,13 +296,13 @@ const DayCell = React.memo(function DayCell({
  * Calendario Mensile a Griglia stile Coraline (Hardware Accelerated, Gesture Swipe & 120 FPS)
  */
 const CalendarGrid = React.memo(function CalendarGrid({ 
-  selectedDate, 
   onSelectDate, 
   allLogs = {},
   workoutLogs = {},
   onSaveWorkout,
   displayYear,
   displayMonth,
+  todayStr: propTodayStr,
   onPrevMonth,
   onNextMonth,
   onResetToCurrentMonth,
@@ -306,7 +317,22 @@ const CalendarGrid = React.memo(function CalendarGrid({
   const workoutModalState = propWorkoutModalState !== undefined ? propWorkoutModalState : internalWorkoutModalState;
   const setWorkoutModalState = onWorkoutModalStateChange || setInternalWorkoutModalState;
 
-  const { firstDayColumn, daysArray, todayStr, leadingDaysCount, trailingDaysCount } = useMemo(() => {
+  const handleOpenWorkoutModal = useCallback((dStr) => {
+    setWorkoutModalState({ isOpen: true, dateStr: dStr });
+  }, [setWorkoutModalState]);
+
+  const handleCloseWorkoutModal = useCallback(() => {
+    setWorkoutModalState({ isOpen: false, dateStr: null });
+  }, [setWorkoutModalState]);
+
+  const handleSelectWorkoutFromModal = useCallback((status) => {
+    if (workoutModalState.dateStr && onSaveWorkout) {
+      onSaveWorkout(workoutModalState.dateStr, status);
+    }
+    setWorkoutModalState({ isOpen: false, dateStr: null });
+  }, [workoutModalState.dateStr, onSaveWorkout, setWorkoutModalState]);
+
+  const { daysArray, todayStr, leadingDaysCount, trailingDaysCount } = useMemo(() => {
     const safeYear = typeof displayYear === 'number' ? displayYear : new Date().getFullYear();
     const safeMonth = typeof displayMonth === 'number' ? displayMonth : new Date().getMonth();
     const count = new Date(safeYear, safeMonth + 1, 0).getDate();
@@ -314,22 +340,24 @@ const CalendarGrid = React.memo(function CalendarGrid({
     const col = rawFirst === 0 ? 7 : rawFirst;
     const arr = Array.from({ length: count }, (_, i) => i + 1);
     
-    const now = new Date();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const today = `${now.getFullYear()}-${m}-${d}`;
+    let today = propTodayStr;
+    if (typeof today !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(today)) {
+      const now = new Date();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      today = `${now.getFullYear()}-${m}-${d}`;
+    }
 
     const leading = col - 1;
     const trailing = (7 - ((leading + count) % 7)) % 7;
 
     return {
-      firstDayColumn: col,
       daysArray: arr,
       todayStr: today,
       leadingDaysCount: leading,
       trailingDaysCount: trailing
     };
-  }, [displayYear, displayMonth]);
+  }, [displayYear, displayMonth, propTodayStr]);
 
   // Gestione Swipe Orizzontale Naturale per Sfogliare i Mesi (Thumb Reach)
   const handleTouchStart = (e) => {
@@ -445,7 +473,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
       }} />
 
       {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
-      <div style={{
+      <div className="vortex-bg-layer" style={{
         position: 'absolute',
         inset: 0,
         backgroundImage: `url(${vortexBg})`,
@@ -657,7 +685,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
               workoutState={workoutState}
               calendarMode={calendarMode}
               onSelectDate={onSelectDate}
-              onOpenWorkoutModal={(dStr) => setWorkoutModalState({ isOpen: true, dateStr: dStr })}
+              onOpenWorkoutModal={handleOpenWorkoutModal}
               onCatSpeak={onCatSpeak}
             />
           );
@@ -669,26 +697,34 @@ const CalendarGrid = React.memo(function CalendarGrid({
         ))}
       </div>
 
-      {/* SLIDER / SEGMENTED CONTROL NEUTRO IN TONO BIANCO: DIETA / ALL. */}
+      {/* SLIDER / SEGMENTED CONTROL DINAMICO: SI ADATTA AL TEMA ATTIVO (DIETA / ALLENAMENTO) */}
       <div
         role="tablist"
         aria-label="Modalità calendario"
         style={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: '164px',
+          maxWidth: '172px',
           margin: '12px auto 2px auto',
           padding: '3px',
-          backgroundColor: 'rgba(10, 14, 24, 0.85)',
+          backgroundColor: calendarMode === 'workout'
+            ? 'rgba(28, 12, 10, 0.92)'
+            : 'rgba(8, 22, 38, 0.90)',
           borderRadius: '14px',
-          border: '1px solid rgba(226, 232, 240, 0.18)',
-          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35)',
+          border: calendarMode === 'workout'
+            ? '1px solid rgba(197, 155, 109, 0.55)'
+            : '1px solid rgba(216, 198, 21, 0.38)',
+          boxShadow: calendarMode === 'workout'
+            ? 'inset 0 1.5px 4px rgba(0, 0, 0, 0.75), 0 2px 8px rgba(83, 21, 14, 0.6), 0 0 12px rgba(197, 155, 109, 0.20)'
+            : 'inset 0 1.5px 4px rgba(0, 0, 0, 0.75), 0 2px 8px rgba(13, 44, 73, 0.55), 0 0 12px rgba(216, 198, 21, 0.15)',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: '4px',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          transition: 'background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease'
         }}
       >
+        {/* BOTTONE DIETA: TEMA ORO CORALINE / BLU NOTTE */}
         <button
           type="button"
           role="tab"
@@ -701,19 +737,22 @@ const CalendarGrid = React.memo(function CalendarGrid({
           }}
           style={{
             minHeight: '38px',
-            padding: '8px 12px',
+            padding: '8px 10px',
             borderRadius: '11px',
             border: calendarMode === 'diet'
-              ? '1px solid rgba(226, 232, 240, 0.9)'
+              ? '1px solid rgba(255, 235, 120, 0.92)'
               : '1px solid transparent',
             background: calendarMode === 'diet'
-              ? 'rgba(226, 232, 240, 0.88)'
+              ? 'linear-gradient(135deg, rgba(230, 208, 30, 0.96) 0%, rgba(195, 158, 18, 0.98) 100%)'
               : 'transparent',
             boxShadow: calendarMode === 'diet'
-              ? '0 0 8px rgba(226, 232, 240, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4)'
+              ? '0 0 12px rgba(216, 198, 21, 0.55), 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45)'
               : 'none',
-            color: calendarMode === 'diet' ? '#0a0f1d' : 'rgba(226, 232, 240, 0.55)',
-            fontWeight: calendarMode === 'diet' ? 700 : 500,
+            color: calendarMode === 'diet'
+              ? '#081422'
+              : (calendarMode === 'workout' ? 'rgba(212, 210, 187, 0.50)' : 'rgba(221, 202, 183, 0.55)'),
+            fontWeight: calendarMode === 'diet' ? 800 : 500,
+            textShadow: calendarMode === 'diet' ? '0 1px 0 rgba(255, 255, 255, 0.25)' : 'none',
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
             letterSpacing: '0.4px',
@@ -723,13 +762,14 @@ const CalendarGrid = React.memo(function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             lineHeight: 1.2,
-            transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
             touchAction: 'manipulation'
           }}
         >
           Dieta
         </button>
 
+        {/* BOTTONE ALLENAMENTO: TEMA CIRCO BOBINSKY / BRONZO E OTTONE */}
         <button
           type="button"
           role="tab"
@@ -742,19 +782,22 @@ const CalendarGrid = React.memo(function CalendarGrid({
           }}
           style={{
             minHeight: '38px',
-            padding: '8px 12px',
+            padding: '8px 10px',
             borderRadius: '11px',
             border: calendarMode === 'workout'
-              ? '1px solid rgba(226, 232, 240, 0.9)'
+              ? '1px solid rgba(235, 195, 150, 0.92)'
               : '1px solid transparent',
             background: calendarMode === 'workout'
-              ? 'rgba(226, 232, 240, 0.88)'
+              ? 'linear-gradient(135deg, rgba(215, 175, 130, 0.96) 0%, rgba(165, 115, 75, 0.98) 100%)'
               : 'transparent',
             boxShadow: calendarMode === 'workout'
-              ? '0 0 8px rgba(226, 232, 240, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4)'
+              ? '0 0 14px rgba(197, 155, 109, 0.65), 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 245, 225, 0.45)'
               : 'none',
-            color: calendarMode === 'workout' ? '#0a0f1d' : 'rgba(226, 232, 240, 0.55)',
-            fontWeight: calendarMode === 'workout' ? 700 : 500,
+            color: calendarMode === 'workout'
+              ? '#240b06'
+              : (calendarMode === 'diet' ? 'rgba(221, 202, 183, 0.55)' : 'rgba(212, 210, 187, 0.50)'),
+            fontWeight: calendarMode === 'workout' ? 800 : 500,
+            textShadow: calendarMode === 'workout' ? '0 1px 0 rgba(255, 255, 255, 0.25)' : 'none',
             fontFamily: 'var(--font-gothic)',
             fontSize: '11px',
             letterSpacing: '0.4px',
@@ -764,7 +807,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             lineHeight: 1.2,
-            transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
             touchAction: 'manipulation'
           }}
         >
@@ -777,13 +820,8 @@ const CalendarGrid = React.memo(function CalendarGrid({
         isOpen={workoutModalState.isOpen}
         dateStr={workoutModalState.dateStr}
         currentStatus={workoutModalState.dateStr && workoutLogs ? workoutLogs[workoutModalState.dateStr] : null}
-        onSelectStatus={(status) => {
-          if (workoutModalState.dateStr && onSaveWorkout) {
-            onSaveWorkout(workoutModalState.dateStr, status);
-          }
-          setWorkoutModalState({ isOpen: false, dateStr: null });
-        }}
-        onClose={() => setWorkoutModalState({ isOpen: false, dateStr: null })}
+        onSelectStatus={handleSelectWorkoutFromModal}
+        onClose={handleCloseWorkoutModal}
       />
     </div>
   );

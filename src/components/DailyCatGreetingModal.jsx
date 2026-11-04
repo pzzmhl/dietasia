@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import catStandingImg from '../assets/cat-standing.webp';
+import catStandingImg from '../assets/cat-success.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 import { hapticButtonStitch } from '../utils/haptics';
 import { getTimeOfDayGreeting, getDailyCatQuoteForDate } from '../data/dailyCatQuotes';
@@ -8,12 +8,11 @@ import { getTimeOfDayGreeting, getDailyCatQuoteForDate } from '../data/dailyCatQ
  * Schermata Giornaliera Minimale del Gatto (Primo Accesso del Giorno)
  * Ispirata al layout minimale scuro di riferimento:
  * - Sfondo: texture vortice dell'Altro Mondo con vignette
- * - In alto a destra: pulsante ✕ di chiusura
  * - Al centro: saluto temporale ("Buongiorno/Buon pomeriggio/Buonasera Asia"),
  *   frase del Gatto in grande, e il Gatto che fluttua
- * - In basso: bottone circolare con freccia avanti (→)
+ * - In basso: bottone circolare con freccia avanti (→) per entrare nel diario
  */
-export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
+export default function DailyCatGreetingModal({ isOpen, onClose, dateStr, initialQuote = null }) {
   const [visible, setVisible] = useState(false);
   const [greeting, setGreeting] = useState('');
   const [quote, setQuote] = useState('');
@@ -30,13 +29,17 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
   useEffect(() => {
     if (isOpen) {
       setGreeting(getTimeOfDayGreeting());
-      setQuote(getDailyCatQuoteForDate(dateStr));
+      if (initialQuote) {
+        setQuote(initialQuote);
+      } else {
+        setQuote(getDailyCatQuoteForDate(dateStr));
+      }
       const raf = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(raf);
     } else {
       setVisible(false);
     }
-  }, [isOpen, dateStr]);
+  }, [isOpen, dateStr, initialQuote]);
 
   if (!isOpen) return null;
 
@@ -46,7 +49,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
     dismissTimerRef.current = setTimeout(() => {
       onClose();
-    }, 240);
+    }, 70);
   };
 
   return (
@@ -67,13 +70,17 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
         boxSizing: 'border-box',
         overflow: 'hidden',
         touchAction: 'none',
+        pointerEvents: visible ? 'auto' : 'none',
         opacity: visible ? 1 : 0,
         transform: visible ? 'scale(1)' : 'scale(0.985)',
-        transition: 'opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1)'
+        transition: visible 
+          ? 'opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)' 
+          : 'opacity 0.07s ease-out, transform 0.07s ease-out'
       }}
     >
       {/* SFONDO VORTICE DELL'ALTRO MONDO */}
       <div
+        className="vortex-bg-layer"
         aria-hidden="true"
         style={{
           position: 'absolute',
@@ -91,37 +98,8 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
         }}
       />
 
-      {/* Pulsante chiusura rapida ✕ in alto a destra */}
-      <button
-        type="button"
-        onClick={handleDismiss}
-        aria-label="Chiudi"
-        style={{
-          position: 'absolute',
-          top: 'calc(env(safe-area-inset-top, 24px) + 12px)',
-          right: '16px',
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(3, 10, 18, 0.65)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: 'var(--coraline-parchment)',
-          fontSize: '13px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          zIndex: 10,
-          lineHeight: 1,
-          touchAction: 'manipulation',
-          padding: 0
-        }}
-      >
-        ✕
-      </button>
-
       {/* Spazio flessibile in alto per bilanciare il centraggio perfetto */}
-      <div style={{ flex: '0 0 10px', width: '100%' }} />
+      <div style={{ flex: '0 0 16px', width: '100%' }} />
 
       {/* BLOCCO UNICO CENTRALE (TUTTO ORIENTATO AL CENTRO) */}
       <div
@@ -168,7 +146,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           "{quote}"
         </h1>
 
-        {/* 3. Il Gatto sotto, ancora più grande di prima, che prende quasi lo schermo */}
+        {/* 3. Il Gatto sotto, grande e fluttuante */}
         <div
           style={{
             position: 'relative',
@@ -178,7 +156,7 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
             marginTop: '4px'
           }}
         >
-          {/* Alone di mistero dietro al gatto gigante */}
+          {/* Alone di mistero dietro al gatto */}
           <div
             style={{
               position: 'absolute',
@@ -194,8 +172,12 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
           <img
             src={catStandingImg}
             alt="Il Gatto Nero di Coraline"
+            width={175}
+            height={310}
             loading="eager"
+            fetchPriority="high"
             decoding="async"
+            draggable={false}
             style={{
               height: '310px',
               maxHeight: '44vh',
@@ -248,6 +230,8 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr }) {
         >
           {/* Freccia avanti scura in netto contrasto sul cerchio giallo */}
           <svg
+            aria-hidden="true"
+            focusable="false"
             width="24"
             height="24"
             viewBox="0 0 24 24"

@@ -9,7 +9,8 @@ export default defineConfig({
   },
   plugins: [react()],
   esbuild: {
-    drop: ['console', 'debugger']
+    pure: ['console.log', 'console.debug', 'console.info', 'console.warn'],
+    drop: ['debugger']
   },
   build: {
     outDir: 'dist',

@@ -4,11 +4,9 @@ import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 import { 
-  triggerHapticFeedback, 
   hapticButtonStitch, 
   hapticSuccess, 
-  hapticLight, 
-  hapticWarning 
+  hapticLight 
 } from '../utils/haptics';
 
 /**
@@ -32,13 +30,9 @@ export default function DaySelectionModal({
   onClose 
 }) {
   const [visible, setVisible] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
   const isSubmittingRef = useRef(false);
-  const resetTimerRef = useRef(null);
 
   useEffect(() => {
-    setConfirmReset(false);
-    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     if (isOpen) {
       isSubmittingRef.current = false;
       const raf = requestAnimationFrame(() => setVisible(true));
@@ -48,15 +42,20 @@ export default function DaySelectionModal({
     }
   }, [isOpen, dateStr]);
 
-  useEffect(() => {
-    return () => {
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-    };
-  }, []);
-
   const handleSelect = (status) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
+    const isDeselecting = currentStatus === status;
+    if (isDeselecting) {
+      hapticLight();
+      onSelectStatus('neutral');
+      return;
+    }
+    if (status === 'cheat') {
+      hapticButtonStitch();
+    } else {
+      hapticSuccess();
+    }
     onSelectStatus(status);
   };
 
@@ -70,16 +69,6 @@ export default function DaySelectionModal({
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   if (!isOpen || !dateStr || dateStr > todayStr) return null;
-
-  // Formattazione data in italiano senza anno (es. Lunedi 2 Novembre) con "i" normale al posto di "ì"
-  const dateObj = new Date(dateStr + 'T12:00:00');
-  const options = { weekday: 'long', day: 'numeric', month: 'long' };
-  const rawDate = dateObj.toLocaleDateString('it-IT', options)
-    .replace(/ì/g, 'i')
-    .replace(/í/g, 'i')
-    .replace(/Ì/g, 'I')
-    .replace(/Í/g, 'I');
-  const capitalizedDate = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
 
   // La chiave è utilizzabile se ce ne sono disponibili o se è già stata assegnata a questo giorno
   const canUseKey = remainingKeys > 0 || currentStatus === 'cheat_key';
@@ -102,20 +91,20 @@ export default function DaySelectionModal({
         willChange: 'opacity',
         transform: 'translateZ(0)'
       }}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
-        className="stitched-card vortex-card"
+        className="stitched-card"
         style={{
           width: '100%',
-          maxWidth: '290px',
+          maxWidth: '240px',
           background: 'linear-gradient(180deg, rgba(13, 44, 73, 0.94) 0%, rgba(6, 22, 37, 0.96) 100%)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           borderRadius: '24px',
           border: '1.5px solid var(--border-dark-blue-light)',
           boxShadow: 'inset 0 1.5px 0 rgba(216, 198, 21, 0.35), 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(26, 69, 110, 0.4)',
-          padding: '20px 16px 16px 16px',
+          padding: '16px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
@@ -129,6 +118,8 @@ export default function DaySelectionModal({
       >
         {/* TRAMA VORTICE DI CORALINE SULLO SFONDO */}
         <div
+          className="vortex-bg-layer"
+          aria-hidden="true"
           style={{
             position: 'absolute',
             inset: 0,
@@ -147,82 +138,20 @@ export default function DaySelectionModal({
           }}
         />
 
-        {/* Pulsante chiusura rapida ✕ */}
-        <button
-          type="button"
-          onClick={handleClose}
-          aria-label="Chiudi"
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '12px',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(3, 10, 18, 0.65)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: 'var(--coraline-parchment)',
-            fontSize: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 10,
-            lineHeight: 1,
-            touchAction: 'manipulation',
-            padding: 0
-          }}
-        >
-          ✕
-        </button>
-
-        {/* Intestazione Data & Domanda */}
-        <div style={{ textAlign: 'center', marginBottom: '16px', padding: '0 6px', position: 'relative', zIndex: 1 }}>
-          {/* Data in piccolo in font Coraline nel colore blu scuro di Coraline */}
-          <h3 style={{
-            fontSize: '13px',
-            fontFamily: 'var(--font-coraline)',
-            color: '#4686cb',
-            letterSpacing: '0.6px',
-            lineHeight: 1.25,
-            margin: '0 0 5px 0',
-            textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(70, 134, 203, 0.45)'
-          }}>
-            {capitalizedDate}
-          </h3>
-
-          {/* Scritta sotto in BIANCO */}
-          <p style={{
-            fontSize: '12px',
-            fontFamily: 'var(--font-body)',
-            color: '#ffffff',
-            fontWeight: 500,
-            lineHeight: 1.35,
-            margin: 0,
-            textShadow: '0 1px 3px rgba(0, 0, 0, 0.85)'
-          }}>
-            Come è andata questa giornata?
-          </p>
-        </div>
-
         {/* GRIGLIA 2x2 DEI 4 RIQUADRI */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
           gap: '12px',
-          marginBottom: '6px',
           position: 'relative',
           zIndex: 1
         }}>
           {/* 1. IN ALTO A SINISTRA: PIETRA VERDE (ROTTA MANTENUTA) */}
           <button
             type="button"
-            onClick={() => {
-              hapticSuccess();
-              handleSelect(currentStatus === 'success' ? 'neutral' : 'success');
-            }}
-            aria-label="Pietra Verde: Rotta Mantenuta"
-            title="Pietra Verde: Rotta Mantenuta"
+            onClick={() => handleSelect('success')}
+            aria-label={currentStatus === 'success' ? "Pietra Verde selezionata: tocca per rimuovere" : "Pietra Verde: Rotta Mantenuta"}
+            title={currentStatus === 'success' ? "Tocca per rimuovere la selezione" : "Pietra Verde: Rotta Mantenuta"}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -257,6 +186,11 @@ export default function DaySelectionModal({
               <img 
                 src={seeingStoneImg} 
                 alt="" 
+                width={54}
+                height={54}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
                 style={{ 
                   width: '100%', 
                   height: '100%', 
@@ -280,12 +214,9 @@ export default function DaySelectionModal({
           {/* 2. IN ALTO A DESTRA: BOTTONE NERO (GIORNO FUORI SENTIERO) */}
           <button
             type="button"
-            onClick={() => {
-              hapticButtonStitch();
-              handleSelect(currentStatus === 'cheat' ? 'neutral' : 'cheat');
-            }}
-            aria-label="Bottone Nero: Fuori Sentiero"
-            title="Bottone Nero: Fuori Sentiero"
+            onClick={() => handleSelect('cheat')}
+            aria-label={currentStatus === 'cheat' ? "Bottone Nero selezionato: tocca per rimuovere" : "Bottone Nero: Fuori Sentiero"}
+            title={currentStatus === 'cheat' ? "Tocca per rimuovere la selezione" : "Bottone Nero: Fuori Sentiero"}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -320,6 +251,11 @@ export default function DaySelectionModal({
               <img 
                 src={blackButtonImg} 
                 alt="" 
+                width={54}
+                height={54}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
                 style={{ 
                   width: '100%', 
                   height: '100%', 
@@ -344,12 +280,11 @@ export default function DaySelectionModal({
             type="button"
             onClick={() => {
               if (!canUseKey) return;
-              hapticSuccess();
-              handleSelect(currentStatus === 'cheat_key' ? 'neutral' : 'cheat_key');
+              handleSelect('cheat_key');
             }}
             disabled={!canUseKey}
-            aria-label="Chiave della Libertà"
-            title={canUseKey ? "Giorno di Libertà (Chiave Nera)" : "Nessuna chiave disponibile"}
+            aria-label={currentStatus === 'cheat_key' ? "Chiave della Libertà selezionata: tocca per rimuovere" : "Chiave della Libertà"}
+            title={currentStatus === 'cheat_key' ? "Tocca per rimuovere la chiave" : (canUseKey ? "Giorno di Libertà (Chiave Nera)" : "Nessuna chiave disponibile")}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -385,6 +320,11 @@ export default function DaySelectionModal({
               <img 
                 src={keyImg} 
                 alt="" 
+                width={56}
+                height={56}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
                 style={{ 
                   width: '100%', 
                   height: '100%', 
@@ -405,122 +345,42 @@ export default function DaySelectionModal({
             )}
           </button>
 
-          {/* 4. IN BASSO A DESTRA: AZZERA (SE REGISTRATO) OPPURE ANNULLA */}
-          {currentStatus !== 'neutral' ? (
-            <button
-              type="button"
-              onClick={() => {
-                if (!confirmReset) {
-                  hapticLight();
-                  setConfirmReset(true);
-                  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-                  resetTimerRef.current = setTimeout(() => {
-                    setConfirmReset(false);
-                  }, 3500);
-                } else {
-                  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-                  setConfirmReset(false);
-                  hapticWarning();
-                  handleSelect('neutral');
-                }
-              }}
-              aria-label={confirmReset ? 'Conferma azzeramento esito' : 'Azzera esito registrato'}
-              title={confirmReset ? 'Tocca di nuovo per confermare' : 'Azzera esito'}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '90px',
-                borderRadius: '18px',
-                backgroundColor: confirmReset ? 'rgba(50, 18, 22, 0.94)' : 'rgba(26, 32, 44, 0.75)',
-                border: confirmReset ? '2px solid #ef4444' : '1.5px solid rgba(221, 202, 183, 0.35)',
-                boxShadow: confirmReset
-                  ? '0 0 16px rgba(239, 68, 68, 0.5), inset 0 0 10px rgba(185, 28, 28, 0.3)'
-                  : 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.45)',
-                cursor: 'pointer',
-                touchAction: 'manipulation',
-                transition: 'all 0.15s ease',
-                gap: '6px'
-              }}
-            >
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: confirmReset ? 'rgba(239, 68, 68, 0.2)' : 'rgba(6, 20, 34, 0.85)',
-                border: confirmReset ? '1.5px solid #ef4444' : '1px solid rgba(221, 202, 183, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: confirmReset ? '#ef4444' : 'var(--coraline-parchment)',
-                fontSize: '17px',
-                lineHeight: 1
-              }}>
-                ↺
-              </div>
-              <span style={{
-                fontSize: '11px',
-                fontFamily: 'var(--font-gothic)',
-                fontWeight: confirmReset ? 800 : 700,
-                color: confirmReset ? '#fca5a5' : 'var(--coraline-parchment)',
-                letterSpacing: '0.4px'
-              }}>
-                {confirmReset ? 'Confermi?' : 'Azzera'}
-              </span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                onClose();
-              }}
-              aria-label="Chiudi finestra"
-              title="Chiudi"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '90px',
-                borderRadius: '18px',
-                backgroundColor: 'rgba(6, 22, 37, 0.55)',
-                border: '1.5px solid rgba(221, 202, 183, 0.18)',
-                boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 4px 12px rgba(0, 0, 0, 0.35)',
-                cursor: 'pointer',
-                touchAction: 'manipulation',
-                transition: 'all 0.15s ease',
-                gap: '6px'
-              }}
-            >
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(3, 10, 18, 0.65)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--coraline-parchment)',
-                fontSize: '14px',
-                lineHeight: 1
-              }}>
-                ✕
-              </div>
-              <span style={{
-                fontSize: '11px',
-                fontFamily: 'var(--font-gothic)',
-                fontWeight: 700,
-                color: 'var(--coraline-parchment)',
-                opacity: 0.75,
-                letterSpacing: '0.4px'
-              }}>
-                Annulla
-              </span>
-            </button>
-          )}
+          {/* 4. IN BASSO A DESTRA: TASTO ✕ PER CHIUDERE E ANNULLARE LA SELEZIONE */}
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Chiudi finestra"
+            title="Chiudi"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '90px',
+              borderRadius: '18px',
+              backgroundColor: 'rgba(6, 22, 37, 0.55)',
+              border: '1.5px solid rgba(221, 202, 183, 0.22)',
+              boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 4px 12px rgba(0, 0, 0, 0.35)',
+              cursor: 'pointer',
+              touchAction: 'manipulation',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(3, 10, 18, 0.65)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--coraline-parchment)',
+              fontSize: '18px',
+              lineHeight: 1
+            }}>
+              ✕
+            </div>
+          </button>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { calculateEclipseState } from '../utils/eclipseLogic.js';
 import { getConsecutiveDietStreak } from '../utils/storage.js';
-import { calculateHistoricalComparison } from '../utils/historicalStats.js';
 import { smoothScrollToElement } from '../utils/scrollAnimation.js';
-import { triggerHapticFeedback } from '../services/haptics';
-import { getUIElementExplanation } from '../data/catQuotes';
+import { triggerHapticFeedback } from '../utils/haptics';
+import { getUIElementExplanation } from '../data/catExplanations';
+import { getSyncStatus, subscribeSyncStatus } from '../utils/syncQueue.js';
 
 // Immagine profilo Boring Blue Boy da Coraline
 import profileAvatarImg from '../assets/profile-avatar.webp';
@@ -14,14 +14,11 @@ import streakStarImg from '../assets/streak-star.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
 // Sfondo cielo stellato magico di Coraline
 import starryBg from '../assets/coraline-starry-bg.webp';
-// Texture con sfondo delle stelline di Coraline
-import catCloudPattern from '../assets/cat-cloud-pattern.webp';
 
-// Oggetti grafici reali di Coraline per gli esiti dei 7 giorni e le statistiche
+// Oggetti grafici reali di Coraline per gli esiti dei 7 giorni
 import seeingStoneImg from '../assets/seeing-stone.webp'; // Pietra verde (dieta seguita)
 import blackButtonImg from '../assets/black-button.webp'; // Bottone nero (giorno fuori sentiero)
 import keyImg from '../assets/key.webp';                 // Chiave nera (chiave jolly)
-import gearBallImg from '../assets/gear-ball.webp';       // Palla cambio allenamento Bobinsky
 
 // I 7 snapshot fotografici originali estratti direttamente dalla reference cinematografica di Coraline
 import moonPhase0 from '../assets/eclipse-phases/coraline-moon-phase-0.webp';
@@ -31,11 +28,6 @@ import moonPhase3 from '../assets/eclipse-phases/coraline-moon-phase-3.webp';
 import moonPhase4 from '../assets/eclipse-phases/coraline-moon-phase-4.webp';
 import moonPhase5 from '../assets/eclipse-phases/coraline-moon-phase-5.webp';
 import moonPhase6 from '../assets/eclipse-phases/coraline-moon-phase-6.webp';
-
-const MONTHS_IT = [
-  'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
-  'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
-];
 
 const MOON_PHASES = [
   moonPhase0,
@@ -49,25 +41,14 @@ const MOON_PHASES = [
 
 const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
   allLogs = {},
-  workoutLogs = {},
   todayStr,
-  displayYear,
-  displayMonth,
   onOpenSettings = () => {},
   customAvatar = null,
   onScrollToDashboard,
   onCatSpeak
 }) {
-  const currentYear = todayStr ? Number(todayStr.split('-')[0]) : new Date().getFullYear();
-  const currentMonth = todayStr ? Number(todayStr.split('-')[1]) - 1 : new Date().getMonth();
-  const year = displayYear !== undefined ? displayYear : currentYear;
-  const month = displayMonth !== undefined ? displayMonth : currentMonth;
-
   const handleScrollToDashboard = () => {
     triggerHapticFeedback('selection');
-    if (onCatSpeak) {
-      onCatSpeak(getUIElementExplanation('dashboard_streak_badge'));
-    }
     if (onScrollToDashboard) {
       onScrollToDashboard();
     } else {
@@ -87,126 +68,6 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     return getConsecutiveDietStreak(allLogs);
   }, [allLogs]);
 
-  // Calcolo statistiche storiche per Scheda 2 del Carosello
-  const stats = useMemo(() => {
-    return calculateHistoricalComparison(allLogs, workoutLogs, year, month);
-  }, [allLogs, workoutLogs, year, month]);
-
-  // Variazioni percentuali rispetto alla media per le 4 box comparative
-  const comparisonDeltas = useMemo(() => {
-    // 1. Aderenza: delta rispetto alla media storica
-    const adhDelta = stats.adherenceDelta;
-    const adhSign = adhDelta > 0 ? `+${adhDelta}%` : adhDelta < 0 ? `${adhDelta}%` : '0%';
-    const adhColor = adhDelta > 0 ? '#4ade80' : adhDelta < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
-
-    // 2. Giorni Rispettati: delta rispetto alla media mensile
-    const avgSucc = parseFloat(stats.avgMonthlySuccess) || 0;
-    let succPct = 0;
-    if (avgSucc > 0) {
-      succPct = Math.round(((stats.currentSuccessCount - avgSucc) / avgSucc) * 100);
-    } else if (stats.currentSuccessCount > 0) {
-      succPct = 100;
-    }
-    const succSign = succPct > 0 ? `+${succPct}%` : succPct < 0 ? `${succPct}%` : '0%';
-    const succColor = succPct > 0 ? '#4ade80' : succPct < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
-
-    // 3. Imprevisti: MENO imprevisti è miglioramento (verde), PIÙ imprevisti è deviazione (rosso)
-    const avgCheat = parseFloat(stats.avgMonthlyCheats) || 0;
-    let cheatPct = 0;
-    if (avgCheat > 0) {
-      cheatPct = Math.round(((stats.currentCheatCount - avgCheat) / avgCheat) * 100);
-    } else if (stats.currentCheatCount > 0) {
-      cheatPct = 100;
-    }
-    const cheatSign = cheatPct > 0 ? `+${cheatPct}%` : cheatPct < 0 ? `${cheatPct}%` : '0%';
-    const cheatColor = cheatPct < 0 ? '#4ade80' : cheatPct > 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
-
-    // 4. Allenamenti: delta rispetto alla media mensile
-    const avgWork = parseFloat(stats.avgMonthlyWorkouts) || 0;
-    let workPct = 0;
-    if (avgWork > 0) {
-      workPct = Math.round(((stats.currentWorkoutCount - avgWork) / avgWork) * 100);
-    } else if (stats.currentWorkoutCount > 0) {
-      workPct = 100;
-    }
-    const workSign = workPct > 0 ? `+${workPct}%` : workPct < 0 ? `${workPct}%` : '0%';
-    const workColor = workPct > 0 ? '#4ade80' : workPct < 0 ? '#ef4444' : 'rgba(221, 202, 183, 0.75)';
-
-    return {
-      adh: { text: `(${adhSign})`, color: adhColor },
-      succ: { text: `(${succSign})`, color: succColor },
-      cheat: { text: `(${cheatSign})`, color: cheatColor },
-      work: { text: `(${workSign})`, color: workColor }
-    };
-  }, [stats]);
-
-  // Stato e navigazione a vista singola con due box fisici concatenati
-  const [activeTab, setActiveTab] = useState(0); // 0: Ritmo / Luna, 1: Statistiche
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const isHorizontalSwipe = useRef(null);
-
-  const handleTouchStart = (e) => {
-    if (!e.touches || e.touches.length === 0) return;
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    isHorizontalSwipe.current = null;
-    setIsDragging(false);
-    setDragOffset(0);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!e.touches || e.touches.length === 0) return;
-    const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
-    const deltaX = currentX - touchStartX.current;
-    const deltaY = currentY - touchStartY.current;
-
-    if (isHorizontalSwipe.current === null) {
-      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
-        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
-          isHorizontalSwipe.current = true;
-          setIsDragging(true);
-        } else {
-          isHorizontalSwipe.current = false;
-        }
-      }
-    }
-
-    if (isHorizontalSwipe.current) {
-      // Resistenza ai bordi (rubber banding) se si trascina oltre il limite
-      if ((activeTab === 0 && deltaX > 0) || (activeTab === 1 && deltaX < 0)) {
-        setDragOffset(deltaX * 0.22);
-      } else {
-        setDragOffset(deltaX);
-      }
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    if (isHorizontalSwipe.current) {
-      if (dragOffset < -45 && activeTab === 0) {
-        triggerHapticFeedback('selection');
-        setActiveTab(1);
-      } else if (dragOffset > 45 && activeTab === 1) {
-        triggerHapticFeedback('selection');
-        setActiveTab(0);
-      }
-    }
-    setDragOffset(0);
-    isHorizontalSwipe.current = null;
-  };
-
-  const handleSelectTab = (newTab) => {
-    if (newTab === activeTab) return;
-    triggerHapticFeedback('selection');
-    setActiveTab(newTab);
-  };
-
   // Effetto glow visivo quando la luna si libera (retrocessione del bottone)
   const [isGlowActive, setIsGlowActive] = useState(false);
   const prevIndexRef = useRef(phaseIndex);
@@ -219,6 +80,73 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     }
     prevIndexRef.current = phaseIndex;
   }, [phaseIndex]);
+
+  // Stato sincronizzazione Cloud live (Indicatore Visivo)
+  const [syncStatus, setSyncStatus] = useState(() => getSyncStatus());
+
+  useEffect(() => {
+    const unsub = subscribeSyncStatus((newStatus) => {
+      setSyncStatus(newStatus);
+    });
+    return () => {
+      if (typeof unsub === 'function') unsub();
+    };
+  }, []);
+
+  const syncConfig = useMemo(() => {
+    switch (syncStatus) {
+      case 'syncing':
+        return {
+          color: '#38bdf8',
+          glow: '0 0 8px rgba(56, 189, 248, 0.9)',
+          title: 'Sincronizzazione Cloud in corso...',
+          icon: (
+            <span style={{
+              display: 'inline-block',
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              border: '1.5px solid rgba(255, 255, 255, 0.3)',
+              borderTopColor: '#ffffff',
+              animation: 'spinSync 0.8s linear infinite'
+            }} />
+          )
+        };
+      case 'pending':
+        return {
+          color: '#f59e0b',
+          glow: '0 0 6px rgba(245, 158, 11, 0.8)',
+          title: 'Modifiche in attesa di salvataggio...',
+          icon: <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#ffffff' }} />
+        };
+      case 'offline':
+        return {
+          color: '#64748b',
+          glow: 'none',
+          title: 'Offline (dati al sicuro sul dispositivo)',
+          icon: <span style={{ width: '5px', height: '1.5px', borderRadius: '1px', backgroundColor: '#cbd5e1' }} />
+        };
+      case 'error':
+        return {
+          color: '#ef4444',
+          glow: '0 0 8px rgba(239, 68, 68, 0.85)',
+          title: 'Errore sincronizzazione (ritenterà)',
+          icon: <span style={{ fontSize: '9px', fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>!</span>
+        };
+      case 'synced':
+      default:
+        return {
+          color: '#10b981',
+          glow: '0 0 7px rgba(16, 185, 129, 0.75)',
+          title: 'Dati sincronizzati e protetti nel Cloud',
+          icon: (
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )
+        };
+    }
+  }, [syncStatus]);
 
   return (
     <div style={{
@@ -280,7 +208,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           }}
         >
           {/* Spirale sfocata molto leggera identica ai box della Dashboard */}
-          <div style={{
+          <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
             backgroundImage: `url(${vortexBg})`,
@@ -300,6 +228,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           <img
             src={streakStarImg}
             alt="Palla del Circo"
+            width={26}
+            height={26}
+            loading="eager"
+            decoding="async"
+            draggable={false}
             style={{
               width: '26px',
               height: '26px',
@@ -330,7 +263,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
         </button>
 
         {/* GRUPPO A DESTRA: ICONA PROFILO ASIA */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 10 }}>
           {/* ICONA PROFILO A DESTRA (FOTO PERSONALIZZATA O BORING BLUE BOY DA CORALINE) */}
           <button
             onClick={() => {
@@ -338,7 +271,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               onOpenSettings('profile');
             }}
             aria-label="Apri impostazioni profilo"
-            title="Profilo & Impostazioni"
+            title={`Profilo & Impostazioni (${syncConfig.title})`}
             style={{
               background: 'none',
               border: 'none',
@@ -347,12 +280,16 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               outline: 'none',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              WebkitTapHighlightColor: 'transparent',
+              position: 'relative'
             }}
           >
             <div style={{
               width: '46px',
               height: '46px',
+              minWidth: '46px',
+              minHeight: '46px',
               borderRadius: '14px',
               background: '#0c1013',
               border: '2px solid rgba(47, 77, 108, 0.65)',
@@ -361,83 +298,80 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'transform 0.15s ease'
+              position: 'relative',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}>
               <img
                 src={customAvatar || profileAvatarImg}
                 alt="Profilo di Asia"
+                width={46}
+                height={46}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                draggable={false}
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover'
+                  objectFit: 'cover',
+                  display: 'block',
+                  position: 'relative',
+                  zIndex: 2
                 }}
               />
+            </div>
+
+            {/* BADGE VISIVO STATO SINCRONIZZAZIONE (BSU) */}
+            <div
+              title={syncConfig.title}
+              aria-label={`Stato sincronizzazione: ${syncConfig.title}`}
+              style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-2px',
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                backgroundColor: syncConfig.color,
+                border: '2px solid #071524',
+                boxShadow: syncConfig.glow,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+                pointerEvents: 'none'
+              }}
+            >
+              {syncConfig.icon}
             </div>
           </button>
         </div>
       </div>
 
       {/* =========================================================
-          2. CAROUSEL A DUE BOX FISICI CONCATENATI CON SCORRIMENTO ORIZZONTALE A TUTTO SCHERMO
+          2. SCHEDA LA TUA SETTIMANA (LUNA & SETTE GIORNI)
           ========================================================= */}
       <div
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
         style={{
-          width: 'calc(100% + 32px)',
-          marginLeft: '-16px',
-          marginRight: '-16px',
-          height: '388px',
-          minHeight: '388px',
-          maxHeight: '388px',
+          width: '100%',
+          minHeight: '418px',
+          borderRadius: '24px',
+          background: 'linear-gradient(180deg, rgba(6, 9, 12, 0.99) 0%, rgba(8, 18, 30, 0.96) 12%, rgba(13, 44, 73, 0.88) 32%, rgba(12, 22, 33, 0.94) 62%, rgba(6, 9, 12, 0.99) 100%)',
+          border: '1.5px solid rgba(47, 77, 108, 0.45)',
+          outline: '1px dashed rgba(139, 229, 116, 0.16)',
+          outlineOffset: '-6px',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(47, 77, 108, 0.25), 0 0 24px rgba(13, 44, 73, 0.25)',
+          padding: '24px 16px 18px 16px',
           position: 'relative',
           overflow: 'hidden',
-          touchAction: 'manipulation'
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          boxSizing: 'border-box'
         }}
       >
-        {/* BINARIO ORIZZONTALE DEI DUE BOX CONCATENATI (200% LARGHEZZA) */}
-        <div
-          style={{
-            display: 'flex',
-            width: '200%',
-            height: '100%',
-            transform: isDragging
-              ? `translate3d(calc(${activeTab === 0 ? '0%' : '-50%'} + ${dragOffset}px), 0, 0)`
-              : (activeTab === 0 ? 'translate3d(0%, 0, 0)' : 'translate3d(-50%, 0, 0)'),
-            transition: isDragging ? 'none' : 'transform 0.52s cubic-bezier(0.2, 0.9, 0.3, 1)',
-            willChange: 'transform'
-          }}
-        >
-          {/* SLIDE 1: BOX LA TUA SETTIMANA */}
-          <div
-            style={{
-              width: '50%',
-              height: '100%',
-              flexShrink: 0,
-              padding: '0 16px',
-              boxSizing: 'border-box'
-            }}
-          >
-            <div
-              key="card-tab-0"
-              style={{
-                width: '100%',
-                height: '100%',
-                borderRadius: '24px',
-                background: 'linear-gradient(180deg, rgba(6, 9, 12, 0.99) 0%, rgba(8, 18, 30, 0.96) 12%, rgba(13, 44, 73, 0.88) 32%, rgba(12, 22, 33, 0.94) 62%, rgba(6, 9, 12, 0.99) 100%)',
-                border: '1.5px solid rgba(47, 77, 108, 0.45)',
-                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(47, 77, 108, 0.25), 0 0 24px rgba(13, 44, 73, 0.25)',
-                padding: '24px 16px 18px 16px',
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                boxSizing: 'border-box'
-              }}
-            >
         {/* SFUMATURA NERA CINEMATICA SIA DALL'ALTO CHE DAL BASSO */}
         <div style={{
           position: 'absolute',
@@ -467,7 +401,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
         }} />
 
         {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
-        <div style={{
+        <div className="vortex-bg-layer" style={{
           position: 'absolute',
           inset: 0,
           backgroundImage: `url(${vortexBg})`,
@@ -518,22 +452,31 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           }}>
             La tua<br />settimana
           </div>
-          {/* 2. SOTTO: RITMO DELLA DIETA (CREMA CORALINE VINTAGE - NON BIANCO SPARATO) */}
+          {/* 2. SOTTO: RITMO DELLA DIETA (CREMA CORALINE VINTAGE CON CUCITURE A PUNTO CROCE) */}
           <div style={{
-            fontFamily: 'var(--font-gothic)',
-            fontSize: '11px',
-            textTransform: 'uppercase',
-            letterSpacing: '1.3px',
-            color: '#DDCAB7',
-            fontWeight: 700,
-            textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
           }}>
-            RITMO DELLA DIETA
+            <span style={{ fontSize: '9px', color: 'rgba(221, 202, 183, 0.45)', letterSpacing: '2px', userSelect: 'none' }}>✕—✕</span>
+            <span style={{
+              fontFamily: 'var(--font-gothic)',
+              fontSize: '11px',
+              textTransform: 'uppercase',
+              letterSpacing: '1.4px',
+              color: '#DDCAB7',
+              fontWeight: 700,
+              textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)'
+            }}>
+              RITMO DELLA DIETA
+            </span>
+            <span style={{ fontSize: '9px', color: 'rgba(221, 202, 183, 0.45)', letterSpacing: '2px', userSelect: 'none' }}>✕—✕</span>
           </div>
         </div>
 
         {/* =========================================================
-            LA LUNA CINEMATOGRAFICA A 7 FASI FLUTTUANTE (HERO SCURITA)
+            LA LUNA CINEMATOGRAFICA A 7 FASI FLUTTUANTE (HERO)
             ========================================================= */}
         <div 
           role="button"
@@ -568,7 +511,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             filter: 'blur(30px)',
             WebkitFilter: 'blur(30px)',
             animation: 'moonHaloPulse 3.6s ease-in-out infinite',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            zIndex: 0
           }} />
 
           {/* 2. Alone di luce soffusa a contatto con la luna (sfumatura delicata, zero stacco) */}
@@ -579,10 +523,11 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             background: 'radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(242, 255, 246, 0.22) 42%, rgba(139, 229, 116, 0.07) 70%, transparent 88%)',
             filter: 'blur(16px)',
             WebkitFilter: 'blur(16px)',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            zIndex: 0
           }} />
 
-          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE CON CONTORNO MORBIDAMENTE SFUMATO */}
+          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE */}
           {MOON_PHASES.map((imgSrc, idx) => {
             const isActive = idx === phaseIndex;
             return (
@@ -590,6 +535,12 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 key={idx}
                 src={imgSrc}
                 alt={`Luna Coraline Fase ${idx + 1} di 7`}
+                width={185}
+                height={185}
+                loading={isActive ? 'eager' : 'lazy'}
+                fetchPriority={isActive ? 'high' : 'auto'}
+                decoding="async"
+                draggable={false}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -598,15 +549,14 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   height: '100%',
                   objectFit: 'contain',
                   borderRadius: '50%',
+                  zIndex: 2,
                   opacity: isActive ? 1 : 0,
-                  transform: isActive ? 'scale(1)' : 'scale(0.985)',
+                  transform: isActive ? 'translateZ(0) scale(1)' : 'translateZ(0) scale(0.985)',
                   transition: 'opacity 650ms cubic-bezier(0.4, 0, 0.2, 1), transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  maskImage: 'radial-gradient(circle at center, black 58%, rgba(0, 0, 0, 0.8) 75%, rgba(0, 0, 0, 0.25) 90%, transparent 100%)',
-                  WebkitMaskImage: 'radial-gradient(circle at center, black 58%, rgba(0, 0, 0, 0.8) 75%, rgba(0, 0, 0, 0.25) 90%, transparent 100%)',
                   filter: isGlowActive && isActive
                     ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 28px rgba(139, 229, 116, 0.35)) brightness(0.88) contrast(1.05)'
                     : 'drop-shadow(0 0 14px rgba(255, 255, 255, 0.38)) drop-shadow(0 0 22px rgba(139, 229, 116, 0.14)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.75)) brightness(0.86) contrast(1.08)',
-                  willChange: 'opacity, transform',
+                  willChange: isActive ? 'opacity, transform' : 'auto',
                   pointerEvents: 'none'
                 }}
               />
@@ -620,15 +570,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             Oggetti: Pietra Verde, Bottone Nero, Chiave Nera
             ========================================================= */}
         <div 
-          role="button"
-          tabIndex={0}
-          aria-label="Striscia dei 7 giorni della settimana: tocca per ascoltare la spiegazione del Gatto"
-          onClick={() => {
-            triggerHapticFeedback('selection');
-            if (onCatSpeak) {
-              onCatSpeak(getUIElementExplanation('dashboard_seven_days'));
-            }
-          }}
+          aria-label="Riepilogo ultimi 7 giorni"
           style={{
             position: 'relative',
             zIndex: 1,
@@ -643,8 +585,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             border: '1px solid rgba(47, 77, 108, 0.35)',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(47, 77, 108, 0.15)',
             overflow: 'hidden',
-            cursor: 'pointer',
-            touchAction: 'manipulation'
+            cursor: 'default'
           }}>
           {/* Livello 1: Texture cielo stellato molto sfocata e scurita */}
           <div
@@ -768,6 +709,10 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                       src={seeingStoneImg}
                       alt="Pietra Verde (Dieta Seguita)"
                       title="Dieta Seguita: Pietra Veggente Verde"
+                      width={18}
+                      height={18}
+                      decoding="async"
+                      draggable={false}
                       style={{
                         width: '18px',
                         height: '18px',
@@ -782,6 +727,10 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                       src={blackButtonImg}
                       alt="Bottone Nero (Giorno Fuori Sentiero)"
                       title="Giorno Fuori Sentiero: Bottone Nero"
+                      width={17}
+                      height={17}
+                      decoding="async"
+                      draggable={false}
                       style={{
                         width: '17px',
                         height: '17px',
@@ -796,6 +745,10 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                       src={keyImg}
                       alt="Chiave Nera (Giorno di Libertà)"
                       title="Giorno di Libertà: Chiave Nera"
+                      width={19}
+                      height={19}
+                      decoding="async"
+                      draggable={false}
                       style={{
                         width: '19px',
                         height: '19px',
@@ -821,570 +774,9 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           })}
         </div>
       </div>
-    </div>
 
-    {/* SLIDE 2: BOX STATISTICHE COMPARATIVE (VIOLA COME LA DASHBOARD) */}
-    <div
-      style={{
-        width: '50%',
-        height: '100%',
-        flexShrink: 0,
-        padding: '0 16px',
-        boxSizing: 'border-box'
-      }}
-    >
-      <div
-        key="card-tab-1"
-        style={{
-          width: '100%',
-          height: '100%',
-          borderRadius: '24px',
-          background: 'linear-gradient(180deg, rgba(13, 44, 73, 0.94) 0%, rgba(12, 16, 19, 0.98) 55%, rgba(6, 9, 12, 0.99) 100%)',
-          border: '1.5px solid rgba(47, 77, 108, 0.45)',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(47, 77, 108, 0.25), 0 0 24px rgba(13, 44, 73, 0.25)',
-          padding: '14px',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          boxSizing: 'border-box'
-        }}
-      >
-            {/* SFONDO DELLE STELLINE DI CORALINE (OSCURITO E BEN DOSATO) */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: `url(${catCloudPattern})`,
-              backgroundPosition: 'center center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              opacity: 0.20,
-              pointerEvents: 'none',
-              borderRadius: 'inherit',
-              zIndex: 0
-            }} />
-
-            {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SCURITO) */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: `url(${starryBg})`,
-              backgroundPosition: 'center center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              opacity: 0.09,
-              pointerEvents: 'none',
-              borderRadius: 'inherit',
-              zIndex: 0
-            }} />
-
-            {/* VELATURA SCURA CINEMATICA PER OSCURIRE LO SFONDO GENERALE */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'radial-gradient(circle at center, rgba(12, 16, 19, 0.4) 0%, rgba(6, 9, 12, 0.72) 100%)',
-              pointerEvents: 'none',
-              borderRadius: 'inherit',
-              zIndex: 0
-            }} />
-
-            {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: `url(${vortexBg})`,
-              backgroundPosition: 'center center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              opacity: 0.05,
-              filter: 'blur(2px)',
-              WebkitFilter: 'blur(2px)',
-              maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-              WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-              pointerEvents: 'none',
-              borderRadius: 'inherit',
-              zIndex: 0
-            }} />
-
-            {/* ALONE RADIALE BLU NOTTE CINEMATICO CORALINE */}
-            <div style={{
-              position: 'absolute',
-              top: '35px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '260px',
-              height: '240px',
-              background: 'radial-gradient(circle, rgba(47, 77, 108, 0.25) 0%, rgba(55, 74, 79, 0.12) 50%, rgba(20, 45, 76, 0.06) 70%, transparent 80%)',
-              pointerEvents: 'none',
-              zIndex: 0
-            }} />
-
-            {/* I 4 GRANDI BOX STATISTICHE IN GRIGLIA 2x2: RIEMPIMENTO UGUALE AI BOX DELLA DASHBOARD */}
-            <div style={{
-              position: 'relative',
-              zIndex: 1,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '10px',
-              width: '100%',
-              height: '100%',
-              boxSizing: 'border-box'
-            }}>
-              {/* BOX 1: ADERENZA DIETA (PIETRA VEGGENTE FLUTTUANTE GIGANTE) */}
-              <div 
-                role="button"
-                tabIndex={0}
-                aria-label="Aderenza Dieta: tocca per ascoltare la spiegazione del Gatto"
-                onClick={() => {
-                  triggerHapticFeedback('selection');
-                  if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('dashboard_card_adherence'));
-                  }
-                }}
-                style={{
-                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.42)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
-                  padding: '12px 6px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxSizing: 'border-box',
-                  cursor: 'pointer',
-                  touchAction: 'manipulation'
-                }}
-              >
-                {/* Spirale sfocata molto leggera identica alla Dashboard */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${vortexBg})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.045,
-                  filter: 'blur(2px)',
-                  WebkitFilter: 'blur(2px)',
-                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                <img
-                  src={seeingStoneImg}
-                  alt="Aderenza Dieta"
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 0 12px rgba(139, 229, 116, 0.75)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.9))',
-                    animation: 'stoneFloat 3.8s ease-in-out infinite',
-                    willChange: 'transform',
-                    marginBottom: '6px',
-                    position: 'relative',
-                    zIndex: 1
-                  }}
-                />
-
-                <div style={{
-                  fontFamily: 'var(--font-gothic)',
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  color: '#ffffff',
-                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(139, 229, 116, 0.4)',
-                  marginBottom: '4px',
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  {stats.currentAdherence}%
-                </div>
-
-                <div style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '11px',
-                  color: '#d0cfcd',
-                  opacity: 0.9,
-                  lineHeight: 1.25,
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  Media: <strong style={{ color: '#ffffff' }}>{stats.historicalAdherence}%</strong> <span style={{ color: comparisonDeltas.adh.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.adh.text}</span>
-                </div>
-              </div>
-
-              {/* BOX 2: GIORNI RISPETTATI (STELLA ROSSA FLUTTUANTE GIGANTE) */}
-              <div 
-                role="button"
-                tabIndex={0}
-                aria-label="Giorni Rispettati: tocca per ascoltare la spiegazione del Gatto"
-                onClick={() => {
-                  triggerHapticFeedback('selection');
-                  if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('dashboard_card_success'));
-                  }
-                }}
-                style={{
-                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.42)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
-                  padding: '12px 6px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxSizing: 'border-box',
-                  cursor: 'pointer',
-                  touchAction: 'manipulation'
-                }}
-              >
-                {/* Spirale sfocata molto leggera identica alla Dashboard */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${vortexBg})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.045,
-                  filter: 'blur(2px)',
-                  WebkitFilter: 'blur(2px)',
-                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                <img
-                  src={streakStarImg}
-                  alt="Giorni Rispettati"
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 4px 14px rgba(220, 38, 38, 0.8)) drop-shadow(0 0 10px rgba(239, 68, 68, 0.4))',
-                    animation: 'starFloat 3.2s ease-in-out infinite 0.4s',
-                    willChange: 'transform',
-                    marginBottom: '6px',
-                    position: 'relative',
-                    zIndex: 1
-                  }}
-                />
-
-                <div style={{
-                  fontFamily: 'var(--font-gothic)',
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  color: '#8be574',
-                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(139, 229, 116, 0.45)',
-                  marginBottom: '4px',
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  {stats.currentSuccessCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>gg</span>
-                </div>
-
-                <div style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '11px',
-                  color: '#d0cfcd',
-                  opacity: 0.9,
-                  lineHeight: 1.25,
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  Media: <strong style={{ color: '#ffffff' }}>{stats.avgMonthlySuccess}/m</strong> <span style={{ color: comparisonDeltas.succ.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.succ.text}</span>
-                </div>
-              </div>
-
-              {/* BOX 3: BOTTONI NERI (BOTTONE NERO FLUTTUANTE GIGANTE) */}
-              <div 
-                role="button"
-                tabIndex={0}
-                aria-label="Bottoni Neri: tocca per ascoltare la spiegazione del Gatto"
-                onClick={() => {
-                  triggerHapticFeedback('selection');
-                  if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('dashboard_card_cheats'));
-                  }
-                }}
-                style={{
-                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.42)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
-                  padding: '12px 6px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxSizing: 'border-box',
-                  cursor: 'pointer',
-                  touchAction: 'manipulation'
-                }}
-              >
-                {/* Spirale sfocata molto leggera identica alla Dashboard */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${vortexBg})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.045,
-                  filter: 'blur(2px)',
-                  WebkitFilter: 'blur(2px)',
-                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                <img
-                  src={blackButtonImg}
-                  alt="Bottoni Neri"
-                  style={{
-                    width: '58px',
-                    height: '58px',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.5))',
-                    animation: 'buttonFloat 3.6s ease-in-out infinite 0.8s',
-                    willChange: 'transform',
-                    marginBottom: '6px',
-                    position: 'relative',
-                    zIndex: 1
-                  }}
-                />
-
-                <div style={{
-                  fontFamily: 'var(--font-gothic)',
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  color: '#fca5a5',
-                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(239, 68, 68, 0.45)',
-                  marginBottom: '4px',
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  {stats.currentCheatCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>imprevisti</span>
-                </div>
-
-                <div style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '11px',
-                  color: '#d0cfcd',
-                  opacity: 0.9,
-                  lineHeight: 1.25,
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  Media: <strong style={{ color: '#ffffff' }}>{stats.avgMonthlyCheats}/m</strong> <span style={{ color: comparisonDeltas.cheat.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.cheat.text}</span>
-                </div>
-              </div>
-
-              {/* BOX 4: ALLENAMENTI BOBINSKY (PALLA DEL CAMBIO FLUTTUANTE GIGANTE) */}
-              <div 
-                role="button"
-                tabIndex={0}
-                aria-label="Allenamenti Bobinsky: tocca per ascoltare la spiegazione del Gatto"
-                onClick={() => {
-                  triggerHapticFeedback('selection');
-                  if (onCatSpeak) {
-                    onCatSpeak(getUIElementExplanation('dashboard_card_workouts'));
-                  }
-                }}
-                style={{
-                  backgroundColor: 'rgba(12, 16, 19, 0.85)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(55, 74, 79, 0.42)',
-                  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
-                  padding: '12px 6px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxSizing: 'border-box',
-                  cursor: 'pointer',
-                  touchAction: 'manipulation'
-                }}
-              >
-                {/* Spirale sfocata molto leggera identica alla Dashboard */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${vortexBg})`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: 0.045,
-                  filter: 'blur(2px)',
-                  WebkitFilter: 'blur(2px)',
-                  maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-                  pointerEvents: 'none',
-                  borderRadius: 'inherit',
-                  zIndex: 0
-                }} />
-
-                <img
-                  src={gearBallImg}
-                  alt="Allenamenti"
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 4px 14px rgba(224, 159, 62, 0.65)) drop-shadow(0 0 10px rgba(139, 229, 116, 0.35))',
-                    animation: 'stoneFloat 3.8s ease-in-out infinite 0.5s',
-                    willChange: 'transform',
-                    marginBottom: '6px',
-                    position: 'relative',
-                    zIndex: 1
-                  }}
-                />
-
-                <div style={{
-                  fontFamily: 'var(--font-gothic)',
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  color: '#e09f3e',
-                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 12px rgba(224, 159, 62, 0.45)',
-                  marginBottom: '4px',
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  {stats.currentWorkoutCount} <span style={{ fontSize: '15px', fontWeight: 700 }}>workout</span>
-                </div>
-
-                <div style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '11px',
-                  color: '#d0cfcd',
-                  opacity: 0.9,
-                  lineHeight: 1.25,
-                  position: 'relative',
-                  zIndex: 1
-                }}>
-                  Media: <strong style={{ color: '#ffffff' }}>{stats.avgMonthlyWorkouts}/m</strong> <span style={{ color: comparisonDeltas.work.color, fontWeight: 700, marginLeft: '3px' }}>{comparisonDeltas.work.text}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-      {/* =========================================================
-          INDICATORI DI PAGINA (PAGINATION DOTS) SOTTO LA SCHEDA
-          ========================================================= */}
-      <div
-        role="tablist"
-        aria-label="Pagine statistiche"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          marginTop: '12px',
-          marginBottom: '2px',
-          userSelect: 'none'
-        }}
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 0}
-          aria-label="Scheda 1: Ritmo della Dieta e Luna"
-          onClick={() => handleSelectTab(0)}
-          style={{
-            width: activeTab === 0 ? '22px' : '7px',
-            height: '7px',
-            borderRadius: '5px',
-            backgroundColor: activeTab === 0 ? 'rgba(226, 232, 240, 0.72)' : 'rgba(226, 232, 240, 0.22)',
-            border: activeTab === 0 ? '1px solid rgba(226, 232, 240, 0.85)' : '1px solid rgba(226, 232, 240, 0.15)',
-            boxShadow: activeTab === 0 ? '0 0 6px rgba(226, 232, 240, 0.35)' : 'none',
-            padding: 0,
-            cursor: 'pointer',
-            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
-            touchAction: 'manipulation'
-          }}
-        />
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 1}
-          aria-label="Scheda 2: Statistiche Comparative e Medie"
-          onClick={() => handleSelectTab(1)}
-          style={{
-            width: activeTab === 1 ? '22px' : '7px',
-            height: '7px',
-            borderRadius: '5px',
-            backgroundColor: activeTab === 1 ? 'rgba(226, 232, 240, 0.72)' : 'rgba(226, 232, 240, 0.22)',
-            border: activeTab === 1 ? '1px solid rgba(226, 232, 240, 0.85)' : '1px solid rgba(226, 232, 240, 0.15)',
-            boxShadow: activeTab === 1 ? '0 0 6px rgba(226, 232, 240, 0.35)' : 'none',
-            padding: 0,
-            cursor: 'pointer',
-            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
-            touchAction: 'manipulation'
-          }}
-        />
-      </div>
-
-      {/* ANIMAZIONI DI TRANSIZIONE SCHEDE E FLUTTUAZIONE LUNA & OGGETTI */}
+      {/* ANIMAZIONI DI FLUTTUAZIONE LUNA & OGGETTI */}
       <style>{`
-        @keyframes coralineCardSoftFadeInRight {
-          0% {
-            opacity: 0;
-            transform: translate3d(10px, 0, 0);
-          }
-          100% {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-          }
-        }
-
-        @keyframes coralineCardSoftFadeInLeft {
-          0% {
-            opacity: 0;
-            transform: translate3d(-10px, 0, 0);
-          }
-          100% {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-          }
-        }
-
         @keyframes moonFloatingBreathe {
           0%, 100% {
             transform: translate3d(0, 0, 0) scale(1);
@@ -1402,42 +794,6 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           50% {
             transform: scale(1.12);
             opacity: 0.95;
-          }
-        }
-
-        @keyframes stoneFloat {
-          0%, 100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate3d(0, -6px, 0) rotate(2.4deg);
-          }
-        }
-
-        @keyframes starFloat {
-          0%, 100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate3d(0, -6px, 0) rotate(-2.4deg);
-          }
-        }
-
-        @keyframes buttonFloat {
-          0%, 100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate3d(0, -5px, 0) rotate(2deg);
-          }
-        }
-
-        @keyframes keyFloat {
-          0%, 100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate3d(0, -6px, 0) rotate(-2deg);
           }
         }
       `}</style>

@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import gearBallImg from '../assets/gear-ball.webp';
 import vortexBg from '../assets/coraline-vortex-bg.webp';
-import { triggerHapticFeedback } from '../services/haptics';
-import BobinskyReactionModal from './BobinskyReactionModal';
+import { hapticSuccess, hapticLight } from '../utils/haptics';
 
 /**
- * Modal Rapido per la Registrazione dell'Allenamento da Calendario:
- * - Sfondo con la spirale / trama vortice di Coraline.
- * - Data in piccolo in font Coraline (blu scuro di Coraline).
- * - Scritta sottostante in bianco.
+ * Modal Compatto e Iconico per la Registrazione dell'Allenamento da Calendario:
+ * - Zero scritte (niente data, né titolo, né domande).
+ * - Sfondo con la spirale / trama vortice di Coraline e palette Bobinsky.
+ * - Solo 2 tasti affiancati:
+ *   1. Tasto Allenamento Sì con la pallina di Bobinsky
+ *   2. Tasto ✕ per chiudere la finestra e annullare la selezione.
  */
 export default function DayWorkoutModal({
   isOpen,
@@ -18,7 +19,6 @@ export default function DayWorkoutModal({
   onClose
 }) {
   const [visible, setVisible] = useState(false);
-  const [reactionStatus, setReactionStatus] = useState(null);
   const isSubmittingRef = useRef(false);
 
   useEffect(() => {
@@ -29,54 +29,34 @@ export default function DayWorkoutModal({
     } else {
       setVisible(false);
     }
-  }, [isOpen]);
+  }, [isOpen, dateStr]);
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   if (!isOpen || !dateStr || dateStr > todayStr) return null;
 
-  const dateObj = new Date(dateStr + 'T00:00:00');
-  const options = { weekday: 'long', day: 'numeric', month: 'long' };
-  const rawDate = dateObj.toLocaleDateString('it-IT', options)
-    .replace(/ì/g, 'i')
-    .replace(/í/g, 'i')
-    .replace(/Ì/g, 'I')
-    .replace(/Í/g, 'I');
-  const capitalizedDate = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
-
-  const handleSelectWithReaction = (targetStatus) => {
+  const handleSelect = (targetStatus) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
-    const nextStatus = currentStatus === targetStatus ? null : targetStatus;
-    if (nextStatus) {
-      triggerHapticFeedback(nextStatus === 'yes' ? 'success' : 'cheat');
-      setReactionStatus(nextStatus);
-    } else {
-      triggerHapticFeedback('selection');
+    if (currentStatus === targetStatus) {
+      hapticLight();
       onSelectStatus(null);
+      return;
     }
+    hapticSuccess();
+    onSelectStatus(targetStatus);
   };
 
   const handleClose = () => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
-    triggerHapticFeedback('selection');
+    hapticLight();
     onClose();
   };
 
   return (
-    <>
-      <BobinskyReactionModal
-        status={reactionStatus}
-        onClose={() => {
-          const s = reactionStatus;
-          setReactionStatus(null);
-          onSelectStatus(s);
-        }}
-      />
-
-      <div
-        style={{
+    <div
+      style={{
         position: 'fixed',
         inset: 0,
         zIndex: 9998,
@@ -94,213 +74,161 @@ export default function DayWorkoutModal({
       }}
       onClick={handleClose}
     >
-      <div
-        className="stitched-card vortex-card"
-        style={{
-          width: '100%',
-          maxWidth: '300px',
-          background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.96) 0%, rgba(5, 17, 30, 0.98) 100%)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderRadius: '24px',
-          border: '1.5px solid rgba(141, 109, 82, 0.45)',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(141, 109, 82, 0.2)',
-          padding: '22px 18px 18px 18px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          transform: visible ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 14px, 0) scale(0.96)',
-          transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-          willChange: 'transform',
-          boxSizing: 'border-box'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* TRAMA VORTICE DI CORALINE SULLO SFONDO */}
         <div
+          className="stitched-card"
           style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${vortexBg})`,
-            backgroundPosition: 'center center',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            opacity: 0.12,
-            filter: 'blur(1.5px)',
-            WebkitFilter: 'blur(1.5px)',
-            maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.2) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.2) 90%)',
-            pointerEvents: 'none',
-            borderRadius: 'inherit',
-            zIndex: 0
-          }}
-        />
-
-        {/* Pulsante chiusura ✕ */}
-        <button
-          type="button"
-          onClick={handleClose}
-          aria-label="Chiudi"
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '12px',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(3, 10, 18, 0.65)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: 'var(--coraline-parchment)',
-            fontSize: '13px',
+            width: '100%',
+            maxWidth: '240px',
+            background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.96) 0%, rgba(5, 17, 30, 0.98) 100%)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '24px',
+            border: '1.5px solid rgba(141, 109, 82, 0.45)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(141, 109, 82, 0.2)',
+            padding: '16px',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 10,
-            lineHeight: 1,
-            touchAction: 'manipulation',
-            padding: 0
+            flexDirection: 'column',
+            position: 'relative',
+            overflow: 'hidden',
+            transform: visible ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 14px, 0) scale(0.96)',
+            transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+            willChange: 'transform',
+            boxSizing: 'border-box'
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          ✕
-        </button>
-
-        {/* Intestazione Data */}
-        <div style={{ textAlign: 'center', marginBottom: '12px', position: 'relative', zIndex: 1 }}>
-          <h3 style={{
-            fontSize: '13px',
-            fontFamily: 'var(--font-coraline)',
-            color: '#4686cb',
-            letterSpacing: '0.6px',
-            margin: '0 0 4px 0',
-            textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(70, 134, 203, 0.45)'
-          }}>
-            {capitalizedDate}
-          </h3>
-          <div style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: '13px',
-            color: '#ffffff',
-            fontWeight: 600,
-            letterSpacing: '0.4px',
-            textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)'
-          }}>
-            Allenamento
-          </div>
-        </div>
-
-        {/* Palla Cambio Marcia */}
-        <div style={{
-          width: '68px',
-          height: '68px',
-          margin: '0 auto 12px auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          zIndex: 1
-        }}>
-          <img
-            src={gearBallImg}
-            alt="Palla Allenamento"
+          {/* TRAMA VORTICE DI CORALINE SULLO SFONDO */}
+          <div
+            className="vortex-bg-layer"
+            aria-hidden="true"
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 8px rgba(139, 229, 116, 0.35))'
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${vortexBg})`,
+              backgroundPosition: 'center center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.12,
+              filter: 'blur(1.5px)',
+              WebkitFilter: 'blur(1.5px)',
+              maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.2) 90%)',
+              WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.2) 90%)',
+              pointerEvents: 'none',
+              borderRadius: 'inherit',
+              zIndex: 0
             }}
           />
+
+          {/* GRIGLIA A 2 TASTI */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '12px',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            {/* TASTO 1: PALLINA ALLENAMENTO SÌ */}
+            <button
+              type="button"
+              onClick={() => handleSelect('yes')}
+              aria-label={currentStatus === 'yes' ? "Allenamento selezionato: tocca per rimuovere" : "Allenamento Completato"}
+              title={currentStatus === 'yes' ? "Tocca per rimuovere l'allenamento" : "Allenamento Completato"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '90px',
+                borderRadius: '18px',
+                backgroundColor: currentStatus === 'yes'
+                  ? 'rgba(48, 28, 16, 0.92)'
+                  : 'rgba(6, 22, 37, 0.8)',
+                border: currentStatus === 'yes'
+                  ? '2px solid rgb(197, 155, 109)'
+                  : '1.5px solid rgba(141, 109, 82, 0.35)',
+                boxShadow: currentStatus === 'yes'
+                  ? 'inset 0 1px 0 rgba(212, 210, 187, 0.35), 0 0 18px rgba(197, 155, 109, 0.5), inset 0 0 14px rgba(141, 109, 82, 0.4)'
+                  : 'inset 0 1px 0 rgba(221, 202, 183, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 16px rgba(141, 109, 82, 0.12)',
+                cursor: 'pointer',
+                touchAction: 'manipulation',
+                transition: 'all 0.15s ease',
+                position: 'relative'
+              }}
+            >
+              <div style={{
+                width: '54px',
+                height: '54px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                filter: currentStatus === 'yes'
+                  ? 'drop-shadow(0 0 10px rgba(197, 155, 109, 0.8))'
+                  : 'drop-shadow(0 4px 8px rgba(0,0,0,0.6))'
+              }}>
+                <img
+                  src={gearBallImg}
+                  alt=""
+                  width={54}
+                  height={54}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+              {currentStatus === 'yes' && (
+                <span style={{
+                  position: 'absolute',
+                  top: '6px',
+                  right: '8px',
+                  fontSize: '11px',
+                  fontWeight: 900,
+                  color: 'rgb(197, 155, 109)'
+                }}>✓</span>
+              )}
+            </button>
+
+            {/* TASTO 2: TASTO ✕ PER CHIUDERE E ANNULLARE LA SELEZIONE */}
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Chiudi finestra"
+              title="Chiudi"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '90px',
+                borderRadius: '18px',
+                backgroundColor: 'rgba(6, 22, 37, 0.55)',
+                border: '1.5px solid rgba(141, 109, 82, 0.35)',
+                boxShadow: 'inset 0 1px 0 rgba(221, 202, 183, 0.15), 0 4px 12px rgba(0, 0, 0, 0.35)',
+                cursor: 'pointer',
+                touchAction: 'manipulation',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(3, 10, 18, 0.65)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--coraline-parchment)',
+                fontSize: '18px',
+                lineHeight: 1
+              }}>
+                ✕
+              </div>
+            </button>
+          </div>
         </div>
-
-        <p style={{
-          fontSize: '12px',
-          fontFamily: 'var(--font-body)',
-          color: '#ffffff',
-          textAlign: 'center',
-          margin: '0 0 16px 0',
-          position: 'relative',
-          zIndex: 1,
-          textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)'
-        }}>
-          Ti sei allenata in questa data?
-        </p>
-
-        {/* Due Opzioni: SÌ e NO (uguali, nel tema di Bobinsky senza verde né rosso) */}
-        <div style={{ display: 'flex', gap: '10px', width: '100%', marginBottom: '10px', position: 'relative', zIndex: 1 }}>
-          <button
-            type="button"
-            onClick={() => handleSelectWithReaction('yes')}
-            style={{
-              flex: 1,
-              padding: '10px 12px',
-              borderRadius: '14px',
-              backgroundColor: currentStatus === 'yes' ? 'rgba(20, 10, 32, 0.95)' : 'rgba(6, 20, 34, 0.75)',
-              border: currentStatus === 'yes' ? '1.5px solid rgb(141, 109, 82)' : '1px solid rgba(141, 109, 82, 0.45)',
-              boxShadow: currentStatus === 'yes' ? '0 2px 10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(221, 202, 183, 0.25), 0 0 10px rgba(141, 109, 82, 0.3)' : 'none',
-              color: currentStatus === 'yes' ? '#ffffff' : 'var(--coraline-parchment)',
-              fontFamily: 'var(--font-gothic)',
-              fontSize: '14px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              touchAction: 'manipulation',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            {currentStatus === 'yes' ? '✓ Sì' : 'Sì'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSelectWithReaction('no')}
-            style={{
-              flex: 1,
-              padding: '10px 12px',
-              borderRadius: '14px',
-              backgroundColor: currentStatus === 'no' ? 'rgba(20, 10, 32, 0.95)' : 'rgba(6, 20, 34, 0.75)',
-              border: currentStatus === 'no' ? '1.5px solid rgb(141, 109, 82)' : '1px solid rgba(141, 109, 82, 0.45)',
-              boxShadow: currentStatus === 'no' ? '0 2px 10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(221, 202, 183, 0.25), 0 0 10px rgba(141, 109, 82, 0.3)' : 'none',
-              color: currentStatus === 'no' ? '#ffffff' : 'var(--coraline-parchment)',
-              fontFamily: 'var(--font-gothic)',
-              fontSize: '14px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              touchAction: 'manipulation',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            {currentStatus === 'no' ? '✓ No' : 'No'}
-          </button>
-        </div>
-
-        {/* Cancella Registrazione se presente */}
-        {currentStatus && (
-          <button
-            type="button"
-            onClick={() => {
-              triggerHapticFeedback('selection');
-              onSelectStatus(null);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--coraline-parchment)',
-              opacity: 0.65,
-              fontSize: '11px',
-              fontFamily: 'var(--font-gothic)',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              padding: '4px 8px',
-              position: 'relative',
-              zIndex: 1
-            }}
-          >
-            ↺ Cancella selezione
-          </button>
-        )}
       </div>
-    </div>
-    </>
   );
 }

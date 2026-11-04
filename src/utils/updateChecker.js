@@ -10,7 +10,7 @@
 
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
-export const CURRENT_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.7.1';
+export const CURRENT_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.8.0';
 export const GITHUB_OWNER = 'pzzmhl';
 export const GITHUB_REPO = 'dietasia';
 export const CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 ore

@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import otherMotherImg from '../assets/other-mother-key.webp';
-import wybieImg from '../assets/wybie-proud.webp';
 import catModalBg from '../assets/cat-modal-bg.webp';
-import { triggerHapticFeedback } from '../services/haptics';
+import { triggerHapticFeedback } from '../utils/haptics';
 
 /**
  * Modal Eventi Speciali della Storia di Coraline:
- * - 'other_mother_keys': L'Altra Madre vorrebbe un copione rigido (chiavi mensili esaurite)
- * - 'wybie_streak': Wybie si congratula per il traguardo di giorni di dieta consecutivi
+ * L'Altra Madre vorrebbe un copione rigido (chiavi mensili esaurite).
  */
-export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak = 0, onClose }) {
+export default function StoryEventModal({ isOpen, onClose }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -22,37 +20,6 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const isOtherMother = type === 'other_mother_keys';
-
-  // Configurazione contenuti e stile
-  const config = isOtherMother ? {
-    title: "L'Altra Madre vorrebbe un copione perfetto...",
-    image: otherMotherImg,
-    imageAlt: "L'Altra Madre che custodisce l'ultima chiave",
-    imageHeight: '220px',
-    quote: "Le quattro chiavi di scorta hanno fatto il loro lavoro questo mese, Asia. L'Altra Madre vorrebbe che tutto fosse rigido, immutabile e finto, ma la tua forza vive nel mondo reale. Da qui in avanti non servono magie: basta la tua bussola quotidiana.",
-    buttonLabel: "Il mondo reale appartiene a me ✦",
-    borderColor: '#ef4444',
-    glowColor: 'rgba(239, 68, 68, 0.5)',
-    stitchColor: '#f87171',
-    buttonBg: 'rgba(50, 18, 22, 0.85)',
-    buttonBorder: 'rgba(239, 68, 68, 0.5)',
-    titleColor: '#fca5a5'
-  } : {
-    title: "Wybie è fiero di te!",
-    image: wybieImg,
-    imageAlt: "Wybie Lovat sorridente e fiero",
-    imageHeight: '235px',
-    quote: `Ehi Asia, persino la nonna sarebbe a bocca aperta! Sono già ben ${streak} giorni che tieni saldo il timone con una costanza incredibile! Guarda che mappa limpida che stai disegnando nel mondo reale!`,
-    buttonLabel: "Grazie Wybie, un giorno alla volta! ✦",
-    borderColor: 'var(--coraline-yellow)',
-    glowColor: 'rgba(216, 198, 21, 0.45)',
-    stitchColor: 'var(--coraline-yellow)',
-    buttonBg: 'rgba(48, 38, 22, 0.85)',
-    buttonBorder: 'rgba(216, 198, 21, 0.5)',
-    titleColor: 'var(--coraline-yellow)'
-  };
 
   return (
     <div
@@ -81,8 +48,8 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           borderRadius: '24px',
-          border: `2px dashed ${config.stitchColor}`,
-          boxShadow: `0 16px 40px rgba(0, 0, 0, 0.9), 0 0 24px ${config.glowColor}, inset 0 0 20px rgba(0, 0, 0, 0.7)`,
+          border: '2px dashed #f87171',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.9), 0 0 24px rgba(239, 68, 68, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.7)',
           padding: '22px 18px 20px 18px',
           display: 'flex',
           flexDirection: 'column',
@@ -128,8 +95,8 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
         <h3
           style={{
             fontFamily: 'var(--font-coraline)',
-            fontSize: isOtherMother ? '14px' : '15px',
-            color: config.titleColor,
+            fontSize: '14px',
+            color: '#fca5a5',
             textAlign: 'center',
             margin: '0 0 14px 0',
             letterSpacing: '0.8px',
@@ -137,35 +104,38 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
             lineHeight: 1.3
           }}
         >
-          {config.title}
+          L'Altra Madre vorrebbe un copione perfetto...
         </h3>
 
-        {/* IMMAGINE DEL PERSONAGGIO (ALTRA MADRE O WYBIE) */}
+        {/* IMMAGINE DELL'ALTRA MADRE */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: config.imageHeight,
+            height: '220px',
             marginBottom: '14px',
             position: 'relative'
           }}
         >
           <img
-            src={config.image}
-            alt={config.imageAlt}
-            loading="eager"
+            src={otherMotherImg}
+            alt="L'Altra Madre che custodisce l'ultima chiave"
+            width={220}
+            height={220}
+            loading="lazy"
             decoding="async"
+            draggable={false}
             style={{
               maxHeight: '100%',
               maxWidth: '100%',
               objectFit: 'contain',
-              filter: isOtherMother
-                ? 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 14px rgba(239, 68, 68, 0.45))'
-                : 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 14px rgba(216, 198, 21, 0.35))',
+              filter: 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 14px rgba(239, 68, 68, 0.45))',
               transform: visible ? 'translateZ(0) scale(1)' : 'translateZ(0) scale(0.95)',
               transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-              borderRadius: isOtherMother ? '14px' : '0'
+              borderRadius: '14px',
+              position: 'relative',
+              zIndex: 1
             }}
           />
         </div>
@@ -174,7 +144,7 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
         <div
           style={{
             backgroundColor: 'rgba(13, 44, 73, 0.75)',
-            border: `1.5px dashed ${config.stitchColor}`,
+            border: '1.5px dashed #f87171',
             borderRadius: '16px',
             padding: '14px 14px',
             marginBottom: '18px',
@@ -194,11 +164,11 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
               textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
             }}
           >
-            "{config.quote}"
+            "Le quattro chiavi di scorta hanno fatto il loro lavoro questo mese, Asia. L'Altra Madre vorrebbe che tutto fosse rigido, immutabile e finto, ma la tua forza vive nel mondo reale. Da qui in avanti non servono magie: basta la tua bussola quotidiana."
           </p>
         </div>
 
-        {/* BOTTONE D'AZIONE CON FONT LEGGIBILE E CHIARO */}
+        {/* BOTTONE D'AZIONE */}
         <button
           type="button"
           onClick={() => {
@@ -208,8 +178,8 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
           style={{
             width: '100%',
             padding: '12px 14px',
-            backgroundColor: config.buttonBg,
-            border: `1.5px solid ${config.buttonBorder}`,
+            backgroundColor: 'rgba(50, 18, 22, 0.85)',
+            border: '1.5px solid rgba(239, 68, 68, 0.5)',
             borderRadius: '14px',
             color: '#ffffff',
             fontFamily: 'var(--font-body)',
@@ -217,15 +187,14 @@ export default function StoryEventModal({ isOpen, type = 'wybie_streak', streak 
             fontSize: '13.5px',
             letterSpacing: '0.4px',
             cursor: 'pointer',
-            boxShadow: `0 4px 14px rgba(0, 0, 0, 0.6), 0 0 10px ${config.glowColor}`,
+            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6), 0 0 10px rgba(239, 68, 68, 0.5)',
             touchAction: 'manipulation',
             transition: 'transform 0.15s ease'
           }}
         >
-          {config.buttonLabel}
+          Il mondo reale appartiene a me ✦
         </button>
       </div>
     </div>
   );
 }
-

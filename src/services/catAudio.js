@@ -4,7 +4,7 @@
  * - Audio precaricato in memoria per garantire risposta immediata al tocco
  */
 
-export const CAT_AUDIO_SRC = '/audio/cat/cat-meow.mp3';
+const CAT_AUDIO_SRC = '/audio/cat/cat-meow.mp3';
 
 let catAudioInstance = null;
 
@@ -13,7 +13,7 @@ function getCatAudio() {
   if (!catAudioInstance) {
     try {
       catAudioInstance = new Audio(CAT_AUDIO_SRC);
-      catAudioInstance.preload = 'auto';
+      catAudioInstance.preload = 'none';
       catAudioInstance.volume = 0.90;
     } catch (e) {
       console.warn('[CatAudio] Errore inizializzazione audio gatto:', e);
@@ -25,7 +25,7 @@ function getCatAudio() {
 /**
  * Riproduce il verso ufficiale del Gatto Nero
  */
-export function playCatMeow(volume = 0.90) {
+function playCatMeow(volume = 0.90) {
   if (typeof window === 'undefined') return;
   const audio = getCatAudio();
   if (!audio) return;

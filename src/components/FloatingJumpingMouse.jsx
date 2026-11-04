@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import jumpingMouseImg from '../assets/jumping-mouse.webp';
 import catCloudPattern from '../assets/cat-cloud-pattern.webp';
-import { hapticLight, hapticButtonStitch } from '../utils/haptics';
+import { hapticLight } from '../utils/haptics';
 import { playTrumpetFanfare } from '../services/trumpetAudio';
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
@@ -15,8 +15,7 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js';
  * - Animazione saltellante originale (mouseTrumpetBlast)
  */
 const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
-  unmarkedDays = [],
-  onSelectDay = () => {}
+  unmarkedDays = []
 }) {
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
@@ -30,11 +29,12 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
   });
 
   const [isCloudOpen, setIsCloudOpen] = useState(true);
+  const [isPausedByWybie, setIsPausedByWybie] = useState(false);
   const [testForced, setTestForced] = useState(() => {
     try {
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.has('testMouse') || sessionStorage.getItem('test_coraline_mouse') === 'true';
+        return urlParams.has('testMouse') || sessionStorage.getItem(STORAGE_KEYS.TEST_MOUSE_SESSION) === 'true';
       }
     } catch (e) {}
     return false;
@@ -49,6 +49,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
         localStorage.removeItem(STORAGE_KEYS.MOUSE_NOTICE_DISMISSED_DATE);
       } catch (err) {}
       setIsDismissed(false);
+      setIsPausedByWybie(false);
       setIsCloudOpen(true);
       setTestForced(true);
       if (testTimerRef.current) clearTimeout(testTimerRef.current);
@@ -57,11 +58,18 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
       }, 250);
     };
 
+    const handleWybieVisibility = (e) => {
+      setIsPausedByWybie(Boolean(e?.detail?.visible));
+    };
+
     window.addEventListener('test-coraline-mouse', handleTestEvent);
+    window.addEventListener('coraline-wybie-visibility', handleWybieVisibility);
     window.testCoralineMouse = handleTestEvent;
 
     return () => {
       window.removeEventListener('test-coraline-mouse', handleTestEvent);
+      window.removeEventListener('coraline-wybie-visibility', handleWybieVisibility);
+      delete window.testCoralineMouse;
       if (testTimerRef.current) {
         clearTimeout(testTimerRef.current);
       }
@@ -75,39 +83,22 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
   const effectiveDays = (Array.isArray(unmarkedDays) && unmarkedDays.length > 0)
     ? unmarkedDays
     : (testForced ? sampleDays : []);
-  const firstMissingDate = effectiveDays[0];
   const missingCount = effectiveDays.length;
 
   // Riproduce la trombetta all'avvio quando il topo appare
   useEffect(() => {
-    if (effectiveDays.length > 0 && !isDismissed && !hasPlayedEntranceSoundRef.current) {
+    if (effectiveDays.length > 0 && !isDismissed && !isPausedByWybie && !hasPlayedEntranceSoundRef.current) {
       hasPlayedEntranceSoundRef.current = true;
       const timer = setTimeout(() => {
         playTrumpetFanfare(0.85);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [effectiveDays.length, isDismissed]);
+  }, [effectiveDays.length, isDismissed, isPausedByWybie]);
 
-  if (isDismissed || effectiveDays.length === 0) {
+  if (isDismissed || isPausedByWybie || effectiveDays.length === 0) {
     return null;
   }
-
-  const formatDateLabel = (dStr) => {
-    try {
-      if (!dStr) return '';
-      const parts = dStr.split('-');
-      if (parts.length === 3) {
-        const day = parseInt(parts[2], 10);
-        const monthIdx = parseInt(parts[1], 10) - 1;
-        const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
-        return `${day} ${months[monthIdx] || ''}`;
-      }
-      return dStr;
-    } catch (e) {
-      return dStr || '';
-    }
-  };
 
   const handleDismissToday = (e) => {
     if (e) e.stopPropagation();
@@ -125,14 +116,6 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
     setIsCloudOpen((prev) => !prev);
   };
 
-  const handleOpenDayModal = (e) => {
-    if (e) e.stopPropagation();
-    hapticButtonStitch();
-    if (firstMissingDate) {
-      onSelectDay(firstMissingDate);
-    }
-  };
-
   return (
     <aside
       aria-label="Avviso Topo Saltatore del Circo"
@@ -140,7 +123,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
         position: 'fixed',
         bottom: 'calc(env(safe-area-inset-bottom, 12px) + 12px)',
         left: '18px',
-        zIndex: 9980,
+        zIndex: 10005, // In primo piano assoluto per i test ripetuti
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -151,21 +134,19 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
       {/* NUVOLETTA IDENTICA A QUELLA DEL GATTO: FUMETTO BIANCO PULITO CON TRAMA STELLATA DISSOLTA E PUNTA FUMETTO */}
       {isCloudOpen && (
         <div
-          onClick={handleDismissToday}
           style={{
             position: 'absolute',
             bottom: '108px',
             left: '2px',
             width: 'max-content',
-            maxWidth: 'min(175px, 44vw)',
-            padding: '10px 14px',
+            maxWidth: 'min(195px, 52vw)',
+            padding: '11px 14px',
             borderRadius: '16px',
             backgroundColor: '#ffffff',
             border: '1.5px solid #0f172a',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35)',
             color: '#0f172a',
             fontFamily: 'var(--font-body)',
-            cursor: 'pointer',
             pointerEvents: 'auto',
             animation: 'mouseCloudPop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards',
             userSelect: 'none',
@@ -205,7 +186,7 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
             }}
           />
 
-          {/* CONTENUTO INFORMATIVO DELLA NUVOLETTA */}
+          {/* CONTENUTO INFORMATIVO DELLA NUVOLETTA: SOLO FRASE DEI GIORNI MANCANTI E TASTO OKAY IN GRIGIO */}
           <div
             style={{
               position: 'relative',
@@ -214,69 +195,46 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '6px'
+              gap: '8px'
             }}
           >
             <div
               style={{
-                fontSize: '11px',
+                fontSize: '11.5px',
                 fontWeight: 650,
-                lineHeight: 1.35,
-                color: '#0f172a'
+                lineHeight: 1.4,
+                color: '#0f172a',
+                padding: '0 2px'
               }}
             >
-              {missingCount === 1 ? (
-                <>Pst! 🎺 C'è una pagina da sfogliare:<br/><strong>{formatDateLabel(firstMissingDate)}</strong></>
-              ) : (
-                <>Pst! 🎺 Ci sono <strong>{missingCount} pagine</strong> da sfogliare<br/><span style={{ fontSize: '10px', opacity: 0.8 }}>(la prima: {formatDateLabel(firstMissingDate)})</span></>
-              )}
+              {missingCount === 1
+                ? 'Hai 1 giorno da compilare nel diario.'
+                : `Hai ${missingCount} giorni da compilare nel diario.`}
             </div>
 
-            {/* PULSANTI: VAI AL GIORNO + PIÙ TARDI */}
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <button
-                type="button"
-                onClick={handleOpenDayModal}
-                title="Apri il diario per questa data"
-                style={{
-                  background: 'rgb(141, 109, 82)',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '3px 10px',
-                  fontSize: '10.5px',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-gothic)',
-                  cursor: 'pointer',
-                  letterSpacing: '0.4px',
-                  boxShadow: '0 2px 6px rgba(141, 109, 82, 0.45)',
-                  touchAction: 'manipulation'
-                }}
-              >
-                Mostrami
-              </button>
-              <button
-                type="button"
-                onClick={handleDismissToday}
-                title="Rimanda a più tardi"
-                style={{
-                  background: 'rgba(30, 41, 59, 0.85)',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '3px 10px',
-                  fontSize: '10.5px',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-gothic)',
-                  cursor: 'pointer',
-                  letterSpacing: '0.4px',
-                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.35)',
-                  touchAction: 'manipulation'
-                }}
-              >
-                Più tardi
-              </button>
-            </div>
+            {/* UNICO PULSANTE: OKAY IN GRIGIO CHE LO FA SCOMPARIRE FINO AL GIORNO SEGUENTE */}
+            <button
+              type="button"
+              onClick={handleDismissToday}
+              aria-label="Okay, ho capito"
+              style={{
+                background: '#64748b',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '4px 18px',
+                fontSize: '11px',
+                fontWeight: 700,
+                fontFamily: 'var(--font-gothic)',
+                cursor: 'pointer',
+                letterSpacing: '0.4px',
+                boxShadow: '0 2px 6px rgba(100, 116, 139, 0.4)',
+                touchAction: 'manipulation',
+                transition: 'background-color 0.18s ease'
+              }}
+            >
+              Okay
+            </button>
           </div>
         </div>
       )}
@@ -304,8 +262,11 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
           src={jumpingMouseImg}
           alt="Topo Saltatore del Circo"
           className="jumping-mouse-animated"
+          width={95}
+          height={95}
           loading="eager"
           decoding="async"
+          draggable={false}
           style={{
             height: '95px',
             width: 'auto',

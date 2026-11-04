@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { App as CapApp } from '@capacitor/app';
 import ButtonMoonEclipse from './components/ButtonMoonEclipse';
 import MonthStatsBar from './components/MonthStatsBar';
@@ -9,39 +9,32 @@ import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
 import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import FloatingJumpingMouse from './components/FloatingJumpingMouse';
+import FloatingWybie from './components/FloatingWybie';
 import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
-import SecretLoveModal from './components/SecretLoveModal';
-import SecretSettingsModal from './components/SecretSettingsModal';
 import UpdateAvailableModal from './components/UpdateAvailableModal';
+
+// Code-splitting: il modale impostazioni (84 KB) viene scaricato on-demand
+const SecretSettingsModal = lazy(() => import('./components/SecretSettingsModal'));
 import { checkForAppUpdates } from './utils/updateChecker';
 import { 
-  requestNotificationPermission, 
   scheduleDailyReminder,
   sendWybieStreakNotification,
   sendOtherMotherKeysDepletedNotification,
   initNotificationChannels
 } from './utils/notifications';
-import { triggerHapticFeedback, hapticLight, hapticSuccess, hapticButtonStitch } from './utils/haptics';
+import { triggerHapticFeedback, hapticLight } from './utils/haptics';
 import { smoothScrollToElement } from './utils/scrollAnimation';
-import { initBackgroundMusic, pauseMusicImmediately, playMusicWithFadeIn } from './services/backgroundMusic';
+import { initBackgroundMusic, isMusicEnabled, pauseMusicImmediately, playMusicWithFadeIn } from './services/backgroundMusic';
 import { playRandomCatSound } from './services/catAudio';
+import { 
+  WYBIE_MILESTONE_STREAKS, 
+  canWybieSpeakToday, 
+  recordWybieSpokenToday 
+} from './data/wybieQuotes';
 
-// Immagini critiche per il rendering immediato e il preloading
-import catStandingImg from './assets/cat-standing.webp';
-import catSuccessImg from './assets/cat-success.webp';
-import catFailImg from './assets/cat-fail.webp';
-import catCheatKeyImg from './assets/cat-cheat-key.webp';
-import blackButtonImg from './assets/black-button.webp';
-import seeingStoneImg from './assets/seeing-stone.webp';
-import keyImg from './assets/key.webp';
-import streakStarImg from './assets/streak-star.webp';
-import jumpingMouseImg from './assets/jumping-mouse.webp';
-import otherMotherImg from './assets/other-mother-key.webp';
-import wybieImg from './assets/wybie-proud.webp';
-import catModalBg from './assets/cat-modal-bg.webp';
-import secretDoorImg from './assets/secret-door.webp';
-import vortexBg from './assets/coraline-vortex-bg.webp';
+// Asset grafici critici per la vista principale
+import catStandingImg from './assets/cat-success.webp';
 import starryBg from './assets/coraline-starry-bg.webp';
 import catCloudPattern from './assets/cat-cloud-pattern.webp';
 
@@ -70,29 +63,61 @@ import {
   triggerQueueFlush, 
   getPendingSyncCount 
 } from './utils/syncQueue.js';
-import { getRandomCatQuote, getSmartSituationalCatQuote } from './data/catQuotes';
+import { getRandomDailyCatQuote } from './data/dailyCatQuotes';
 import { STORAGE_KEYS } from './constants/storageKeys.js';
+
+// Lazy loading dinamico del database citazioni (207 KB):
+// Non viene parsato all'avvio ma caricato in modo trasparente
+let catQuotesModulePromise = null;
+function getCatQuotesModule() {
+  if (!catQuotesModulePromise) {
+    catQuotesModulePromise = import('./data/catQuotes');
+  }
+  return catQuotesModulePromise;
+}
 
 export default function App() {
   const [todayStr, setTodayStr] = useState(() => getTodayDateString());
   const todayObj = useMemo(() => new Date(todayStr + 'T12:00:00'), [todayStr]);
 
-  // Heartbeat per il cambio di data a mezzanotte (anche ad app rimasta aperta in primo piano)
+  // Heartbeat a basso consumo per il cambio di data a mezzanotte (60s invece di 20s per risparmiare CPU/batteria)
   useEffect(() => {
     const checkTransition = () => {
       const freshToday = getTodayDateString();
       setTodayStr((prev) => (prev !== freshToday ? freshToday : prev));
     };
 
-    const interval = setInterval(checkTransition, 20000);
+    const interval = setInterval(checkTransition, 60000);
     const now = new Date();
     const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
     const msToMidnight = Math.max(1000, midnight.getTime() - now.getTime());
     const midnightTimeout = setTimeout(checkTransition, msToMidnight);
 
+    // Warm-up trasparente in idle per le citazioni del gatto
+    let idleHandle = null;
+    const useNativeIdle = typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function';
+    if (typeof window !== 'undefined') {
+      if (useNativeIdle) {
+        idleHandle = window.requestIdleCallback(() => {
+          getCatQuotesModule();
+        });
+      } else {
+        idleHandle = setTimeout(() => {
+          getCatQuotesModule();
+        }, 1500);
+      }
+    }
+
     return () => {
       clearInterval(interval);
       clearTimeout(midnightTimeout);
+      if (idleHandle !== null && typeof window !== 'undefined') {
+        if (useNativeIdle && typeof window.cancelIdleCallback === 'function') {
+          window.cancelIdleCallback(idleHandle);
+        } else {
+          clearTimeout(idleHandle);
+        }
+      }
     };
   }, []);
 
@@ -110,11 +135,25 @@ export default function App() {
     }
   });
 
+  const wybieWorkoutTimerRef = useRef(null);
+
   const handleSaveWorkout = useCallback((dateStr, status) => {
     const updated = saveWorkoutLog(dateStr, status);
     setWorkoutLogs(updated);
     triggerDebouncedCloudSync(exportFullCloudBackupPayload);
-  }, []);
+
+    // Se ha completato l'allenamento "Sì" oggi, e Wybie non ha parlato ieri (giorni alterni):
+    if (dateStr === todayStr && status === 'yes' && canWybieSpeakToday(todayStr)) {
+      recordWybieSpokenToday(todayStr);
+      if (wybieWorkoutTimerRef.current) clearTimeout(wybieWorkoutTimerRef.current);
+      wybieWorkoutTimerRef.current = setTimeout(() => {
+        wybieWorkoutTimerRef.current = null;
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('trigger-wybie', { detail: { type: 'workout' } }));
+        }
+      }, 1500);
+    }
+  }, [todayStr]);
 
   const handleAvatarChange = useCallback((newAvatar) => {
     saveCustomAvatar(newAvatar);
@@ -134,21 +173,17 @@ export default function App() {
     dateStr: null
   });
 
-  // Modal Reazione Bobinsky a schermo intero
-  const [bobinskyReactionStatus, setBobinskyReactionStatus] = useState(null);
-
-  // Modal Eventi di Trama Speciali (Altra Madre chiavi esaurite & Wybie traguardo streak)
+  // Modal Eventi di Trama Speciali (Altra Madre chiavi esaurite)
   const [storyModalState, setStoryModalState] = useState({
     isOpen: false,
-    type: 'wybie_streak',
-    streak: 0
+    type: 'other_mother_keys'
   });
 
   // Modal del Tutor Gatto Nero e Memorizzazione Ultima Frase
   const [catModalState, setCatModalState] = useState(() => {
     try {
-      const savedQuote = localStorage.getItem('coraline_last_cat_quote');
-      const savedContext = localStorage.getItem('coraline_last_cat_context') || 'success';
+      const savedQuote = localStorage.getItem(STORAGE_KEYS.LAST_CAT_QUOTE);
+      const savedContext = localStorage.getItem(STORAGE_KEYS.LAST_CAT_CONTEXT) || 'success';
       return {
         isOpen: false,
         quote: savedQuote || "I gatti non hanno bisogno di nomi. Noi sappiamo già chi siamo... ma tu ricordati di segnare il tuo diario.",
@@ -164,6 +199,7 @@ export default function App() {
   });
 
   // Schermata Minimale Quotidiana del Gatto (Primo Accesso del Giorno)
+  const [dailyGreetingQuoteOverride, setDailyGreetingQuoteOverride] = useState(null);
   const [isDailyGreetingOpen, setIsDailyGreetingOpen] = useState(() => {
     try {
       const lastGreetingDate = localStorage.getItem(STORAGE_KEYS.LAST_DAILY_GREETING_DATE);
@@ -178,10 +214,8 @@ export default function App() {
       localStorage.setItem(STORAGE_KEYS.LAST_DAILY_GREETING_DATE, todayStr);
     } catch (e) {}
     setIsDailyGreetingOpen(false);
+    setDailyGreetingQuoteOverride(null);
   }, [todayStr]);
-
-  // Riquadro Segreto per Asia (Easter egg "Ti amo" attivato con pressione prolungata della Porticina)
-  const [isLoveModalOpen, setIsLoveModalOpen] = useState(false);
 
   // Nuvoletta del Gatto Fluttuante (in stile Pokémon / Coraline per spiegazioni contestuali)
   const [catSpeech, setCatSpeech] = useState(null);
@@ -206,6 +240,7 @@ export default function App() {
     return () => {
       if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
       if (catSpeechTimerRef.current) clearTimeout(catSpeechTimerRef.current);
+      if (wybieWorkoutTimerRef.current) clearTimeout(wybieWorkoutTimerRef.current);
     };
   }, []);
 
@@ -216,11 +251,46 @@ export default function App() {
   // Modal Notifica Aggiornamento Disponibile via GitHub Releases
   const [updateAvailableInfo, setUpdateAvailableInfo] = useState(null);
 
+  const handleOpenSettings = useCallback((tab = 'settings') => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setIsSettingsOpen(false);
+  }, []);
+
+  const handleScrollToDashboard = useCallback(() => {
+    smoothScrollToElement('dashboard-stats-section', 1400);
+  }, []);
+
+  const handleCloseDayModal = useCallback(() => {
+    setDayModalState({ isOpen: false, dateStr: null });
+  }, []);
+
+  const handleCloseCatModal = useCallback(() => {
+    setCatModalState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handleCloseStoryModal = useCallback(() => {
+    setStoryModalState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handleCloseUpdateModal = useCallback(() => {
+    setUpdateAvailableInfo(null);
+  }, []);
+
+  const handleOpenDailyGreetingPreview = useCallback(() => {
+    setDailyGreetingQuoteOverride(getRandomDailyCatQuote());
+    setIsDailyGreetingOpen(true);
+  }, []);
+
   const handleChangeKeysPerMonth = useCallback((newCount) => {
     setKeysPerMonth(newCount);
     try {
-      localStorage.setItem('coraline_keys_per_month', String(newCount));
+      localStorage.setItem(STORAGE_KEYS.KEYS_PER_MONTH, String(newCount));
     } catch (e) {}
+    triggerDebouncedCloudSync(exportFullCloudBackupPayload);
   }, []);
 
   const handleRestoreSuccess = useCallback(() => {
@@ -228,7 +298,7 @@ export default function App() {
     setWorkoutLogs(getWorkoutLogs());
     setCustomAvatar(getCustomAvatar());
     try {
-      const k = Number(localStorage.getItem('coraline_keys_per_month')) || 4;
+      const k = Number(localStorage.getItem(STORAGE_KEYS.KEYS_PER_MONTH)) || 4;
       setKeysPerMonth(k);
     } catch (e) {}
   }, []);
@@ -237,10 +307,8 @@ export default function App() {
   const activeModalsRef = useRef({
     update: false,
     workout: false,
-    bobinskyReaction: false,
     settings: false,
     dailyGreeting: false,
-    love: false,
     day: false,
     story: false,
     cat: false
@@ -249,36 +317,34 @@ export default function App() {
   activeModalsRef.current = {
     update: !!updateAvailableInfo,
     workout: workoutModalState.isOpen,
-    bobinskyReaction: !!bobinskyReactionStatus,
     settings: isSettingsOpen,
     dailyGreeting: isDailyGreetingOpen,
-    love: isLoveModalOpen,
     day: dayModalState.isOpen,
     story: storyModalState.isOpen,
     cat: catModalState.isOpen
   };
 
   // Gestione nativa del tasto indietro Android e ciclo di vita app (Lifecycle & Batteria)
+  const dismissGreetingRef = useRef(handleDismissDailyGreeting);
+  dismissGreetingRef.current = handleDismissDailyGreeting;
+
   useEffect(() => {
+    let isDisposed = false;
     let backListener = null;
     let appStateListener = null;
 
     const registerNativeHandlers = async () => {
       try {
-        backListener = await CapApp.addListener('backButton', () => {
-          const { update, workout, bobinskyReaction, settings, dailyGreeting, love, day, story, cat } = activeModalsRef.current;
+        const backHandle = await CapApp.addListener('backButton', () => {
+          const { update, workout, settings, dailyGreeting, day, story, cat } = activeModalsRef.current;
           if (update) {
             setUpdateAvailableInfo(null);
           } else if (workout) {
             setWorkoutModalState({ isOpen: false, dateStr: null });
-          } else if (bobinskyReaction) {
-            setBobinskyReactionStatus(null);
           } else if (settings) {
             setIsSettingsOpen(false);
           } else if (dailyGreeting) {
-            handleDismissDailyGreeting();
-          } else if (love) {
-            setIsLoveModalOpen(false);
+            dismissGreetingRef.current();
           } else if (day) {
             setDayModalState({ isOpen: false, dateStr: null });
           } else if (story) {
@@ -290,23 +356,31 @@ export default function App() {
             CapApp.exitApp();
           }
         });
+        if (isDisposed) {
+          backHandle.remove();
+          return;
+        }
+        backListener = backHandle;
 
         // Quando l'app va in background su Android, sospende l'audio per preservare la batteria
-        appStateListener = await CapApp.addListener('appStateChange', ({ isActive }) => {
+        // e al ritorno in primo piano riprende SOLO se l'utente non aveva messo la musica in muto
+        const stateHandle = await CapApp.addListener('appStateChange', ({ isActive }) => {
           if (!isActive) {
             pauseMusicImmediately();
           } else {
-            playMusicWithFadeIn();
+            if (isMusicEnabled()) {
+              playMusicWithFadeIn();
+            }
             // Verifica transizione mezzanotte se l'app è rimasta aperta in background
             const freshToday = getTodayDateString();
-            setTodayStr((prev) => {
-              if (prev !== freshToday) {
-                return freshToday;
-              }
-              return prev;
-            });
+            setTodayStr((prev) => (prev !== freshToday ? freshToday : prev));
           }
         });
+        if (isDisposed) {
+          stateHandle.remove();
+          return;
+        }
+        appStateListener = stateHandle;
       } catch (err) {
         // Ambiente web standard
       }
@@ -323,6 +397,7 @@ export default function App() {
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
+      isDisposed = true;
       document.removeEventListener('visibilitychange', handleVisibility);
       if (backListener && backListener.remove) {
         backListener.remove();
@@ -359,7 +434,6 @@ export default function App() {
           const shouldRestore = pendingCount === 0 && (localCount === 0 || (cloudRes.updatedAt && cloudRes.updatedAt > localLastTime && cloudCount >= localCount));
 
           if (shouldRestore) {
-            console.log('[Supabase] Ripristino automatico dal Cloud completato con successo!');
             const restored = restoreFullCloudBackupPayload(cloudRes.data);
             if (restored && restored.success) {
               setAllLogs(restored.logs);
@@ -370,7 +444,7 @@ export default function App() {
           }
         }
       } catch (err) {
-        console.log('[Supabase] Sincronizzazione cloud in background completata:', err.message);
+        // Fallimento silenzioso di background: i dati locali restano intatti
       }
     };
 
@@ -383,36 +457,14 @@ export default function App() {
         document.body.classList.toggle('no-floating-fx', floatOff);
         document.body.classList.toggle('no-vortex-bg', vortexOff);
       }
+      // Pulizia una tantum di eventuali vecchie chiavi giornaliere accumulate
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(STORAGE_KEYS.CAT_CLICKS_LEGACY_PREFIX)) {
+          localStorage.removeItem(k);
+        }
+      }
     } catch (e) {}
-
-    // Precaricamento deferito in idle per garantire un First Paint istantaneo e 60fps allo scroll
-    const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 350));
-    const idleHandle = scheduleIdle(() => {
-      const allEssentialImages = [
-        catStandingImg,
-        keyImg,
-        vortexBg,
-        starryBg,
-        catSuccessImg,
-        catFailImg,
-        catCheatKeyImg,
-        blackButtonImg,
-        seeingStoneImg,
-        streakStarImg,
-        otherMotherImg,
-        wybieImg,
-        jumpingMouseImg,
-        catModalBg,
-        secretDoorImg,
-        catCloudPattern
-      ];
-
-      allEssentialImages.forEach((src) => {
-        const img = new Image();
-        img.decoding = 'async';
-        img.src = src;
-      });
-    });
 
     // Controllo aggiornamenti non invasivo in background (rispetta la cache di 12 ore)
     const updateCheckTimer = setTimeout(() => {
@@ -427,9 +479,6 @@ export default function App() {
 
     return () => {
       clearTimeout(updateCheckTimer);
-      if (window.cancelIdleCallback && typeof idleHandle === 'number') {
-        window.cancelIdleCallback(idleHandle);
-      }
     };
   }, []);
 
@@ -494,10 +543,10 @@ export default function App() {
     return Math.max(0, keysPerMonth - used);
   }, [dayModalState.dateStr, selectedDate, allLogs, keysPerMonth, remainingKeys]);
 
-  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore memoizzato (nessuna falsa simulazione)
+  // Calcola i giorni passati non ancora contrassegnati per il Topo Saltatore memoizzato (reattivo anche a mezzanotte)
   const unmarkedDays = useMemo(() => {
     return getUnmarkedPastDays(allLogs);
-  }, [allLogs]);
+  }, [allLogs, todayStr]);
 
   // Controlla se la giornata odierna è già stata registrata
   const isTodayAlreadyLogged = useMemo(() => {
@@ -517,7 +566,7 @@ export default function App() {
   }, [isTodayAlreadyLogged]);
 
   // Selezione esito dal pop-up o dalla dashboard ottimizzata
-  const handleSelectStatusFromModal = useCallback((newStatus, optionalDateStr = null) => {
+  const handleSelectStatusFromModal = useCallback(async (newStatus, optionalDateStr = null) => {
     const targetDate = optionalDateStr || dayModalState.dateStr || selectedDate;
     const oldLog = allLogs[targetDate] || {};
     const wasAlreadyKey = oldLog.dietState === 'cheat_key';
@@ -557,6 +606,7 @@ export default function App() {
         }, 120);
       } else {
         // Ancora qualche chiave rimasta: parla il Gatto
+        const { getRandomCatQuote } = await getCatQuotesModule();
         const quote = getRandomCatQuote('key');
         try {
           localStorage.setItem(STORAGE_KEYS.LAST_CAT_QUOTE, quote);
@@ -577,26 +627,27 @@ export default function App() {
       const newStreak = getConsecutiveDietStreak(updatedLogs, targetDate);
       const lastCelebrated = Number(localStorage.getItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK) || 0);
 
-      // NOTIFICA 1: Wybie celebra traguardi di costanza (3 giorni, ogni settimana 7/14/21/28... o 30 giorni)
-      // Negli altri giorni interviene il Gatto con le sue frasi incoraggianti!
-      const isMilestoneDay = newStreak === 3 || (newStreak >= 7 && newStreak % 7 === 0) || (newStreak >= 30 && newStreak % 30 === 0);
-      const isMilestone = isMilestoneDay && newStreak !== lastCelebrated;
+      // NOTIFICA 1: Wybie celebra traguardi di costanza a giorni alterni (mai per due giorni consecutivi!)
+      // Traguardi calibrati: 1, 3, 5, 7, 10, 14, 21, 30, 45, 60, 75, 90, 100
+      const isMilestoneDay = WYBIE_MILESTONE_STREAKS.includes(newStreak);
+      const isMilestone = isMilestoneDay && newStreak !== lastCelebrated && canWybieSpeakToday(todayStr);
 
       if (isMilestone) {
         try {
           localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, String(newStreak));
         } catch (e) {}
 
+        recordWybieSpokenToday(todayStr);
         sendWybieStreakNotification(newStreak);
         if (modalOpenTimerRef.current) clearTimeout(modalOpenTimerRef.current);
         modalOpenTimerRef.current = setTimeout(() => {
-          setStoryModalState({
-            isOpen: true,
-            type: 'wybie_streak',
-            streak: newStreak
-          });
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('trigger-wybie', { detail: { streak: newStreak } }));
+          }
         }, 120);
       } else {
+        // Negli altri giorni o se Wybie ha parlato ieri (giorni alterni), interviene il Gatto!
+        const { getRandomCatQuote } = await getCatQuotesModule();
         const quote = getRandomCatQuote('success');
         try {
           localStorage.setItem(STORAGE_KEYS.LAST_CAT_QUOTE, quote);
@@ -618,6 +669,7 @@ export default function App() {
         localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, '0');
       } catch (e) {}
 
+      const { getRandomCatQuote } = await getCatQuotesModule();
       const quote = getRandomCatQuote('cheat');
       try {
         localStorage.setItem(STORAGE_KEYS.LAST_CAT_QUOTE, quote);
@@ -638,7 +690,7 @@ export default function App() {
         localStorage.setItem(STORAGE_KEYS.LAST_CELEBRATED_STREAK, '0');
       } catch (e) {}
     }
-  }, [dayModalState.dateStr, selectedDate, allLogs, keysPerMonth, remainingKeys]);
+  }, [dayModalState.dateStr, selectedDate, allLogs, keysPerMonth, todayStr]);
 
   const currentDayLog = dayModalState.dateStr 
     ? (allLogs[dayModalState.dateStr] || { dietState: 'neutral' })
@@ -712,18 +764,10 @@ export default function App() {
         <div style={{ marginBottom: '16px' }}>
           <ButtonMoonEclipse
             allLogs={allLogs}
-            workoutLogs={workoutLogs}
             todayStr={todayStr}
-            displayYear={displayYear}
-            displayMonth={displayMonth}
-            onOpenSettings={(tab = 'settings') => {
-              setSettingsTab(tab);
-              setIsSettingsOpen(true);
-            }}
+            onOpenSettings={handleOpenSettings}
             customAvatar={customAvatar}
-            onScrollToDashboard={() => {
-              smoothScrollToElement('dashboard-stats-section', 1400);
-            }}
+            onScrollToDashboard={handleScrollToDashboard}
             onCatSpeak={handleCatSpeak}
           />
         </div>
@@ -735,19 +779,17 @@ export default function App() {
           todayStr={todayStr} 
           workoutLogs={workoutLogs}
           onSaveWorkout={handleSaveWorkout}
-          reactionStatus={bobinskyReactionStatus}
-          onReactionStatusChange={setBobinskyReactionStatus}
         />
 
         {/* 3. IL CALENDARIO: GRIGLIA MENSILE */}
         <CalendarGrid
-          selectedDate={selectedDate}
           onSelectDate={handleDayClick}
           allLogs={allLogs}
           workoutLogs={workoutLogs}
           onSaveWorkout={handleSaveWorkout}
           displayYear={displayYear}
           displayMonth={displayMonth}
+          todayStr={todayStr}
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
           onResetToCurrentMonth={handleResetToCurrentMonth}
@@ -763,6 +805,7 @@ export default function App() {
         <MonthStatsBar
           displayYear={displayYear}
           displayMonth={displayMonth}
+          todayStr={todayStr}
           allLogs={allLogs}
           workoutLogs={workoutLogs}
           keysPerMonth={keysPerMonth}
@@ -774,44 +817,21 @@ export default function App() {
           <CoralineDivider variant="wardrobe" />
         </div>
 
-        {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY & EASTER EGG SPECIALE) */}
+        {/* 5. LA PORTICINA SEGRETA DELL'ALTRO MONDO (PORTALE SPOTIFY) */}
         <div style={{ position: 'relative', zIndex: 10 }}>
-          <SecretDoor onLongPress={() => setIsLoveModalOpen(true)} />
+          <SecretDoor />
         </div>
 
         {/* 6. DEDICA NELLA NOTTE STELLATA */}
-        <div
-          style={{
-            marginTop: '56px',
-            marginBottom: '40px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-            userSelect: 'none',
-            position: 'relative',
-            zIndex: 1
-          }}
-        >
-          <span
-            style={{
-              fontFamily: 'var(--font-coraline)',
-              fontSize: '11px',
-              letterSpacing: '0.8px',
-              color: 'rgba(221, 202, 183, 0.42)',
-              textShadow: '0 0 8px rgba(0, 0, 0, 0.9)',
-              fontWeight: 400
-            }}
-          >
-            fatto con amore dal tuo Michele
-          </span>
-        </div>
+
 
       {/* TOPO SALTATORE FLOTTANTE IN BASSO A SINISTRA CON NUVOLETTA CARTONATA */}
       <FloatingJumpingMouse
         unmarkedDays={unmarkedDays}
-        onSelectDay={handleDayClick}
       />
+
+      {/* WYBIE LOVAT FLOTTANTE IN BASSO A SINISTRA CON NUVOLETTA SPECCHIATA VERSO L'INTERNO */}
+      <FloatingWybie />
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA CON NUVOLETTA POKÉMON/CORALINE */}
       <div
@@ -909,7 +929,7 @@ export default function App() {
         )}
 
         <button
-          onClick={() => {
+          onClick={async () => {
             hapticLight();
             const todayStatus = (typeof allLogs[todayStr] === 'object' ? allLogs[todayStr]?.dietState : allLogs[todayStr]) || null;
             
@@ -936,16 +956,23 @@ export default function App() {
               }
             }
 
-            const hasAbsence = getUnmarkedPastDays(allLogs, todayStr).length > 0;
+            const hasAbsence = unmarkedDays.length > 0;
 
             let openCount = 1;
             try {
-              const clickKey = `coraline_cat_clicks_${todayStr}`;
-              const prev = Number(localStorage.getItem(clickKey) || 0) + 1;
-              localStorage.setItem(clickKey, String(prev));
+              const rawClicks = localStorage.getItem(STORAGE_KEYS.CAT_DAILY_CLICKS);
+              let parsedClicks = null;
+              if (rawClicks) {
+                parsedClicks = JSON.parse(rawClicks);
+              }
+              const prev = (parsedClicks && parsedClicks.date === todayStr && Number.isFinite(parsedClicks.count))
+                ? parsedClicks.count + 1
+                : 1;
+              localStorage.setItem(STORAGE_KEYS.CAT_DAILY_CLICKS, JSON.stringify({ date: todayStr, count: prev }));
               openCount = prev;
             } catch (e) {}
 
+            const { getSmartSituationalCatQuote } = await getCatQuotesModule();
             const quote = getSmartSituationalCatQuote({
               todayStatus,
               yesterdayStatus,
@@ -976,8 +1003,12 @@ export default function App() {
           <img
             src={catStandingImg}
             alt="Gatto Nero di Coraline"
+            width={73}
+            height={130}
             loading="eager"
+            fetchPriority="high"
             decoding="async"
+            draggable={false}
             style={{
               height: '130px',
               width: 'auto',
@@ -1029,7 +1060,7 @@ export default function App() {
         currentStatus={currentDayLog.dietState}
         remainingKeys={remainingKeysForModal}
         onSelectStatus={handleSelectStatusFromModal}
-        onClose={() => setDayModalState({ isOpen: false, dateStr: null })}
+        onClose={handleCloseDayModal}
       />
 
       {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}
@@ -1037,48 +1068,45 @@ export default function App() {
         isOpen={catModalState.isOpen}
         quote={catModalState.quote}
         context={catModalState.context}
-        onClose={() => setCatModalState((prev) => ({ ...prev, isOpen: false }))}
+        onClose={handleCloseCatModal}
       />
 
       {/* OVERLAY EVENTI SPECIALI DI TRAMA (ALTRA MADRE CHIAVI FINITE & WYBIE STREAK) */}
       <StoryEventModal
         isOpen={storyModalState.isOpen}
-        type={storyModalState.type}
-        streak={storyModalState.streak}
-        onClose={() => setStoryModalState((prev) => ({ ...prev, isOpen: false }))}
+        onClose={handleCloseStoryModal}
       />
 
-      {/* RIQUADRO SPECIALE "TI AMO" PER ASIA (EASTER EGG ATTIVATO DALLA PORTICINA) */}
-      <SecretLoveModal
-        isOpen={isLoveModalOpen}
-        onClose={() => setIsLoveModalOpen(false)}
-      />
-
-      {/* MODAL IMPOSTAZIONI COMPLETO APERTO DAL PROFILO IN ALTO A DESTRA */}
-      <SecretSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        initialTab={settingsTab}
-        keysPerMonth={keysPerMonth}
-        onChangeKeysPerMonth={handleChangeKeysPerMonth}
-        onRestoreSuccess={handleRestoreSuccess}
-        onOpenDailyGreeting={() => setIsDailyGreetingOpen(true)}
-        customAvatar={customAvatar}
-        onAvatarChange={handleAvatarChange}
-      />
+      {/* MODAL IMPOSTAZIONI COMPLETO APERTO DAL PROFILO IN ALTO A DESTRA (Lazy Loaded con Suspense) */}
+      <Suspense fallback={null}>
+        {isSettingsOpen && (
+          <SecretSettingsModal
+            isOpen={isSettingsOpen}
+            onClose={handleCloseSettings}
+            initialTab={settingsTab}
+            keysPerMonth={keysPerMonth}
+            onChangeKeysPerMonth={handleChangeKeysPerMonth}
+            onRestoreSuccess={handleRestoreSuccess}
+            onOpenDailyGreeting={handleOpenDailyGreetingPreview}
+            customAvatar={customAvatar}
+            onAvatarChange={handleAvatarChange}
+          />
+        )}
+      </Suspense>
 
       {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}
       <DailyCatGreetingModal
         isOpen={isDailyGreetingOpen}
         onClose={handleDismissDailyGreeting}
         dateStr={todayStr}
+        initialQuote={dailyGreetingQuoteOverride}
       />
 
       {/* MODAL NOTIFICA AGGIORNAMENTO DISPONIBILE (GITHUB RELEASES) */}
       <UpdateAvailableModal
         isOpen={!!updateAvailableInfo}
         updateInfo={updateAvailableInfo}
-        onClose={() => setUpdateAvailableInfo(null)}
+        onClose={handleCloseUpdateModal}
       />
       </div>
     </>
