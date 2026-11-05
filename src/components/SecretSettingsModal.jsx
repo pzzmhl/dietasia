@@ -314,7 +314,10 @@ export default function SecretSettingsModal({
     setUpdateCheckStatus('Controllo versioni GitHub...');
     try {
       const res = await checkForAppUpdates({ force: true });
-      if (res && res.updateAvailable) {
+      if (res && res.otaAppliedSilently) {
+        setUpdateCheckStatus(`✦ Versione ${res.latestVersion} applicata in automatico!`);
+        scheduleUpdateStatusClear(4000);
+      } else if (res && res.updateAvailable) {
         setAvailableUpdate(res);
         setUpdateCheckStatus(`✦ Nuova versione ${res.latestVersion} disponibile!`);
       } else {

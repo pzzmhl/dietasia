@@ -1,28 +1,46 @@
 /**
- * Servizio di Controllo Aggiornamenti Applicazione via GitHub Releases API
- * 
- * - Zero dipendenze esterne & Zero telemetria
- * - Non-intrusivo & Offline-Safe (timeout 5s, fallimento silenzioso in background)
- * - Throttling / Cache configurabile (massimo un controllo ogni 12 ore)
- * - Supporto per ignorare temporaneamente la release ("Più tardi")
- * - Download nativo dell'APK tramite browser/installer di sistema Android
+ * Servizio Ibrido di Aggiornamento Applicazione (Zero-Click OTA Live Update + Fallback APK)
+ *
+ * - Modalità Primaria (Zero-Click OTA su Android nativo):
+ *   Scarica silenziosamente in background il pacchetto `coraline-ota-bundle.zip` da GitHub Releases
+ *   tramite `@capgo/capacitor-updater` e lo imposta per il caricamento automatico (senza alcun
+ *   pop-up, senza permessi di installazione APK e senza che Asia debba cliccare nulla).
+ * - Anti-Brick Rollback Nativo:
+ *   `notifyOtaAppReady()` conferma all'avvio che il bundle corrente è sano; in caso di errore
+ *   critico entro 10s, il plugin nativo ripristina da solo la versione precedente funzionante.
+ * - Modalità Fallback (APK):
+ *   Se una release non contiene il bundle OTA o per chi aggiorna manualmente l'APK.
  */
 
+import { Capacitor } from '@capacitor/core';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
-export const CURRENT_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.8.1';
+export const CURRENT_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.8.2';
 export const GITHUB_OWNER = 'pzzmhl';
 export const GITHUB_REPO = 'dietasia';
-export const CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 ore
+export const CHECK_INTERVAL_MS = 30 * 60 * 1000; // Controllo silenzioso ogni 30 minuti
+export const OTA_BUNDLE_FILENAME = 'coraline-ota-bundle.zip';
 export const FALLBACK_APK_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest/download/Coraline-Tracker-Beta.apk`;
+
+let isOtaDownloadInProgress = false;
+
+/**
+ * Notifica al motore nativo CapacitorUpdater che il bundle web si è avviato correttamente.
+ * Deve essere invocato all'avvio di App.jsx per confermare la stabilità dell'aggiornamento OTA.
+ */
+export async function notifyOtaAppReady() {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await CapacitorUpdater.notifyAppReady();
+  } catch (e) {
+    // Fallback silenzioso su web o se non inizializzato
+  }
+}
 
 /**
  * Confronto semantico delle versioni (SemVer).
- * Gestisce prefissi 'v' (es. v2.8.0 vs 2.7.0) e lunghezze arbitrarie di release.
- * 
- * @param {string} currentVersion - Es. '2.7.0'
- * @param {string} latestTag - Es. 'v2.8.0'
- * @returns {boolean} True se latestTag è strettamente più recente di currentVersion
+ * Gestisce prefissi 'v' (es. v2.8.2 vs 2.8.1) e lunghezze arbitrarie di release.
  */
 export function isNewerVersion(currentVersion, latestTag) {
   if (!latestTag || typeof latestTag !== 'string') return false;
@@ -45,19 +63,64 @@ export function isNewerVersion(currentVersion, latestTag) {
 }
 
 /**
+ * Scarica e prepara silenziosamente in background il bundle OTA senza chiedere alcun click all'utente.
+ * - Se `applyImmediately === false` (controllo automatico in background), il nuovo bundle viene
+ *   attivato da `CapacitorUpdater.next(...)` al successivo avvio o passaggio in background,
+ *   così lo schermo non ricarica mai mentre Asia sta toccando l'app.
+ * - Se `applyImmediately === true` (tasto manuale nelle Impostazioni), applica subito con `set(...)`.
+ */
+async function performSilentOtaUpdate(otaUrl, latestTag, applyImmediately = false) {
+  if (!Capacitor.isNativePlatform() || !otaUrl || isOtaDownloadInProgress) {
+    return false;
+  }
+
+  const cleanVersion = String(latestTag).replace(/^v/, '').trim();
+  isOtaDownloadInProgress = true;
+
+  try {
+    // 1. Verifica se questo bundle è già stato scaricato in precedenza sul dispositivo
+    const existingList = await CapacitorUpdater.list();
+    const existingBundle = existingList && Array.isArray(existingList.bundles)
+      ? existingList.bundles.find((b) => b && b.version === cleanVersion && b.status !== 'error')
+      : null;
+
+    if (existingBundle && existingBundle.id) {
+      if (applyImmediately) {
+        await CapacitorUpdater.set({ id: existingBundle.id });
+      } else {
+        await CapacitorUpdater.next({ id: existingBundle.id });
+      }
+      isOtaDownloadInProgress = false;
+      return true;
+    }
+
+    // 2. Scarica il pacchetto zip OTA da GitHub Releases in background
+    const downloadedBundle = await CapacitorUpdater.download({
+      url: otaUrl,
+      version: cleanVersion
+    });
+
+    if (downloadedBundle && downloadedBundle.id) {
+      if (applyImmediately) {
+        await CapacitorUpdater.set({ id: downloadedBundle.id });
+      } else {
+        await CapacitorUpdater.next({ id: downloadedBundle.id });
+      }
+      isOtaDownloadInProgress = false;
+      return true;
+    }
+  } catch (err) {
+    // Se il download OTA fallisce, lascia gestire il fallback senza bloccare l'app
+  }
+
+  isOtaDownloadInProgress = false;
+  return false;
+}
+
+/**
  * Interroga l'API GitHub Releases per verificare se è disponibile una nuova versione.
- * 
- * @param {{ force?: boolean }} options 
- *   force: true per bypassare la cache delle 12 ore (usato dal tasto manuale)
- * @returns {Promise<{
- *   updateAvailable: boolean,
- *   currentVersion: string,
- *   latestVersion?: string,
- *   releaseNotes?: string,
- *   apkUrl?: string,
- *   releaseUrl?: string,
- *   reason?: string
- * }>}
+ * Su Android nativo, se la release contiene `coraline-ota-bundle.zip`, scarica e applica
+ * l'aggiornamento in modo 100% silenzioso senza mostrare pop-up a Asia.
  */
 export async function checkForAppUpdates({ force = false } = {}) {
   // 1. Controllo connettività offline
@@ -65,7 +128,7 @@ export async function checkForAppUpdates({ force = false } = {}) {
     return { updateAvailable: false, currentVersion: CURRENT_APP_VERSION, reason: 'offline' };
   }
 
-  // 2. Throttling temporale per non stressare l'API rate-limit di GitHub
+  // 2. Throttling temporale (30 min) per non stressare il rate-limit GitHub
   if (!force) {
     try {
       const lastCheck = Number(localStorage.getItem(STORAGE_KEYS.LAST_UPDATE_CHECK) || 0);
@@ -81,7 +144,7 @@ export async function checkForAppUpdates({ force = false } = {}) {
   try {
     const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`, {
       signal: controller.signal,
-      headers: { 
+      headers: {
         Accept: 'application/vnd.github.v3+json'
       }
     });
@@ -94,7 +157,6 @@ export async function checkForAppUpdates({ force = false } = {}) {
     const release = await response.json();
     const latestTag = (release.tag_name || '').trim();
 
-    // Aggiorna timestamp ultimo controllo riuscito
     try {
       localStorage.setItem(STORAGE_KEYS.LAST_UPDATE_CHECK, String(Date.now()));
     } catch (e) {}
@@ -102,7 +164,32 @@ export async function checkForAppUpdates({ force = false } = {}) {
     const isNewer = isNewerVersion(CURRENT_APP_VERSION, latestTag);
 
     if (isNewer) {
-      // Se l'utente ha scelto "Più tardi" per questa esatta versione e non è un check forzato manuale
+      const assets = Array.isArray(release.assets) ? release.assets : [];
+
+      // Cerca il pacchetto OTA (.zip) per l'aggiornamento silenzioso Zero-Click
+      const otaAsset = assets.find(
+        (a) => a && a.name && (a.name === OTA_BUNDLE_FILENAME || a.name.toLowerCase().endsWith('.zip'))
+      );
+
+      // Se siamo su Android nativo e la release ha il bundle OTA, aggiorna in silenzio senza alcun click!
+      if (Capacitor.isNativePlatform() && otaAsset && otaAsset.browser_download_url) {
+        const otaSuccess = await performSilentOtaUpdate(
+          otaAsset.browser_download_url,
+          latestTag,
+          force
+        );
+
+        if (otaSuccess) {
+          return {
+            updateAvailable: false,
+            otaAppliedSilently: true,
+            currentVersion: CURRENT_APP_VERSION,
+            latestVersion: latestTag
+          };
+        }
+      }
+
+      // Fallback APK: solo se non è presente il bundle OTA o se siamo fuori dal runtime nativo
       if (!force) {
         try {
           const ignored = localStorage.getItem(STORAGE_KEYS.IGNORED_UPDATE_VERSION);
@@ -112,11 +199,7 @@ export async function checkForAppUpdates({ force = false } = {}) {
         } catch (e) {}
       }
 
-      // Estrai l'asset APK se disponibile, altrimenti fallback all'URL di download diretto
-      const apkAsset = Array.isArray(release.assets) 
-        ? release.assets.find((a) => a && a.name && a.name.toLowerCase().endsWith('.apk')) 
-        : null;
-
+      const apkAsset = assets.find((a) => a && a.name && a.name.toLowerCase().endsWith('.apk'));
       const apkUrl = apkAsset ? apkAsset.browser_download_url : FALLBACK_APK_URL;
 
       return {
@@ -136,14 +219,12 @@ export async function checkForAppUpdates({ force = false } = {}) {
     };
   } catch (err) {
     clearTimeout(timeoutId);
-    // Fallimento silenzioso di background (nessuna notifica o crash)
     return { updateAvailable: false, currentVersion: CURRENT_APP_VERSION, reason: err.message || 'network_error' };
   }
 }
 
 /**
  * Memorizza la versione ignorata per evitare pop-up fastidiosi durante la giornata
- * @param {string} versionTag 
  */
 export function ignoreUpdateVersion(versionTag) {
   try {
@@ -155,7 +236,6 @@ export function ignoreUpdateVersion(versionTag) {
 
 /**
  * Avvia il download nativo dell'APK tramite l'intento di sistema Android (_system)
- * @param {string} apkUrl 
  */
 export function downloadAndInstallUpdate(apkUrl) {
   const targetUrl = apkUrl || FALLBACK_APK_URL;
@@ -163,4 +243,3 @@ export function downloadAndInstallUpdate(apkUrl) {
     window.open(targetUrl, '_system');
   }
 }
-

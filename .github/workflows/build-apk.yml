@@ -54,6 +54,12 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjc2RpaGhiY3R2ZHRyb2xvam1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTY3MjUsImV4cCI6MjEwOTE5MjcyNX0.3MFtRWCScum4i94eFWipIR9F3okTPHV7l_NW4kaXixo' }}
         run: npm run build
 
+      - name: ⚡ Package OTA Live Update Bundle (Zero-Click Update)
+        run: |
+          cd dist
+          zip -r -q ../coraline-ota-bundle.zip .
+          cd ..
+
       - name: 🤖 Sync Android Platform
         run: npx cap sync android
 
@@ -91,12 +97,13 @@ jobs:
           startsWith(github.ref, 'refs/tags/v') ||
           (github.event_name == 'workflow_dispatch' && inputs.create_release == true)
         with:
-          files: Coraline-Tracker-Beta.apk
+          files: |
+            Coraline-Tracker-Beta.apk
+            coraline-ota-bundle.zip
           tag_name: ${{ inputs.tag_name || github.ref_name }}
           name: Coraline Tracker ${{ inputs.tag_name || github.ref_name }}
           body: |
             ### 🪡 Coraline Tracker per Asia
-            - File APK pronto per installazione su Android: scarica il file **Coraline-Tracker-Beta.apk** qui sotto.
-            - Esperienza nativa a tema Coraline (fasi lunari, bottoni neri, chiavi jolly, allenamenti Bobinsky).
-            - Dashboard con statistiche storiche comparative e scorrimento a carosello.
-            - Easter egg segreti della porticina e gatto tutor.
+            - **Aggiornamento Automatico Silenzioso (OTA)**: chi ha già l'app installata riceve gli aggiornamenti in automatico in background (`coraline-ota-bundle.zip`) senza dover cliccare nulla.
+            - **Prima Installazione Android**: scarica il file **Coraline-Tracker-Beta.apk** qui sotto.
+            - Esperienza nativa a tema Coraline (fasi lunari, bottoni neri, chiavi jolly, allenamenti Bobinsky, porticina segreta e gatto tutor).

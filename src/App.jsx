@@ -16,7 +16,7 @@ const CatModal = lazy(() => import('./components/CatModal'));
 const StoryEventModal = lazy(() => import('./components/StoryEventModal'));
 const DailyCatGreetingModal = lazy(() => import('./components/DailyCatGreetingModal'));
 const UpdateAvailableModal = lazy(() => import('./components/UpdateAvailableModal'));
-import { checkForAppUpdates } from './utils/updateChecker';
+import { checkForAppUpdates, notifyOtaAppReady } from './utils/updateChecker';
 import { 
   scheduleDailyReminder,
   sendWybieStreakNotification,
@@ -378,6 +378,14 @@ export default function App() {
             // Verifica transizione mezzanotte se l'app è rimasta aperta in background
             const freshToday = getTodayDateString();
             setTodayStr((prev) => (prev !== freshToday ? freshToday : prev));
+            // Controlla in silenzio eventuali nuovi aggiornamenti OTA quando l'app torna in primo piano
+            checkForAppUpdates({ force: false })
+              .then((res) => {
+                if (res && res.updateAvailable) {
+                  setUpdateAvailableInfo(res);
+                }
+              })
+              .catch(() => {});
           }
         });
         if (isDisposed) {
@@ -414,6 +422,7 @@ export default function App() {
 
   // Carica i dati salvati, applica le preferenze visive e ottimizza il rendering iniziale
   useEffect(() => {
+    notifyOtaAppReady();
     initBackgroundMusic();
     initSyncQueueListeners();
     triggerQueueFlush(1500);
