@@ -44,9 +44,8 @@ html {
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
-  overscroll-behavior-y: none;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background-color: var(--bg-deep);
 }
 
@@ -56,9 +55,8 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  overscroll-behavior-y: none;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background-color: var(--bg-deep);
   color: var(--coraline-parchment);
   font-family: var(--font-body);
@@ -193,10 +191,10 @@ body.no-floating-fx * {
   font-family: var(--font-gothic);
 }
 
-/* Rimozione della barra di scorrimento sui contenitori scrollabili (senza selettore universale * !important) */
-div, section, main, aside {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+/* Rimozione globale della barra di scorrimento visiva senza bloccare lo scroll touch */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 ::-webkit-scrollbar {

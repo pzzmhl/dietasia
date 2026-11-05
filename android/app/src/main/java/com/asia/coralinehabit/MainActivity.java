@@ -73,9 +73,8 @@ public class MainActivity extends BridgeActivity {
             }
 
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-            webView.setVerticalScrollBarEnabled(false);
-            webView.setHorizontalScrollBarEnabled(false);
+            // Non bloccare lo scorrimento o i fling della WebView con OVER_SCROLL_NEVER o disattivazione canali scroll
+            webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
         } catch (Exception ignored) {
             // Fallback sicuro
         }

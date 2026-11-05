@@ -8,7 +8,7 @@
 Ispirata all'universo dark fantasy e stop-motion di *"Coraline"* (Laika Studios / Henry Selick).
 
 [![Android Build](https://github.com/pzzmhl/dietasia/actions/workflows/build-apk.yml/badge.svg)](https://github.com/pzzmhl/dietasia/actions/workflows/build-apk.yml)
-[![Version](https://img.shields.io/badge/version-2.8.3-blueviolet.svg)](https://github.com/pzzmhl/dietasia/releases)
+[![Version](https://img.shields.io/badge/version-2.8.4-blueviolet.svg)](https://github.com/pzzmhl/dietasia/releases)
 [![OTA Live Updates](https://img.shields.io/badge/OTA-Zero--Click%20Silent-10b981.svg)](https://github.com/pzzmhl/dietasia/releases)
 [![Platform](https://img.shields.io/badge/platform-Android%20120Hz%20%7C%20iOS%20%7C%20Web-blue.svg)](https://capacitorjs.com/)
 

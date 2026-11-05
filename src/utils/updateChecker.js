@@ -16,7 +16,7 @@ import { Capacitor } from '@capacitor/core';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
 
-export const CURRENT_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.8.3';
+export const CURRENT_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.8.4';
 export const GITHUB_OWNER = 'pzzmhl';
 export const GITHUB_REPO = 'dietasia';
 export const CHECK_INTERVAL_MS = 30 * 60 * 1000; // Controllo silenzioso ogni 30 minuti

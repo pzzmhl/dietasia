@@ -18,7 +18,7 @@ import {
  * - Appare sia sui traguardi e allenamenti sia a sorpresa nei giorni randomici con frasi dolci
  * - Toccandolo passa alla frase successiva e resetta il timer di chiusura
  */
-export default function FloatingWybie() {
+export default function FloatingWybie({ isDailyGreetingOpen = false }) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeQuote, setActiveQuote] = useState(ALL_WYBIE_QUOTES[0]);
   const quoteIndexRef = useRef(0);
@@ -54,8 +54,18 @@ export default function FloatingWybie() {
     };
   }, [isVisible]);
 
-  // 1. Apparizione spontanea a giorni alterni (mai per due giorni consecutivi!)
+  // Se la schermata iniziale di benvenuto del Gatto è aperta, Wybie non deve apparire
   useEffect(() => {
+    if (isDailyGreetingOpen && isVisible) {
+      if (autoDismissTimerRef.current) clearTimeout(autoDismissTimerRef.current);
+      setIsVisible(false);
+    }
+  }, [isDailyGreetingOpen, isVisible]);
+
+  // 1. Apparizione spontanea a giorni alterni (mai per due giorni consecutivi e MAI se c'è la schermata iniziale!)
+  useEffect(() => {
+    if (isDailyGreetingOpen) return;
+
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     
@@ -67,11 +77,11 @@ export default function FloatingWybie() {
         setIsVisible(true);
         resetAutoDismiss();
         recordWybieSpokenToday(todayStr);
-      }, 3600); // Compare dopo 3.6 secondi
+      }, 7000); // Compare solo dopo 7 secondi di permanenza attiva nel diario
 
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isDailyGreetingOpen]);
 
   // 2. Ascolto per eventi di traguardo streak, azioni o test manuale
   useEffect(() => {

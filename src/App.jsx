@@ -842,10 +842,11 @@ export default function App() {
       {/* TOPO SALTATORE FLOTTANTE IN BASSO A SINISTRA CON NUVOLETTA CARTONATA */}
       <FloatingJumpingMouse
         unmarkedDays={unmarkedDays}
+        isDailyGreetingOpen={isDailyGreetingOpen}
       />
 
       {/* WYBIE LOVAT FLOTTANTE IN BASSO A SINISTRA CON NUVOLETTA SPECCHIATA VERSO L'INTERNO */}
-      <FloatingWybie />
+      <FloatingWybie isDailyGreetingOpen={isDailyGreetingOpen} />
 
       {/* GATTO NERO GRANDINO FLOTTANTE IN BASSO A DESTRA CON NUVOLETTA POKÉMON/CORALINE */}
       <div

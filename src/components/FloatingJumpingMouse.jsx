@@ -15,7 +15,8 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js';
  * - Animazione saltellante originale (mouseTrumpetBlast)
  */
 const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
-  unmarkedDays = []
+  unmarkedDays = [],
+  isDailyGreetingOpen = false
 }) {
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
@@ -85,8 +86,10 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
     : (testForced ? sampleDays : []);
   const missingCount = effectiveDays.length;
 
-  // Riproduce la trombetta all'avvio quando il topo appare
+  // Riproduce la trombetta all'avvio solo quando non c'è la schermata di saluto iniziale
   useEffect(() => {
+    if (isDailyGreetingOpen) return;
+
     if (effectiveDays.length > 0 && !isDismissed && !isPausedByWybie && !hasPlayedEntranceSoundRef.current) {
       hasPlayedEntranceSoundRef.current = true;
       const timer = setTimeout(() => {
@@ -94,9 +97,9 @@ const FloatingJumpingMouse = React.memo(function FloatingJumpingMouse({
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [effectiveDays.length, isDismissed, isPausedByWybie]);
+  }, [effectiveDays.length, isDismissed, isPausedByWybie, isDailyGreetingOpen]);
 
-  if (isDismissed || isPausedByWybie || effectiveDays.length === 0) {
+  if (isDailyGreetingOpen || isDismissed || isPausedByWybie || effectiveDays.length === 0) {
     return null;
   }
 
