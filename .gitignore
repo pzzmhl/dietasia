@@ -31,7 +31,15 @@ dist-ssr
 android/app/build/
 android/build/
 android/.gradle/
+
+# macOS / iCloud duplicate conflict files
+* [0-9].*
+
 android/local.properties
 android/captures/
 .gradle/
+
+# macOS / iCloud duplicate conflict files
+* [0-9].*
+
 
