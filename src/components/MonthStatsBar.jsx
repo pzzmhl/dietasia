@@ -11,6 +11,7 @@ import { getMonthWorkoutCount, getConsecutiveDietStreak, getTodayDateString } fr
 import { calculateMTDComparison } from '../utils/historicalStats';
 import { triggerHapticFeedback } from '../utils/haptics';
 import { getUIElementExplanation } from '../data/catExplanations';
+import { useInViewport } from '../hooks/useInViewport.js';
 
 /**
  * Dashboard Statistiche Mensile Stile Coraline:
@@ -30,6 +31,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
 }) {
   const [activeTooltip, setActiveTooltip] = useState(null);
   const tooltipTimeoutRef = useRef(null);
+  const [statsViewportRef, isStatsInViewport] = useInViewport(false);
 
   useEffect(() => {
     return () => {
@@ -123,6 +125,8 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
   return (
     <div 
       id="dashboard-stats-section"
+      ref={statsViewportRef}
+      className={`perf-contain-card${isStatsInViewport ? '' : ' offscreen-anim-paused'}`}
       style={{
         width: '100%',
         borderRadius: '24px',
@@ -137,37 +141,29 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
         overflow: 'hidden'
       }}
     >
-      {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E DISSOLTO) */}
+      {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (VIGNETTA NATIVA ZERO FBO) */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `url(${starryBg})`,
+        backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 45%, rgba(12, 16, 19, 0.85) 90%), url(${starryBg})`,
         backgroundPosition: 'center center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         opacity: 0.18,
-        filter: 'blur(2.2px)',
-        WebkitFilter: 'blur(2.2px)',
-        maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
-        WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0
       }} />
 
-      {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
+      {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO (VIGNETTA NATIVA ZERO FBO) */}
       <div className="vortex-bg-layer" style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `url(${vortexBg})`,
+        backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
         backgroundPosition: 'center center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         opacity: 0.07,
-        filter: 'blur(2px)',
-        WebkitFilter: 'blur(2px)',
-        maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-        WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0
@@ -239,9 +235,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.90)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'success' 
@@ -253,24 +247,20 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'manipulation',
-            transition: 'all 0.18s ease',
+            transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
-          {/* Spirale sfocata molto leggera */}
+          {/* Spirale sfocata molto leggera (vignetta singola zero FBO) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0
@@ -357,9 +347,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.90)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'cheat' 
@@ -371,24 +359,20 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'manipulation',
-            transition: 'all 0.18s ease',
+            transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
-          {/* Spirale sfocata molto leggera */}
+          {/* Spirale sfocata molto leggera (vignetta singola zero FBO) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0
@@ -474,9 +458,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.90)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'keys' 
@@ -488,24 +470,20 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'manipulation',
-            transition: 'all 0.18s ease',
+            transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
-          {/* Spirale sfocata molto leggera */}
+          {/* Spirale sfocata molto leggera (vignetta singola zero FBO) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0
@@ -583,9 +561,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.90)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'workout' 
@@ -597,24 +573,20 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'manipulation',
-            transition: 'all 0.18s ease',
+            transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
-          {/* Spirale sfocata molto leggera */}
+          {/* Spirale sfocata molto leggera (vignetta singola zero FBO) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0
@@ -700,9 +672,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.90)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'streak' 
@@ -714,24 +684,20 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'manipulation',
-            transition: 'all 0.18s ease',
+            transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
-          {/* Spirale sfocata molto leggera */}
+          {/* Spirale sfocata molto leggera (vignetta singola zero FBO) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0
@@ -817,9 +783,7 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.90)',
             padding: '16px 10px 14px 10px',
             borderRadius: '20px',
             border: activeTooltip === 'rate' 
@@ -831,24 +795,20 @@ const MonthStatsBar = React.memo(function MonthStatsBar({
             textAlign: 'center',
             cursor: 'pointer',
             touchAction: 'manipulation',
-            transition: 'all 0.18s ease',
+            transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease',
             position: 'relative',
             overflow: 'hidden'
           }}
         >
-          {/* Spirale sfocata molto leggera */}
+          {/* Spirale sfocata molto leggera (vignetta singola zero FBO) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0

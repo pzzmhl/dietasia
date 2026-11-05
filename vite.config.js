@@ -32,10 +32,10 @@ export default defineConfig({
           if (id.includes('node_modules/@supabase')) {
             return 'vendor-supabase';
           }
-          if (id.includes('/data/catQuotes')) {
+          if (id.includes('/data/catQuotes.js')) {
             return 'cat-quotes';
           }
-          if (id.includes('/data/dailyCatQuotes')) {
+          if (id.includes('/data/dailyCatQuotes.js')) {
             return 'daily-cat-quotes';
           }
         }

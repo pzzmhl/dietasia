@@ -1,6 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
 import { STORAGE_KEYS } from '../constants/storageKeys.js';
 import { triggerQueueFlush } from '../utils/syncQueue.js';
+
+let supabaseSdkPromise = null;
+function loadSupabaseSdk() {
+  if (!supabaseSdkPromise) {
+    supabaseSdkPromise = import('@supabase/supabase-js');
+  }
+  return supabaseSdkPromise;
+}
 
 // Fallback pubblico client-side (protetto da policy RLS su Supabase) per garantire
 // il funzionamento del Cloud Sync anche negli APK compilati da GitHub Actions (dove .env non è tracciato)
@@ -29,9 +36,10 @@ let supabaseInstance = null;
 let currentConfigKey = '';
 
 /**
- * Ottiene o inizializza l'istanza del client Supabase
+ * Ottiene o inizializza l'istanza del client Supabase caricando l'SDK (221 KB) in modo asincrono
+ * senza bloccare il thread principale al primo rendering dell'interfaccia.
  */
-export function getSupabaseClient() {
+export async function getSupabaseClient() {
   const { url, anonKey } = getSupabaseConfig();
 
   if (!url || !anonKey) {
@@ -44,6 +52,7 @@ export function getSupabaseClient() {
   }
 
   try {
+    const { createClient } = await loadSupabaseSdk();
     supabaseInstance = createClient(url, anonKey, {
       auth: {
         persistSession: true,
@@ -92,7 +101,7 @@ export function saveCustomSupabaseConfig(url, anonKey) {
  * Registrazione nuovo utente con Email e Password
  */
 export async function supabaseSignUp(email, password) {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
   if (!client) throw new Error('Configura prima URL e Anon Key di Supabase.');
 
   const { data, error } = await client.auth.signUp({
@@ -108,7 +117,7 @@ export async function supabaseSignUp(email, password) {
  * Accesso con Email e Password
  */
 export async function supabaseSignIn(email, password) {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
   if (!client) throw new Error('Configura prima URL e Anon Key di Supabase.');
 
   const { data, error } = await client.auth.signInWithPassword({
@@ -124,7 +133,7 @@ export async function supabaseSignIn(email, password) {
  * Disconnessione
  */
 export async function supabaseSignOut() {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
   if (!client) return;
 
   const { error } = await client.auth.signOut();
@@ -135,7 +144,7 @@ export async function supabaseSignOut() {
  * Ottiene l'utente correntemente autenticato
  */
 export async function getSupabaseUser() {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
   if (!client) return null;
 
   try {
@@ -152,7 +161,7 @@ export async function getSupabaseUser() {
  * @param {object} backupPayload - Dati completi dell'app (dieta, workout, impostazioni)
  */
 export async function uploadBackupToSupabase(backupPayload) {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
   if (!client) throw new Error('Supabase non configurato.');
 
   const user = await getSupabaseUser();
@@ -185,7 +194,7 @@ export async function uploadBackupToSupabase(backupPayload) {
  * Scarica l'ultimo backup dal Cloud Supabase
  */
 export async function downloadBackupFromSupabase() {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
   if (!client) throw new Error('Supabase non configurato.');
 
   const user = await getSupabaseUser();

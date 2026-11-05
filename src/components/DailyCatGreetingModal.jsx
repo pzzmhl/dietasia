@@ -156,15 +156,14 @@ export default function DailyCatGreetingModal({ isOpen, onClose, dateStr, initia
             marginTop: '4px'
           }}
         >
-          {/* Alone di mistero dietro al gatto */}
+          {/* Alone di mistero dietro al gatto (gradiente morbido multi-stop, zero filter:blur) */}
           <div
             style={{
               position: 'absolute',
-              width: '260px',
-              height: '260px',
+              width: '308px',
+              height: '308px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(74, 222, 128, 0.28) 0%, rgba(13, 44, 73, 0.2) 50%, transparent 70%)',
-              filter: 'blur(24px)',
+              background: 'radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, rgba(36, 118, 92, 0.16) 34%, rgba(13, 44, 73, 0.11) 56%, transparent 76%)',
               pointerEvents: 'none'
             }}
           />

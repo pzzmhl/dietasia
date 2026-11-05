@@ -2589,6 +2589,3 @@ export function getSmartSituationalCatQuote(state = {}) {
   // 10. Default: oggi non ancora registrato
   return getRandomCatQuote('no_log');
 }
-
-// Re-export delle spiegazioni deterministiche per compatibilità trasparente
-export { getUIElementExplanation } from './catExplanations';

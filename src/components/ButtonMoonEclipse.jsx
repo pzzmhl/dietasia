@@ -5,6 +5,7 @@ import { smoothScrollToElement } from '../utils/scrollAnimation.js';
 import { triggerHapticFeedback } from '../utils/haptics';
 import { getUIElementExplanation } from '../data/catExplanations';
 import { getSyncStatus, subscribeSyncStatus } from '../utils/syncQueue.js';
+import { useInViewport } from '../hooks/useInViewport.js';
 
 // Immagine profilo Boring Blue Boy da Coraline
 import profileAvatarImg from '../assets/profile-avatar.webp';
@@ -68,17 +69,32 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
     return getConsecutiveDietStreak(allLogs);
   }, [allLogs]);
 
-  // Effetto glow visivo quando la luna si libera (retrocessione del bottone)
+  // Pausa automatica animazioni infinite lunari quando la card è fuori schermo durante lo scroll
+  const [cardViewportRef, isCardInViewport] = useInViewport(true);
+
+  // Effetto glow visivo quando la luna si libera e cross-fade isolato ai soli 2 frame coinvolti
   const [isGlowActive, setIsGlowActive] = useState(false);
+  const [fadingFromIndex, setFadingFromIndex] = useState(null);
   const prevIndexRef = useRef(phaseIndex);
 
   useEffect(() => {
-    if (phaseIndex < prevIndexRef.current) {
-      setIsGlowActive(true);
-      const timer = setTimeout(() => setIsGlowActive(false), 900);
-      return () => clearTimeout(timer);
-    }
+    const previous = prevIndexRef.current;
+    if (previous === phaseIndex) return;
     prevIndexRef.current = phaseIndex;
+
+    setFadingFromIndex(previous);
+    const fadeTimer = setTimeout(() => setFadingFromIndex(null), 680);
+
+    let glowTimer = null;
+    if (phaseIndex < previous) {
+      setIsGlowActive(true);
+      glowTimer = setTimeout(() => setIsGlowActive(false), 900);
+    }
+
+    return () => {
+      clearTimeout(fadeTimer);
+      if (glowTimer) clearTimeout(glowTimer);
+    };
   }, [phaseIndex]);
 
   // Stato sincronizzazione Cloud live (Indicatore Visivo)
@@ -178,9 +194,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             height: '46px',
             padding: '0 14px 0 10px',
             borderRadius: '14px',
-            backgroundColor: 'rgba(12, 16, 19, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(12, 16, 19, 0.91)',
             border: '1px solid rgba(55, 74, 79, 0.42)',
             boxShadow: '0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(208, 207, 205, 0.14)',
             display: 'flex',
@@ -207,19 +221,15 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             e.currentTarget.style.filter = 'none';
           }}
         >
-          {/* Spirale sfocata molto leggera identica ai box della Dashboard */}
+          {/* Spirale sfocata molto leggera identica ai box della Dashboard (zero FBO mask/blur) */}
           <div className="vortex-bg-layer" style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${vortexBg})`,
+            backgroundImage: `radial-gradient(circle at center, rgba(12, 16, 19, 0) 40%, rgba(12, 16, 19, 0.90) 90%), url(${vortexBg})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             opacity: 0.045,
-            filter: 'blur(2px)',
-            WebkitFilter: 'blur(2px)',
-            maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
             pointerEvents: 'none',
             borderRadius: 'inherit',
             zIndex: 0
@@ -354,6 +364,8 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           2. SCHEDA LA TUA SETTIMANA (LUNA & SETTE GIORNI)
           ========================================================= */}
       <div
+        ref={cardViewportRef}
+        className={`perf-contain-card${isCardInViewport ? '' : ' offscreen-anim-paused'}`}
         style={{
           width: '100%',
           minHeight: '418px',
@@ -382,37 +394,29 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
           zIndex: 0
         }} />
 
-        {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (SFOCATO E MOLTO SCURITO) */}
+        {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (VIGNETTA NATIVA ZERO FBO) */}
         <div style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `url(${starryBg})`,
+          backgroundImage: `radial-gradient(circle at center, rgba(8, 18, 30, 0) 45%, rgba(6, 9, 12, 0.85) 90%), url(${starryBg})`,
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           opacity: 0.08,
-          filter: 'blur(2.5px)',
-          WebkitFilter: 'blur(2.5px)',
-          maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
-          WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
           pointerEvents: 'none',
           borderRadius: 'inherit',
           zIndex: 0
         }} />
 
-        {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
+        {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO (VIGNETTA NATIVA ZERO FBO) */}
         <div className="vortex-bg-layer" style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `url(${vortexBg})`,
+          backgroundImage: `radial-gradient(circle at center, rgba(8, 18, 30, 0) 40%, rgba(6, 9, 12, 0.90) 90%), url(${vortexBg})`,
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           opacity: 0.05,
-          filter: 'blur(2px)',
-          WebkitFilter: 'blur(2px)',
-          maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-          WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
           pointerEvents: 'none',
           borderRadius: 'inherit',
           zIndex: 0
@@ -502,34 +506,33 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             cursor: 'pointer',
             touchAction: 'manipulation'
           }}>
-          {/* 1. Ampia foschia eterea lunare ultra-sfumata (bianco prevalente con accenno verde morbidissimo) */}
+          {/* 1. Ampia foschia eterea lunare ultra-sfumata (gradiente gaussiano multi-stop a costo 0 shader) */}
           <div style={{
             position: 'absolute',
-            inset: '-38px',
+            inset: '-64px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.40) 0%, rgba(240, 255, 245, 0.22) 36%, rgba(139, 229, 116, 0.08) 65%, transparent 85%)',
-            filter: 'blur(30px)',
-            WebkitFilter: 'blur(30px)',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.34) 0%, rgba(244, 255, 248, 0.22) 24%, rgba(195, 245, 205, 0.11) 44%, rgba(139, 229, 116, 0.04) 62%, transparent 78%)',
             animation: 'moonHaloPulse 3.6s ease-in-out infinite',
+            willChange: 'transform, opacity',
             pointerEvents: 'none',
             zIndex: 0
           }} />
 
-          {/* 2. Alone di luce soffusa a contatto con la luna (sfumatura delicata, zero stacco) */}
+          {/* 2. Alone di luce soffusa a contatto con la luna (sfumatura delicata, zero filter:blur) */}
           <div style={{
             position: 'absolute',
-            inset: '-18px',
+            inset: '-32px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(242, 255, 246, 0.22) 42%, rgba(139, 229, 116, 0.07) 70%, transparent 88%)',
-            filter: 'blur(16px)',
-            WebkitFilter: 'blur(16px)',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(244, 255, 248, 0.24) 34%, rgba(175, 240, 185, 0.10) 56%, rgba(139, 229, 116, 0.03) 72%, transparent 86%)',
             pointerEvents: 'none',
             zIndex: 0
           }} />
 
-          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE */}
+          {/* I 7 SNAPSHOT FOTOGRAFICI IN CROSS-FADE (solo la fase attiva e quella uscente applicano i filtri GPU) */}
           {MOON_PHASES.map((imgSrc, idx) => {
             const isActive = idx === phaseIndex;
+            const isTransitioning = isActive || idx === fadingFromIndex;
+            const isNeighbor = Math.abs(idx - phaseIndex) <= 1;
             return (
               <img
                 key={idx}
@@ -537,7 +540,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                 alt={`Luna Coraline Fase ${idx + 1} di 7`}
                 width={185}
                 height={185}
-                loading={isActive ? 'eager' : 'lazy'}
+                loading={isActive || isNeighbor ? 'eager' : 'lazy'}
                 fetchPriority={isActive ? 'high' : 'auto'}
                 decoding="async"
                 draggable={false}
@@ -549,14 +552,21 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
                   height: '100%',
                   objectFit: 'contain',
                   borderRadius: '50%',
-                  zIndex: 2,
+                  zIndex: isActive ? 3 : 2,
+                  visibility: isTransitioning ? 'visible' : 'hidden',
                   opacity: isActive ? 1 : 0,
-                  transform: isActive ? 'translateZ(0) scale(1)' : 'translateZ(0) scale(0.985)',
-                  transition: 'opacity 650ms cubic-bezier(0.4, 0, 0.2, 1), transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  filter: isGlowActive && isActive
-                    ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 28px rgba(139, 229, 116, 0.35)) brightness(0.88) contrast(1.05)'
-                    : 'drop-shadow(0 0 14px rgba(255, 255, 255, 0.38)) drop-shadow(0 0 22px rgba(139, 229, 116, 0.14)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.75)) brightness(0.86) contrast(1.08)',
-                  willChange: isActive ? 'opacity, transform' : 'auto',
+                  transform: isTransitioning
+                    ? (isActive ? 'translateZ(0) scale(1)' : 'translateZ(0) scale(0.985)')
+                    : 'none',
+                  transition: isTransitioning
+                    ? 'opacity 650ms cubic-bezier(0.4, 0, 0.2, 1), transform 650ms cubic-bezier(0.4, 0, 0.2, 1)'
+                    : 'none',
+                  filter: !isTransitioning
+                    ? 'none'
+                    : (isGlowActive && isActive
+                      ? 'drop-shadow(0 0 18px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 28px rgba(139, 229, 116, 0.35)) brightness(0.88) contrast(1.05)'
+                      : 'drop-shadow(0 0 14px rgba(255, 255, 255, 0.38)) drop-shadow(0 0 22px rgba(139, 229, 116, 0.14)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.75)) brightness(0.86) contrast(1.08)'),
+                  willChange: isTransitioning ? 'opacity, transform' : 'auto',
                   pointerEvents: 'none'
                 }}
               />
@@ -587,7 +597,7 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
             overflow: 'hidden',
             cursor: 'default'
           }}>
-          {/* Livello 1: Texture cielo stellato molto sfocata e scurita */}
+          {/* Livello 1: Texture cielo stellato scurita (zero filter:blur) */}
           <div
             style={{
               position: 'absolute',
@@ -597,29 +607,25 @@ const ButtonMoonEclipse = React.memo(function ButtonMoonEclipse({
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
               opacity: 0.10,
-              filter: 'blur(3px)',
-              WebkitFilter: 'blur(3px)',
               pointerEvents: 'none',
               borderRadius: 'inherit',
               zIndex: 0
             }}
           />
 
-          {/* Livello 2: Stelline e punti luce diffusi identici allo sfondo totale dell'app (molto sfocati) */}
+          {/* Livello 2: Stelline e punti luce diffusi con gradienti morbidi nativi (zero filter:blur) */}
           <div
             style={{
               position: 'absolute',
               inset: 0,
               backgroundImage: `
-                radial-gradient(1.8px 1.8px at 12% 25%, rgba(221, 202, 183, 0.85), transparent),
-                radial-gradient(2.4px 2.4px at 28% 72%, rgba(216, 198, 21, 0.75), transparent),
-                radial-gradient(1.6px 1.6px at 45% 30%, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(2.2px 2.2px at 64% 68%, rgba(139, 229, 116, 0.7), transparent),
-                radial-gradient(2.5px 2.5px at 80% 22%, rgba(221, 202, 183, 0.8), transparent),
-                radial-gradient(1.8px 1.8px at 93% 76%, rgba(216, 198, 21, 0.75), transparent)
+                radial-gradient(4px 4px at 12% 25%, rgba(221, 202, 183, 0.72) 0%, rgba(221, 202, 183, 0.25) 45%, transparent 100%),
+                radial-gradient(5px 5px at 28% 72%, rgba(216, 198, 21, 0.65) 0%, rgba(216, 198, 21, 0.22) 45%, transparent 100%),
+                radial-gradient(3.6px 3.6px at 45% 30%, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.24) 45%, transparent 100%),
+                radial-gradient(4.8px 4.8px at 64% 68%, rgba(139, 229, 116, 0.60) 0%, rgba(139, 229, 116, 0.20) 45%, transparent 100%),
+                radial-gradient(5.2px 5.2px at 80% 22%, rgba(221, 202, 183, 0.68) 0%, rgba(221, 202, 183, 0.24) 45%, transparent 100%),
+                radial-gradient(4px 4px at 93% 76%, rgba(216, 198, 21, 0.65) 0%, rgba(216, 198, 21, 0.22) 45%, transparent 100%)
               `,
-              filter: 'blur(2.2px)',
-              WebkitFilter: 'blur(2.2px)',
               opacity: 0.8,
               pointerEvents: 'none',
               borderRadius: 'inherit',

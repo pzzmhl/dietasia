@@ -79,9 +79,7 @@ export default function DayWorkoutModal({
           style={{
             width: '100%',
             maxWidth: '240px',
-            background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.96) 0%, rgba(5, 17, 30, 0.98) 100%)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            background: 'linear-gradient(180deg, rgba(9, 29, 49, 0.97) 0%, rgba(5, 17, 30, 0.99) 100%)',
             borderRadius: '24px',
             border: '1.5px solid rgba(141, 109, 82, 0.45)',
             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(141, 109, 82, 0.2)',
@@ -97,22 +95,18 @@ export default function DayWorkoutModal({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* TRAMA VORTICE DI CORALINE SULLO SFONDO */}
+          {/* TRAMA VORTICE DI CORALINE SULLO SFONDO (VIGNETTA NATIVA ZERO FBO) */}
           <div
             className="vortex-bg-layer"
             aria-hidden="true"
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `url(${vortexBg})`,
+              backgroundImage: `radial-gradient(circle at center, rgba(5, 17, 30, 0) 45%, rgba(5, 17, 30, 0.80) 90%), url(${vortexBg})`,
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
               opacity: 0.12,
-              filter: 'blur(1.5px)',
-              WebkitFilter: 'blur(1.5px)',
-              maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.2) 90%)',
-              WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.2) 90%)',
               pointerEvents: 'none',
               borderRadius: 'inherit',
               zIndex: 0

@@ -44,6 +44,9 @@ html {
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background-color: var(--bg-deep);
 }
 
@@ -53,6 +56,9 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background-color: var(--bg-deep);
   color: var(--coraline-parchment);
   font-family: var(--font-body);
@@ -103,9 +109,6 @@ button:active:not(:disabled),
 /* Card con elegante bordo continuo Blu Scuro e Rim-Lighting superiore cinematografico */
 .stitched-card {
   background: var(--bg-card);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transform: translateZ(0);
   border: 1.5px solid var(--border-dark-blue-light);
   border-radius: 20px;
   position: relative;
@@ -114,7 +117,7 @@ button:active:not(:disabled),
     inset 0 1.5px 0 0 rgba(216, 198, 21, 0.28),
     inset 0 0 18px rgba(6, 22, 37, 0.7),
     0 12px 32px rgba(0, 0, 0, 0.65);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stitched-card::before {
@@ -136,15 +139,13 @@ button:active:not(:disabled),
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('./assets/coraline-vortex-bg.webp');
+  background-image:
+    radial-gradient(circle at center, rgba(12, 16, 19, 0) 35%, rgba(12, 16, 19, 0.75) 90%),
+    url('./assets/coraline-vortex-bg.webp');
   background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
   opacity: 0.06;
-  filter: blur(1.8px);
-  -webkit-filter: blur(1.8px);
-  mask-image: radial-gradient(circle at center, black 35%, rgba(0, 0, 0, 0.25) 90%);
-  -webkit-mask-image: radial-gradient(circle at center, black 35%, rgba(0, 0, 0, 0.25) 90%);
   pointer-events: none;
   border-radius: inherit;
   z-index: 0;
@@ -154,6 +155,22 @@ button:active:not(:disabled),
 body.no-vortex-bg .vortex-card::after,
 body.no-vortex-bg .vortex-bg-layer {
   display: none !important;
+}
+
+/* Preferenze Utente: disattiva fluttuazioni se scelto nelle impostazioni */
+body.no-floating-fx * {
+  animation-play-state: paused !important;
+}
+
+/* Isolamento layout/paint per le card principali della dashboard (zero ricalcoli globali in scroll) */
+.perf-contain-card {
+  contain: layout paint;
+}
+
+/* Mette in pausa a costo 0% GPU le animazioni infinite delle sezioni fuori viewport durante lo scroll */
+.offscreen-anim-paused,
+.offscreen-anim-paused * {
+  animation-play-state: paused !important;
 }
 
 /* Micro-animazioni Stop-Motion organiche per gli elementi tattili */
@@ -170,17 +187,16 @@ body.no-vortex-bg .vortex-bg-layer {
 
 .stop-motion-icon {
   animation: stopMotionSnap 0.24s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-  will-change: transform;
 }
 
 .font-gothic {
   font-family: var(--font-gothic);
 }
 
-/* Rimozione globale della barra di scorrimento (nessuna scrollbar visibile a destra) */
-* {
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE ed Edge */
+/* Rimozione della barra di scorrimento sui contenitori scrollabili (senza selettore universale * !important) */
+div, section, main, aside {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 ::-webkit-scrollbar {

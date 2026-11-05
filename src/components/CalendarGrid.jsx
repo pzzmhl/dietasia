@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import seeingStoneImg from '../assets/seeing-stone.webp';
 import blackButtonImg from '../assets/black-button.webp';
 import keyImg from '../assets/key.webp';
@@ -7,9 +7,10 @@ import vortexBg from '../assets/coraline-vortex-bg.webp';
 import starryBg from '../assets/coraline-starry-bg.webp';
 import coralineDollBg from '../assets/coraline-doll-bg.webp';
 import bobinskyWorkoutBg from '../assets/bobinsky-circus-calendar-bg.webp';
-import DayWorkoutModal from './DayWorkoutModal';
 import { triggerHapticFeedback, hapticButtonStitch, hapticLight } from '../utils/haptics';
 import { getUIElementExplanation } from '../data/catExplanations';
+
+const DayWorkoutModal = lazy(() => import('./DayWorkoutModal'));
 
 // Formato europeo ISO: settimana rigorosamente da Lunedì a Domenica
 const DAYS_HEADER = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -187,7 +188,6 @@ const DayCell = React.memo(function DayCell({
         lineHeight: 1,
         touchAction: 'manipulation',
         opacity: isFuture ? 0.35 : ((isWorkout && workoutState === 'no') ? 0.45 : 1),
-        transform: 'translateZ(0)',
         transition: 'transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease'
       }}
     >
@@ -393,6 +393,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
 
   return (
     <div 
+      className="perf-contain-card"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{ 
@@ -416,75 +417,59 @@ const CalendarGrid = React.memo(function CalendarGrid({
         transition: 'border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease'
       }}
     >
-      {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE */}
+      {/* SFONDO CON CIELO STELLATO MAGICO DI CORALINE (VIGNETTA NATIVA ZERO FBO) */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `url(${starryBg})`,
+        backgroundImage: `radial-gradient(circle at center, rgba(8, 26, 44, 0) 45%, rgba(4, 14, 25, 0.85) 90%), url(${starryBg})`,
         backgroundPosition: 'center center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         opacity: 0.06,
-        filter: 'blur(2px)',
-        WebkitFilter: 'blur(2px)',
-        maskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
-        WebkitMaskImage: 'radial-gradient(circle at center, black 45%, rgba(0, 0, 0, 0.15) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0
       }} />
 
-      {/* SFONDO CON LA BAMBOLA DI CORALINE (PER IL CALENDARIO DIETA) */}
+      {/* SFONDO CON LA BAMBOLA DI CORALINE (PER IL CALENDARIO DIETA - ZERO FBO MASK/BLUR) */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `url(${coralineDollBg})`,
+        backgroundImage: `radial-gradient(circle at 50% 45%, rgba(4, 14, 25, 0.14) 58%, rgba(4, 14, 25, 0.65) 95%), url(${coralineDollBg})`,
         backgroundPosition: 'center 35%',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         opacity: calendarMode === 'diet' ? 0.35 : 0,
-        filter: 'blur(0.5px) brightness(0.85) contrast(1.12)',
-        WebkitFilter: 'blur(0.5px) brightness(0.85) contrast(1.12)',
-        maskImage: 'radial-gradient(circle at 50% 45%, black 60%, rgba(0, 0, 0, 0.4) 95%)',
-        WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 60%, rgba(0, 0, 0, 0.4) 95%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0,
         transition: 'opacity 0.35s ease'
       }} />
 
-      {/* SFONDO CON IL GRANDE BOBINSKY NEL CIRCO (PER IL CALENDARIO ALLENAMENTO) */}
+      {/* SFONDO CON IL GRANDE BOBINSKY NEL CIRCO (PER IL CALENDARIO ALLENAMENTO - ZERO FBO MASK/BLUR) */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `url(${bobinskyWorkoutBg})`,
+        backgroundImage: `radial-gradient(circle at 50% 45%, rgba(14, 6, 5, 0.28) 54%, rgba(14, 6, 5, 0.74) 92%), url(${bobinskyWorkoutBg})`,
         backgroundPosition: 'center 25%',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         opacity: calendarMode === 'workout' ? 0.34 : 0,
-        filter: 'blur(1px) brightness(0.70) contrast(1.12)',
-        WebkitFilter: 'blur(1px) brightness(0.70) contrast(1.12)',
-        maskImage: 'radial-gradient(circle at 50% 45%, black 55%, rgba(0, 0, 0, 0.3) 90%)',
-        WebkitMaskImage: 'radial-gradient(circle at 50% 45%, black 55%, rgba(0, 0, 0, 0.3) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0,
         transition: 'opacity 0.35s ease'
       }} />
 
-      {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO */}
+      {/* TRAMA VORTICE / SPIRALE SFUMATA IN SECONDO PIANO (VIGNETTA NATIVA ZERO FBO) */}
       <div className="vortex-bg-layer" style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `url(${vortexBg})`,
+        backgroundImage: `radial-gradient(circle at center, rgba(8, 26, 44, 0) 40%, rgba(4, 14, 25, 0.90) 90%), url(${vortexBg})`,
         backgroundPosition: 'center center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         opacity: calendarMode === 'workout' ? 0.02 : 0.05,
-        filter: 'blur(2px)',
-        WebkitFilter: 'blur(2px)',
-        maskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
-        WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0, 0, 0, 0.1) 90%)',
         pointerEvents: 'none',
         borderRadius: 'inherit',
         zIndex: 0
@@ -762,7 +747,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             lineHeight: 1.2,
-            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: 'background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease',
             touchAction: 'manipulation'
           }}
         >
@@ -807,7 +792,7 @@ const CalendarGrid = React.memo(function CalendarGrid({
             alignItems: 'center',
             justifyContent: 'center',
             lineHeight: 1.2,
-            transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: 'background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease',
             touchAction: 'manipulation'
           }}
         >
@@ -815,14 +800,18 @@ const CalendarGrid = React.memo(function CalendarGrid({
         </button>
       </div>
 
-      {/* MODAL ALLENAMENTO RAPIDO PER DATA */}
-      <DayWorkoutModal
-        isOpen={workoutModalState.isOpen}
-        dateStr={workoutModalState.dateStr}
-        currentStatus={workoutModalState.dateStr && workoutLogs ? workoutLogs[workoutModalState.dateStr] : null}
-        onSelectStatus={handleSelectWorkoutFromModal}
-        onClose={handleCloseWorkoutModal}
-      />
+      {/* MODAL ALLENAMENTO RAPIDO PER DATA (Lazy Loaded) */}
+      <Suspense fallback={null}>
+        {workoutModalState.isOpen && (
+          <DayWorkoutModal
+            isOpen={workoutModalState.isOpen}
+            dateStr={workoutModalState.dateStr}
+            currentStatus={workoutModalState.dateStr && workoutLogs ? workoutLogs[workoutModalState.dateStr] : null}
+            onSelectStatus={handleSelectWorkoutFromModal}
+            onClose={handleCloseWorkoutModal}
+          />
+        )}
+      </Suspense>
     </div>
   );
 });

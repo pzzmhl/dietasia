@@ -3,6 +3,7 @@ import bobinskyImg from '../assets/bobinsky-training.webp';
 import circusBg from '../assets/bobinsky-circus-bg.webp';
 import { hapticSuccess, hapticLight } from '../utils/haptics';
 import { saveWorkoutLog } from '../utils/storage';
+import { useInViewport } from '../hooks/useInViewport.js';
 
 /**
  * Scheda Giornaliera di Allenamento del Grande Bobinsky:
@@ -32,6 +33,7 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
 
   const [selectedOption, setSelectedOption] = useState(() => todayStatus);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [cardViewportRef, isCardInViewport] = useInViewport(true);
 
   // Riallinea lo stato al cambio giorno (mezzanotte) o in caso di modifiche dal Calendario / ripristino Backup
   useEffect(() => {
@@ -184,9 +186,10 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
     >
       <div style={{ overflow: 'hidden', minHeight: 0 }}>
         <div
+          ref={cardViewportRef}
           role="region"
           aria-label="Avviso Allenamento Bobinsky"
-          className="stitched-card"
+          className={`stitched-card perf-contain-card${isCardInViewport ? '' : ' offscreen-anim-paused'}`}
           style={{
             width: '100%',
             marginBottom: '16px',
@@ -348,7 +351,7 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
               fontWeight: 800,
               cursor: isFadingOut ? 'default' : 'pointer',
               touchAction: 'manipulation',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.12s ease',
               opacity: isNoChosen ? 0.45 : 1
             }}
           >
@@ -390,7 +393,7 @@ const BobinskyWorkoutCard = React.memo(function BobinskyWorkoutCard({
               fontWeight: 800,
               cursor: isFadingOut ? 'default' : 'pointer',
               touchAction: 'manipulation',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.12s ease',
               opacity: isYesChosen ? 0.45 : 1
             }}
           >

@@ -4,6 +4,7 @@ import otherMotherHandImg from '../assets/other-mother-hand.webp';
 import coralineBeetleImg from '../assets/coraline-beetle.webp';
 import coralineWardrobeImg from '../assets/coraline-wardrobe.webp';
 import { triggerHapticFeedback } from '../utils/haptics';
+import { useInViewport } from '../hooks/useInViewport.js';
 
 /**
  * Linea di demarcazione orizzontale in puro stile Coraline con Easter Eggs Interattivi:
@@ -29,6 +30,7 @@ const CoralineDivider = React.memo(function CoralineDivider({
   
   // Insetto-armadio che protegge la porta
   const [isWardrobeGuarding, setIsWardrobeGuarding] = useState(false);
+  const [dividerViewportRef, isDividerInViewport] = useInViewport(false);
 
   const iconRef = useRef(null);
   const timersRef = useRef([]);
@@ -167,6 +169,8 @@ const CoralineDivider = React.memo(function CoralineDivider({
   return (
     <>
       <div
+        ref={dividerViewportRef}
+        className={(!isDividerInViewport && !isWardrobeGuarding && !isHandShaking && !isBeetleEscaping && !isBeetleFadingIn) ? 'offscreen-anim-paused' : undefined}
         role="separator"
         aria-hidden="true"
         style={{

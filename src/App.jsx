@@ -4,18 +4,18 @@ import ButtonMoonEclipse from './components/ButtonMoonEclipse';
 import MonthStatsBar from './components/MonthStatsBar';
 import CalendarGrid from './components/CalendarGrid';
 import DaySelectionModal from './components/DaySelectionModal';
-import CatModal from './components/CatModal';
-import StoryEventModal from './components/StoryEventModal';
 import SecretDoor from './components/SecretDoor';
-import DailyCatGreetingModal from './components/DailyCatGreetingModal';
 import FloatingJumpingMouse from './components/FloatingJumpingMouse';
 import FloatingWybie from './components/FloatingWybie';
 import BobinskyWorkoutCard from './components/BobinskyWorkoutCard';
 import CoralineDivider from './components/CoralineDivider';
-import UpdateAvailableModal from './components/UpdateAvailableModal';
 
-// Code-splitting: il modale impostazioni (84 KB) viene scaricato on-demand
+// Code-splitting dei modali condizionali: riduce il parsing JS e la decodifica immagini al primo frame
 const SecretSettingsModal = lazy(() => import('./components/SecretSettingsModal'));
+const CatModal = lazy(() => import('./components/CatModal'));
+const StoryEventModal = lazy(() => import('./components/StoryEventModal'));
+const DailyCatGreetingModal = lazy(() => import('./components/DailyCatGreetingModal'));
+const UpdateAvailableModal = lazy(() => import('./components/UpdateAvailableModal'));
 import { checkForAppUpdates } from './utils/updateChecker';
 import { 
   scheduleDailyReminder,
@@ -63,7 +63,6 @@ import {
   triggerQueueFlush, 
   getPendingSyncCount 
 } from './utils/syncQueue.js';
-import { getRandomDailyCatQuote } from './data/dailyCatQuotes';
 import { STORAGE_KEYS } from './constants/storageKeys.js';
 
 // Lazy loading dinamico del database citazioni (207 KB):
@@ -100,10 +99,14 @@ export default function App() {
       if (useNativeIdle) {
         idleHandle = window.requestIdleCallback(() => {
           getCatQuotesModule();
+          import('./components/CatModal');
+          import('./components/DayWorkoutModal');
         });
       } else {
         idleHandle = setTimeout(() => {
           getCatQuotesModule();
+          import('./components/CatModal');
+          import('./components/DayWorkoutModal');
         }, 1500);
       }
     }
@@ -280,7 +283,8 @@ export default function App() {
     setUpdateAvailableInfo(null);
   }, []);
 
-  const handleOpenDailyGreetingPreview = useCallback(() => {
+  const handleOpenDailyGreetingPreview = useCallback(async () => {
+    const { getRandomDailyCatQuote } = await import('./data/dailyCatQuotes');
     setDailyGreetingQuoteOverride(getRandomDailyCatQuote());
     setIsDailyGreetingOpen(true);
   }, []);
@@ -410,7 +414,6 @@ export default function App() {
 
   // Carica i dati salvati, applica le preferenze visive e ottimizza il rendering iniziale
   useEffect(() => {
-    setAllLogs(getAllLogs());
     initBackgroundMusic();
     initSyncQueueListeners();
     triggerQueueFlush(1500);
@@ -448,7 +451,8 @@ export default function App() {
       }
     };
 
-    checkCloudSyncOnStartup();
+    // Posticipa il controllo Cloud Sync dopo il primo frame renderizzato per non bloccare l'avvio UI
+    const cloudStartupTimer = setTimeout(checkCloudSyncOnStartup, 650);
 
     try {
       if (typeof document !== 'undefined') {
@@ -478,6 +482,7 @@ export default function App() {
     }, 2800);
 
     return () => {
+      clearTimeout(cloudStartupTimer);
       clearTimeout(updateCheckTimer);
     };
   }, []);
@@ -698,7 +703,7 @@ export default function App() {
 
   return (
     <>
-      {/* SFONDO GLOBALE NOTTURNO STELLATO CON PUNTI LUCE SOFFUSI SFOCATI */}
+      {/* SFONDO GLOBALE NOTTURNO STELLATO CON PUNTI LUCE SOFFUSI (GPU COMPOSITED, ZERO BLUR SHADER) */}
       <div
         aria-hidden="true"
         style={{
@@ -707,10 +712,12 @@ export default function App() {
           pointerEvents: 'none',
           zIndex: 0,
           overflow: 'hidden',
-          backgroundColor: '#0a0b1a'
+          backgroundColor: '#0a0b1a',
+          contain: 'strict',
+          transform: 'translateZ(0)'
         }}
       >
-        {/* Livello 1: texture cielo stellato di Coraline a bassa opacità e sfocato */}
+        {/* Livello 1: texture cielo stellato di Coraline a bassa opacità */}
         <div
           style={{
             position: 'absolute',
@@ -719,31 +726,29 @@ export default function App() {
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'repeat',
-            opacity: 0.14,
-            filter: 'blur(1.6px)',
-            WebkitFilter: 'blur(1.6px)'
+            opacity: 0.14
           }}
         />
 
-        {/* Livello 2: Punti luce stellari sfocati (1px - 2px) sparsi con eleganza */}
+        {/* Livello 2: Punti luce stellari naturalmente soffusi con gradienti multi-stop (zero filter:blur full-screen) */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
             backgroundImage: `
-              radial-gradient(1.5px 1.5px at 15% 12%, rgba(221, 202, 183, 0.75), transparent),
-              radial-gradient(2px 2px at 78% 18%, rgba(216, 198, 21, 0.65), transparent),
-              radial-gradient(1.2px 1.2px at 42% 28%, rgba(255, 255, 255, 0.7), transparent),
-              radial-gradient(2.2px 2.2px at 88% 42%, rgba(139, 229, 116, 0.55), transparent),
-              radial-gradient(1.5px 1.5px at 22% 52%, rgba(221, 202, 183, 0.6), transparent),
-              radial-gradient(2px 2px at 64% 65%, rgba(255, 255, 255, 0.65), transparent),
-              radial-gradient(1.8px 1.8px at 12% 76%, rgba(216, 198, 21, 0.55), transparent),
-              radial-gradient(2.4px 2.4px at 82% 84%, rgba(221, 202, 183, 0.7), transparent),
-              radial-gradient(1.4px 1.4px at 48% 92%, rgba(139, 229, 116, 0.6), transparent)
+              radial-gradient(3.2px 3.2px at 15% 12%, rgba(221, 202, 183, 0.72) 0%, rgba(221, 202, 183, 0.28) 42%, transparent 100%),
+              radial-gradient(4px 4px at 78% 18%, rgba(216, 198, 21, 0.62) 0%, rgba(216, 198, 21, 0.24) 42%, transparent 100%),
+              radial-gradient(2.8px 2.8px at 42% 28%, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.26) 42%, transparent 100%),
+              radial-gradient(4.2px 4.2px at 88% 42%, rgba(139, 229, 116, 0.52) 0%, rgba(139, 229, 116, 0.20) 42%, transparent 100%),
+              radial-gradient(3.2px 3.2px at 22% 52%, rgba(221, 202, 183, 0.58) 0%, rgba(221, 202, 183, 0.22) 42%, transparent 100%),
+              radial-gradient(4px 4px at 64% 65%, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.24) 42%, transparent 100%),
+              radial-gradient(3.6px 3.6px at 12% 76%, rgba(216, 198, 21, 0.52) 0%, rgba(216, 198, 21, 0.20) 42%, transparent 100%),
+              radial-gradient(4.5px 4.5px at 82% 84%, rgba(221, 202, 183, 0.68) 0%, rgba(221, 202, 183, 0.26) 42%, transparent 100%),
+              radial-gradient(3px 3px at 48% 92%, rgba(139, 229, 116, 0.58) 0%, rgba(139, 229, 116, 0.22) 42%, transparent 100%)
             `,
-            filter: 'blur(1.2px)',
-            WebkitFilter: 'blur(1.2px)',
             opacity: 0.85,
+            willChange: 'opacity, transform',
+            transform: 'translateZ(0)',
             animation: 'coralineStarsSubtlePulse 6s ease-in-out infinite'
           }}
         />
@@ -1064,18 +1069,26 @@ export default function App() {
       />
 
       {/* OVERLAY DEL TUTOR (IL GATTO NERO DI CORALINE) */}
-      <CatModal
-        isOpen={catModalState.isOpen}
-        quote={catModalState.quote}
-        context={catModalState.context}
-        onClose={handleCloseCatModal}
-      />
+      <Suspense fallback={null}>
+        {catModalState.isOpen && (
+          <CatModal
+            isOpen={catModalState.isOpen}
+            quote={catModalState.quote}
+            context={catModalState.context}
+            onClose={handleCloseCatModal}
+          />
+        )}
+      </Suspense>
 
       {/* OVERLAY EVENTI SPECIALI DI TRAMA (ALTRA MADRE CHIAVI FINITE & WYBIE STREAK) */}
-      <StoryEventModal
-        isOpen={storyModalState.isOpen}
-        onClose={handleCloseStoryModal}
-      />
+      <Suspense fallback={null}>
+        {storyModalState.isOpen && (
+          <StoryEventModal
+            isOpen={storyModalState.isOpen}
+            onClose={handleCloseStoryModal}
+          />
+        )}
+      </Suspense>
 
       {/* MODAL IMPOSTAZIONI COMPLETO APERTO DAL PROFILO IN ALTO A DESTRA (Lazy Loaded con Suspense) */}
       <Suspense fallback={null}>
@@ -1095,19 +1108,27 @@ export default function App() {
       </Suspense>
 
       {/* SCHERMATA MINIMALE GIORNALIERA DEL GATTO (PRIMO ACCESSO DEL GIORNO) */}
-      <DailyCatGreetingModal
-        isOpen={isDailyGreetingOpen}
-        onClose={handleDismissDailyGreeting}
-        dateStr={todayStr}
-        initialQuote={dailyGreetingQuoteOverride}
-      />
+      <Suspense fallback={null}>
+        {isDailyGreetingOpen && (
+          <DailyCatGreetingModal
+            isOpen={isDailyGreetingOpen}
+            onClose={handleDismissDailyGreeting}
+            dateStr={todayStr}
+            initialQuote={dailyGreetingQuoteOverride}
+          />
+        )}
+      </Suspense>
 
       {/* MODAL NOTIFICA AGGIORNAMENTO DISPONIBILE (GITHUB RELEASES) */}
-      <UpdateAvailableModal
-        isOpen={!!updateAvailableInfo}
-        updateInfo={updateAvailableInfo}
-        onClose={handleCloseUpdateModal}
-      />
+      <Suspense fallback={null}>
+        {updateAvailableInfo && (
+          <UpdateAvailableModal
+            isOpen={!!updateAvailableInfo}
+            updateInfo={updateAvailableInfo}
+            onClose={handleCloseUpdateModal}
+          />
+        )}
+      </Suspense>
       </div>
     </>
   );

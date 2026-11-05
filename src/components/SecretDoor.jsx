@@ -12,25 +12,28 @@ import { stopMusicWithFadeOut } from '../services/backgroundMusic';
 export default function SecretDoor({ onLongPress, onOpenSettings }) {
   const [isRevealed, setIsRevealed] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isInView, setIsInView] = useState(false);
 
   const doorRef = useRef(null);
   const longPressTimerRef = useRef(null);
   const unlockTimerRef = useRef(null);
   const isLongPressRef = useRef(false);
 
-  // Rileva quando l'utente arriva in prossimità della porta e pulisce i timer allo smontaggio
+  // Rileva quando l'utente arriva in prossimità della porta, mette in pausa l'aura fuori schermo e pulisce i timer
   useEffect(() => {
     const el = doorRef.current;
     let observer = null;
     if (el && typeof IntersectionObserver !== 'undefined') {
       observer = new IntersectionObserver(
         ([entry]) => {
+          setIsInView(entry.isIntersecting);
           if (entry.isIntersecting && entry.intersectionRatio > 0.45) {
             setIsRevealed(true);
           }
         },
         {
-          threshold: [0.1, 0.45, 0.8]
+          rootMargin: '100px 0px',
+          threshold: [0, 0.1, 0.45, 0.8]
         }
       );
       observer.observe(el);
@@ -125,24 +128,25 @@ export default function SecretDoor({ onLongPress, onOpenSettings }) {
           flexDirection: 'column',
           alignItems: 'center',
           position: 'relative',
-          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           transform: isUnlocking ? 'scale(1.08) rotate(3deg)' : 'none',
           opacity: 1,
           touchAction: 'manipulation'
         }}
       >
-        {/* Alone di mistero e foschia verde smeraldo dietro la porta (Pulsazione della luce) */}
+        {/* Alone di mistero e foschia verde smeraldo dietro la porta (gradiente multi-stop GPU, zero filter:blur) */}
         <div
           style={{
             position: 'absolute',
-            bottom: '10px',
-            width: '125px',
-            height: '125px',
+            bottom: '-5px',
+            width: '156px',
+            height: '156px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(74, 222, 128, 0.45) 0%, rgba(13, 73, 50, 0.22) 50%, transparent 70%)',
-            filter: 'blur(15px)',
+            background: 'radial-gradient(circle, rgba(74, 222, 128, 0.40) 0%, rgba(45, 165, 95, 0.24) 34%, rgba(13, 73, 50, 0.11) 56%, transparent 76%)',
             pointerEvents: 'none',
-            animation: 'secretDoorAuraPulse 3.2s ease-in-out infinite'
+            willChange: 'transform, opacity',
+            animation: 'secretDoorAuraPulse 3.2s ease-in-out infinite',
+            animationPlayState: isInView ? 'running' : 'paused'
           }}
         />
 
